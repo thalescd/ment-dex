@@ -1,0 +1,15 @@
+# Dependências
+node_modules/
+
+# Pastas de Build/Dist
+dist/
+build/
+out/
+
+# Arquivos de Sistema
+.DS_Store
+Thumbs.db
+
+# Variáveis de ambiente
+.env
+.env.local

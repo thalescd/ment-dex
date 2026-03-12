@@ -1,48 +1,56 @@
-async function getWildLocations(locations){
-    footerP("Fetching wild locations")
-    const rawWildLocations = await fetch(`https://raw.githubusercontent.com/ydarissep/Unbound-Pokedex/refs/heads/main/src/locations/encounters.json`)
-    const jsonWildLocations = await rawWildLocations.json()
+async function getWildLocations(locations) {
+    footerP("Fetching wild locations");
+    const rawWildLocations = await fetch(
+        `https://raw.githubusercontent.com/ydarissep/Unbound-Pokedex/refs/heads/main/src/locations/encounters.json`
+    );
+    const jsonWildLocations = await rawWildLocations.json();
 
-    return regexWildLocations(jsonWildLocations, locations)   
+    return regexWildLocations(jsonWildLocations, locations);
 }
 
-async function getRaidLocations(locations){
-    footerP("Fetching raid locations")
-    const rawRaidLocations = await fetch(`https://raw.githubusercontent.com/${repo1}/src/Tables/raid_encounters.h`)
-    const textRaidLocations = await rawRaidLocations.text()
+async function getRaidLocations(locations) {
+    footerP("Fetching raid locations");
+    const rawRaidLocations = await fetch(
+        `https://raw.githubusercontent.com/${repo1}/src/Tables/raid_encounters.h`
+    );
+    const textRaidLocations = await rawRaidLocations.text();
 
-    return regexRaidLocations(textRaidLocations, locations)   
+    return regexRaidLocations(textRaidLocations, locations);
 }
 
-async function buildLocationsObj(){
-    let locations = {}
+async function buildLocationsObj() {
+    let locations = {};
 
-    locations = await getWildLocations(locations)
-    locations = await getRaidLocations(locations)
+    locations = await getWildLocations(locations);
+    locations = await getRaidLocations(locations);
 
-    localStorage.setItem("locations", LZString.compressToUTF16(JSON.stringify(locations)))
-    return locations
+    localStorage.setItem(
+        "locations",
+        LZString.compressToUTF16(JSON.stringify(locations))
+    );
+    return locations;
 }
 
-
-async function fetchLocationsObj(){
-    if(!localStorage.getItem("locations")){
-        window.locations = await buildLocationsObj()
+async function fetchLocationsObj() {
+    if (!localStorage.getItem("locations")) {
+        window.locations = await buildLocationsObj();
+    } else {
+        window.locations = await JSON.parse(
+            LZString.decompressFromUTF16(localStorage.getItem("locations"))
+        );
     }
-    else{
-        window.locations = await JSON.parse(LZString.decompressFromUTF16(localStorage.getItem("locations")))   
-    }
 
-    let counter = 0
-    window.locationsTracker = []
-    Object.keys(locations).forEach(zone => {
-        Object.keys(locations[zone]).forEach(method => {
-            Object.keys(locations[zone][method]).forEach(speciesName => {
-                locationsTracker[counter] = {}
-                locationsTracker[counter]["key"] = `${zone}\\${method}\\${speciesName}`
-                locationsTracker[counter]["filter"] = []
-                counter++
-            })
-        })
-    })
+    let counter = 0;
+    window.locationsTracker = [];
+    Object.keys(locations).forEach((zone) => {
+        Object.keys(locations[zone]).forEach((method) => {
+            Object.keys(locations[zone][method]).forEach((speciesName) => {
+                locationsTracker[counter] = {};
+                locationsTracker[counter]["key"] =
+                    `${zone}\\${method}\\${speciesName}`;
+                locationsTracker[counter]["filter"] = [];
+                counter++;
+            });
+        });
+    });
 }
