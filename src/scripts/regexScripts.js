@@ -451,7 +451,7 @@ async function regexItemIcon(textItemIconTable, textItemsIcon) {
                             const move = `MOVE_${moveMatch[1]}`;
                             if (move in moves) {
                                 items[itemName]["url"] =
-                                    `https://raw.githubusercontent.com/ydarissep/dex-core/main/sprites/TM_${moves[move]["type"]}.png`;
+                                    `assets/TM_${moves[move]["type"]}.png`;
                             }
                         }
                     }
@@ -693,8 +693,7 @@ function regexScript(
             items[tutorName]["description"] =
                 moves[move]["description"].join("");
             items[tutorName]["pocket"] = "POCKET_TUTOR";
-            items[tutorName]["url"] =
-                `https://raw.githubusercontent.com/ydarissep/dex-core/main/sprites/TM_${moves[move]["type"]}.png`;
+            items[tutorName]["url"] = `assets/TM_${moves[move]["type"]}.png`;
         }
         items[tutorName]["locations"]["Tutor"].push(zone);
     }
