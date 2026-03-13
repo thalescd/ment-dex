@@ -1,9 +1,25 @@
-window.settings = [];
+import { 
+    speciesPanelHistoryContainer, 
+    hideLevelUpFromPreviousEvolution, 
+    speciesPanelLevelUpFromPreviousEvoTableTbody,
+    hideLevelUp,
+    speciesPanelLevelUpTableTbody,
+    hideTMHM,
+    speciesPanelTMHMTableTbody,
+    hideTutor,
+    speciesPanelTutorTableTbody,
+    hideEggMoves,
+    speciesPanelEggMovesTableTbody,
+    popup
+} from './global.js';
+
+export let settings = [];
+
 if (localStorage.getItem("DEXsettings")) {
     settings = JSON.parse(localStorage.getItem("DEXsettings"));
 }
 
-async function applySettings() {
+export async function applySettings() {
     if (settings.includes("speciesPanelHistoryHide")) {
         speciesPanelHistoryContainer.classList.add("hide");
     } else {
@@ -13,9 +29,7 @@ async function applySettings() {
     if (settings.includes("speciesPanelHistorySticky")) {
         speciesPanelHistoryContainer.classList.add("speciesPanelHistorySticky");
     } else {
-        speciesPanelHistoryContainer.classList.remove(
-            "speciesPanelHistorySticky"
-        );
+        speciesPanelHistoryContainer.classList.remove("speciesPanelHistorySticky");
     }
 
     if (settings.includes("hideLevelUpFromPreviousEvolution")) {
@@ -59,7 +73,7 @@ async function applySettings() {
     }
 }
 
-function manageSettings() {
+export function manageSettings() {
     const settingsMainContainer = document.createElement("div");
 
     const speciesPanelFieldset = document.createElement("fieldset");
@@ -78,7 +92,7 @@ function manageSettings() {
     popup.append(settingsMainContainer);
 }
 
-function changeSetting(setting, enable = false) {
+export function changeSetting(setting, enable = false) {
     if (enable) {
         if (!settings.includes(setting)) {
             settings.push(setting);

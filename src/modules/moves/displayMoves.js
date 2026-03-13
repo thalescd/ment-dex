@@ -55,7 +55,7 @@ function appendMovesToTable(moveName) {
     hiddenType.innerText = moves[moveName]["type"];
     hiddenType.className = "hide";
     splitIcon.className = `${sanitizeString(moves[moveName]["split"])} splitIcon`;
-    splitIcon.src = `src/moves/${moves[moveName]["split"]}.png`;
+    splitIcon.src = `assets/${moves[moveName]["split"]}.png`;
     splitContainer.append(split);
     splitContainer.append(hiddenType);
     splitContainer.append(splitIcon);
@@ -144,7 +144,7 @@ function createPopupForMove(move, interactAble = true) {
     moveTypeSplitContainer.append(moveType);
 
     const moveSplit = document.createElement("img");
-    moveSplit.src = `src/moves/${move["split"]}.png`;
+    moveSplit.src = `assets/${move["split"]}.png`;
     moveSplit.className = `${sanitizeString(move["split"])} splitIcon`;
     moveTypeSplitContainer.append(moveSplit);
     popup.append(moveTypeSplitContainer);

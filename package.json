@@ -4,12 +4,11 @@
     "description": "",
     "main": "index.html",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
         "format": "prettier --write .",
         "prepare": "husky"
     },
     "keywords": [],
-    "author": "",
+    "author": "Thales Castro",
     "license": "ISC",
     "devDependencies": {
         "eslint": "^10.0.3",

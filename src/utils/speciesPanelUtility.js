@@ -1224,7 +1224,7 @@ function buildSpeciesPanelLevelUpFromPreviousEvoTable(
 
                 const splitContainer = document.createElement("td");
                 const splitIcon = document.createElement("img");
-                splitIcon.src = `src/moves/${moves[move[0]]["split"]}.png`;
+                splitIcon.src = `assets/${moves[move[0]]["split"]}.png`;
                 splitIcon.className = `${sanitizeString(moves[move[0]]["split"])} splitIcon`;
                 splitContainer.append(splitIcon);
                 row.append(splitContainer);
@@ -1316,7 +1316,7 @@ function buildSpeciesPanelDoubleLearnsetsTable(
 
             const splitContainer = document.createElement("td");
             const splitIcon = document.createElement("img");
-            splitIcon.src = `src/moves/${moves[move[0]]["split"]}.png`;
+            splitIcon.src = `assets/${moves[move[0]]["split"]}.png`;
             splitIcon.className = `${sanitizeString(moves[move[0]]["split"])} splitIcon`;
             splitContainer.append(splitIcon);
             row.append(splitContainer);
@@ -1396,7 +1396,7 @@ function buildSpeciesPanelSingleLearnsetsTable(
 
             const splitContainer = document.createElement("td");
             const splitIcon = document.createElement("img");
-            splitIcon.src = `src/moves/${moves[move]["split"]}.png`;
+            splitIcon.src = `assets/${moves[move]["split"]}.png`;
             splitIcon.className = `${sanitizeString(moves[move]["split"])} splitIcon`;
             splitContainer.append(splitIcon);
             row.append(splitContainer);
