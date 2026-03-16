@@ -1,3 +1,14 @@
+import { repo1 } from '../../utils/config.js';
+import { LZString } from '../../utils/lz-string.js';
+import { footerP } from '../../utils/utility.js';
+import {
+    regexMoves,
+    regexMovesDescription,
+    regexMovesIngameName,
+    regexVanillaMovesDescription,
+    regexMovesFlags
+} from './regexMoves.js';
+
 async function getMoves(moves) {
     footerP("Fetching moves");
     const rawMoves = await fetch(
@@ -79,7 +90,7 @@ async function buildMovesObj() {
     return moves;
 }
 
-async function fetchMovesObj() {
+export async function fetchMovesObj() {
     if (!localStorage.getItem("moves")) {
         window.moves = await buildMovesObj();
     } else {
@@ -89,9 +100,9 @@ async function fetchMovesObj() {
     }
 
     window.movesTracker = [];
-    for (let i = 0, j = Object.keys(moves).length; i < j; i++) {
-        movesTracker[i] = {};
-        movesTracker[i]["key"] = Object.keys(moves)[i];
-        movesTracker[i]["filter"] = [];
+    for (let i = 0, j = Object.keys(window.moves).length; i < j; i++) {
+        window.movesTracker[i] = {};
+        window.movesTracker[i]["key"] = Object.keys(window.moves)[i];
+        window.movesTracker[i]["filter"] = [];
     }
 }

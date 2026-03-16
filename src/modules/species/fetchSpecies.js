@@ -1,157 +1,139 @@
+import { repo1, repo2, repoDex } from '../../utils/config.js';
+import { LZString } from '../../utils/lz-string.js';
+import { setTracker } from '../../utils/domRefs.js';
+import { footerP } from '../../utils/utility.js';
+import {
+    regexSpecies, regexBaseStats, regexLevelUpLearnsets, getLevelUpLearnsetsConversionTable,
+    regexTMHMLearnsets, regexTutorLearnsets, regexEvolution, regexForms,
+    regexEggMovesLearnsets, regexSprite, regexReplaceAbilities,
+    regexAbilitiesArrayForChanges, regexChanges, altFormsLearnsets
+} from './regexSpecies.js';
 
+// --- FUNÇÕES DE FETCH ---
 
-function rebalanceStat(statBase, pokemon) {
-    return Math.min(
-        Math.floor(
-            (statBase * (600 - pokemon.baseHP)) / (pokemon.BST - pokemon.baseHP)
-        ),
-        0xff
+async function getSpecies(speciesObj) {
+    footerP("Fetching species");
+    const rawSpecies = await fetch(`https://raw.githubusercontent.com/${repo1}/include/constants/species.h`);
+    const textSpecies = await rawSpecies.text();
+    return regexSpecies(textSpecies, speciesObj);
+}
+
+async function getBaseStats(speciesObj) {
+    const rawBaseStats = await fetch(`https://raw.githubusercontent.com/${repo2}/src/Base_Stats.c`);
+    const textBaseStats = await rawBaseStats.text();
+    return regexBaseStats(textBaseStats, speciesObj);
+}
+
+async function getLevelUpLearnsets(species) {
+    const rawLevelUpLearnsets = await fetch(
+        `https://raw.githubusercontent.com/${repo2}/src/Learnsets.c`
+    );
+    const textLevelUpLearnsets = await rawLevelUpLearnsets.text();
+
+    const rawLevelUpLearnsetsPointers = await fetch(
+        `https://raw.githubusercontent.com/${repo2}/src/Learnsets.c`
+    );
+    const textLevelUpLearnsetsPointers =
+        await rawLevelUpLearnsetsPointers.text();
+
+    const levelUpLearnsetsConversionTable = getLevelUpLearnsetsConversionTable(
+        textLevelUpLearnsetsPointers
+    );
+
+    return regexLevelUpLearnsets(
+        textLevelUpLearnsets,
+        levelUpLearnsetsConversionTable,
+        species
     );
 }
 
-async function getJSONFromURL(url) {
-    const raw = await fetch(url);
-    const text = await raw.text();
-    return JSON.parse(text);
+async function getTMHMLearnsets(species) {
+    const rawTMHMLearnsets = await fetch(
+        `https://raw.githubusercontent.com/${repo2}/src/TM_Tutor_Tables.c`
+    );
+    const textTMHMLearnsets = await rawTMHMLearnsets.text();
+
+    return regexTMHMLearnsets(
+        textTMHMLearnsets,
+        species,
+        "gTMHMMoves",
+        "gMoveTutorMoves"
+    );
 }
 
-async function applyEnhancements(species) {
-    const storedSaveData = localStorage.getItem("saveData");
-    const randomAbilities = settings.includes("saveRandomizedAbilities");
-    const randomLearnset = settings.includes("saveRandomizedLearnset");
-    const rebalancedStats = settings.includes("saveRebalancedStats");
-    if (rebalancedStats) {
-        Object.keys(species).forEach((name) => {
-            const pokemon = species[name];
-            if (
-                pokemon.ID > 0 &&
-                pokemon.baseHP > 1 &&
-                (pokemon.evolution.length == 0 ||
-                    pokemon.evolution.every(
-                        (evo) =>
-                            evo[0] === "EVO_MEGA" || evo[0] === "EVO_GIGANTAMAX"
-                    ))
-            ) {
-                pokemon.baseAttack = rebalanceStat(pokemon.baseAttack, pokemon);
-                pokemon.baseDefense = rebalanceStat(
-                    pokemon.baseDefense,
-                    pokemon
-                );
-                pokemon.baseSpAttack = rebalanceStat(
-                    pokemon.baseSpAttack,
-                    pokemon
-                );
-                pokemon.baseSpDefense = rebalanceStat(
-                    pokemon.baseSpDefense,
-                    pokemon
-                );
-                pokemon.baseSpeed = rebalanceStat(pokemon.baseSpeed, pokemon);
-                pokemon.BST =
-                    pokemon.baseHP +
-                    pokemon.baseAttack +
-                    pokemon.baseDefense +
-                    pokemon.baseSpAttack +
-                    pokemon.baseSpDefense +
-                    pokemon.baseSpeed;
-            }
-        });
-        Object.keys(species).forEach(
-            (name) =>
-                (species[name]["changes"] = species[name]["changes"].filter(
-                    (change) =>
-                        change[0] != "BST" &&
-                        change[0] != "baseAttack" &&
-                        change[0] != "baseDefense" &&
-                        change[0] != "baseHP" &&
-                        change[0] != "baseSpAttack" &&
-                        change[0] != "baseSpDefense" &&
-                        change[0] != "baseSpeed"
-                ))
-        );
-    }
-    if (
-        !storedSaveData ||
-        storedSaveData == "undefined" ||
-        (!randomAbilities && !randomLearnset)
-    ) {
-        return species;
-    }
-    const saveData = JSON.parse(storedSaveData);
-    if (!saveData) {
-        return species;
-    }
-    const trainerIdFull = saveData.trainerIdFull;
-    const trainerId = saveData.trainerId;
-    const trainerSecretId = saveData.trainerSecretId;
-    if (randomAbilities) {
-        const abilitiesCount = abilities["ABILITY_PASTELVEIL"].id + 1;
-        const abilityTables = await getJSONFromURL(
-            `https://raw.githubusercontent.com/${repo1}/assembly/data/ability_tables.json`
-        );
-        const abilitiesById = Object.fromEntries(
-            Object.entries(abilities)
-                .filter(([ability, values]) => values.id != undefined)
-                .map(([ability, value]) => [value.id, ability])
-        );
-        const abilitiesAlso = Object.fromEntries(
-            Object.entries(abilities)
-                .filter(([ability, values]) => values.also != undefined)
-                .flatMap(([ability, values]) =>
-                    values.also.map((also) => [also, ability])
-                )
-        );
-        Object.keys(species).forEach((name) => {
-            const pokemon = species[name];
-            if (pokemon.ID > 0 && pokemon.baseHP > 0) {
-                pokemon.abilities = pokemon.abilities.map((ability) =>
-                    randomizeAbility(
-                        trainerIdFull,
-                        trainerId,
-                        trainerSecretId,
-                        abilitiesCount,
-                        abilitiesById,
-                        abilitiesAlso,
-                        abilityTables.gRandomizerBannedOriginalAbilities,
-                        abilityTables.gRandomizerBannedNewAbilities,
-                        pokemon.ID,
-                        ability
-                    )
-                );
-            }
-        });
-        Object.keys(species).forEach((name) => {
-            species[name]["changes"] = species[name]["changes"].filter(
-                (change) => change[0] != "abilities"
-            );
-        });
-    }
-    if (randomLearnset) {
-        const moveTables = await getJSONFromURL(
-            `https://raw.githubusercontent.com/${repo1}/assembly/data/move_tables.json`
-        );
-        const movesById = new Map(
-            Object.entries(moves).map(([move, value]) => [value.id, move])
-        );
-        Object.keys(species).forEach((name) => {
-            const pokemon = species[name];
-            if (pokemon.ID > 0 && pokemon.baseHP > 0) {
-                pokemon.levelUpLearnsets = pokemon.levelUpLearnsets.map(
-                    ([move, level]) => [
-                        randomizeMove(
-                            trainerIdFull,
-                            trainerId,
-                            trainerSecretId,
-                            moveTables.gRandomizerBanTable,
-                            movesById,
-                            move
-                        ),
-                        level,
-                    ]
-                );
-            }
-        });
-    }
-    return species;
+async function getTutorLearnsets(species) {
+    const rawTutorLearnsets = await fetch(
+        `https://raw.githubusercontent.com/${repo2}/src/TM_Tutor_Tables.c`
+    );
+    const textTutorLearnsets = await rawTutorLearnsets.text();
+
+    return regexTutorLearnsets(
+        textTutorLearnsets,
+        species,
+        "gMoveTutorMoves",
+        "gTMHMMoves"
+    );
+}
+
+async function getEvolution(species) {
+    const rawEvolution = await fetch(
+        `https://raw.githubusercontent.com/${repo2}/src/Evolution%20Table.c`
+    );
+    const textEvolution = await rawEvolution.text();
+
+    return regexEvolution(textEvolution, species);
+}
+
+async function getForms(species) {
+    const rawForms = await fetch(
+        `https://raw.githubusercontent.com/${repo1}/src/data/pokemon/form_species_tables.h`
+    );
+    const textForms = await rawForms.text();
+
+    return regexForms(textForms, species);
+}
+
+async function getEggMovesLearnsets(species) {
+    const rawEggMoves = await fetch(
+        `https://raw.githubusercontent.com/${repo2}/src/Egg_Moves.c`
+    );
+    const textEggMoves = await rawEggMoves.text();
+
+    return regexEggMovesLearnsets(textEggMoves, species);
+}
+
+async function getSprite(species) {
+    const rawSprite = await fetch(
+        `https://raw.githubusercontent.com/${repo2}/src/Front_Pic_Table.c`
+    );
+    const textSprite = await rawSprite.text();
+
+    return regexSprite(textSprite, species);
+}
+
+async function getReplaceAbilities(species) {
+    const rawReplaceAbilities = await fetch(
+        `https://raw.githubusercontent.com/${repoDex}/main/src/abilities/duplicate_abilities.json`
+    );
+    const jsonReplaceAbilities = await rawReplaceAbilities.json();
+
+    return regexReplaceAbilities(jsonReplaceAbilities, species);
+}
+
+async function getChanges(species, url) {
+    const rawAbilitiesChanges = await fetch(
+        "https://raw.githubusercontent.com/Skeli789/Complete-Fire-Red-Upgrade/master/include/constants/abilities.h"
+    );
+    const textAbilitiesForChanges = await rawAbilitiesChanges.text();
+
+    const abilitiesArrayForChanges = await regexAbilitiesArrayForChanges(
+        textAbilitiesForChanges
+    );
+
+    const rawChanges = await fetch(url);
+    const textChanges = await rawChanges.text();
+
+    return regexChanges(textChanges, species, abilitiesArrayForChanges);
 }
 
 async function fixFormAbilities(species) {
@@ -260,6 +242,8 @@ async function cleanSpecies(species) {
     return species;
 }
 
+// --- CONSTRUÇÃO DO OBJETO ---
+
 async function buildSpeciesObj() {
     let species = {};
     species = await getSpecies(species);
@@ -294,7 +278,6 @@ async function buildSpeciesObj() {
         }
     });
 
-    species = await applyEnhancements(species);
     species = await fixFormAbilities(species);
     await localStorage.setItem(
         "species",
@@ -302,7 +285,7 @@ async function buildSpeciesObj() {
     );
     await localStorage.setItem(
         "moves",
-        LZString.compressToUTF16(JSON.stringify(moves))
+        LZString.compressToUTF16(JSON.stringify(window.moves))
     );
     return species;
 }
@@ -337,7 +320,9 @@ function initializeSpeciesObj(species) {
     return species;
 }
 
-async function fetchSpeciesObj() {
+// --- FUNÇÃO PRINCIPAL CHAMADA PELO APP ---
+
+export async function fetchSpeciesObj() {
     if (!localStorage.getItem("species"))
         window.species = await buildSpeciesObj();
     else
@@ -348,337 +333,12 @@ async function fetchSpeciesObj() {
     window.sprites = {};
     window.speciesTracker = [];
 
-    for (let i = 0, j = Object.keys(species).length; i < j; i++) {
-        speciesTracker[i] = {};
-        speciesTracker[i]["key"] = Object.keys(species)[i];
-        speciesTracker[i]["filter"] = [];
+    for (let i = 0, j = Object.keys(window.species).length; i < j; i++) {
+        window.speciesTracker[i] = {};
+        window.speciesTracker[i]["key"] = Object.keys(window.species)[i];
+        window.speciesTracker[i]["filter"] = [];
     }
 
-    tracker = speciesTracker;
+    setTracker(window.speciesTracker);
 }
 
-//==================================================================================
-
-import { 
-    species, repo1, repo2, repoDex, tracker, settings, moves, abilities 
-} from '../../utils/global.js';
-
-import { footerP } from '../../utils/utility.js';
-
-// Importe todas as funções de regex (Certifique-se de que elas tenham "export" no regexSpecies.js)
-import { 
-    regexSpecies, regexBaseStats, regexLevelUpLearnsets, getLevelUpLearnsetsConversionTable,
-    regexTMHMLearnsets, regexTutorLearnsets, regexEvolution, regexForms,
-    regexEggMovesLearnsets, regexSprite, regexReplaceAbilities, 
-    regexAbilitiesArrayForChanges, regexChanges 
-} from './regexSpecies.js';
-
-// --- FUNÇÕES DE FETCH ---
-
-export async function getSpecies(speciesObj) {
-    footerP("Fetching species");
-    const rawSpecies = await fetch(`https://raw.githubusercontent.com/${repo1}/include/constants/species.h`);
-    const textSpecies = await rawSpecies.text();
-    return regexSpecies(textSpecies, speciesObj);
-}
-
-export async function getBaseStats(speciesObj) {
-    const rawBaseStats = await fetch(`https://raw.githubusercontent.com/${repo2}/src/Base_Stats.c`);
-    const textBaseStats = await rawBaseStats.text();
-    return regexBaseStats(textBaseStats, speciesObj);
-}
-
-export async function getLevelUpLearnsets(species) {
-    const rawLevelUpLearnsets = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Learnsets.c`
-    );
-    const textLevelUpLearnsets = await rawLevelUpLearnsets.text();
-
-    const rawLevelUpLearnsetsPointers = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Learnsets.c`
-    );
-    const textLevelUpLearnsetsPointers =
-        await rawLevelUpLearnsetsPointers.text();
-
-    const levelUpLearnsetsConversionTable = getLevelUpLearnsetsConversionTable(
-        textLevelUpLearnsetsPointers
-    );
-
-    return regexLevelUpLearnsets(
-        textLevelUpLearnsets,
-        levelUpLearnsetsConversionTable,
-        species
-    );
-}
-
-export async function getTMHMLearnsets(species) {
-    const rawTMHMLearnsets = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/TM_Tutor_Tables.c`
-    );
-    const textTMHMLearnsets = await rawTMHMLearnsets.text();
-
-    return regexTMHMLearnsets(
-        textTMHMLearnsets,
-        species,
-        "gTMHMMoves",
-        "gMoveTutorMoves"
-    );
-}
-
-export async function getTutorLearnsets(species) {
-    const rawTutorLearnsets = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/TM_Tutor_Tables.c`
-    );
-    const textTutorLearnsets = await rawTutorLearnsets.text();
-
-    return regexTutorLearnsets(
-        textTutorLearnsets,
-        species,
-        "gMoveTutorMoves",
-        "gTMHMMoves"
-    );
-}
-
-export async function getEvolution(species) {
-    const rawEvolution = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Evolution%20Table.c`
-    );
-    const textEvolution = await rawEvolution.text();
-
-    return regexEvolution(textEvolution, species);
-}
-
-export async function getForms(species) {
-    const rawForms = await fetch(
-        `https://raw.githubusercontent.com/${repo}/src/data/pokemon/form_species_tables.h`
-    );
-    const textForms = await rawForms.text();
-
-    return regexForms(textForms, species);
-}
-
-export async function getEggMovesLearnsets(species) {
-    const rawEggMoves = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Egg_Moves.c`
-    );
-    const textEggMoves = await rawEggMoves.text();
-
-    return regexEggMovesLearnsets(textEggMoves, species);
-}
-
-export async function getSprite(species) {
-    const rawSprite = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Front_Pic_Table.c`
-    );
-    const textSprite = await rawSprite.text();
-
-    return regexSprite(textSprite, species);
-}
-
-export async function getReplaceAbilities(species) {
-    const rawReplaceAbilities = await fetch(
-        `https://raw.githubusercontent.com/${repoDex}/main/src/abilities/duplicate_abilities.json`
-    );
-    const jsonReplaceAbilities = await rawReplaceAbilities.json();
-
-    return regexReplaceAbilities(jsonReplaceAbilities, species);
-}
-
-export async function getChanges(species, url) {
-    const rawAbilitiesChanges = await fetch(
-        "https://raw.githubusercontent.com/Skeli789/Complete-Fire-Red-Upgrade/master/include/constants/abilities.h"
-    );
-    const textAbilitiesForChanges = await rawAbilitiesChanges.text();
-
-    const abilitiesArrayForChanges = await regexAbilitiesArrayForChanges(
-        textAbilitiesForChanges
-    );
-
-    const rawChanges = await fetch(url);
-    const textChanges = await rawChanges.text();
-
-    return regexChanges(textChanges, species, abilitiesArrayForChanges);
-}
-
-// --- LÓGICA DE RANDOMIZER E REBALANCEAMENTO ---
-
-function rebalanceStat(statBase, pokemon) {
-    return Math.min(Math.floor((statBase * (600 - pokemon.baseHP)) / (pokemon.BST - pokemon.baseHP)), 0xff);
-}
-
-// ... (Mantenha randomizeAbility e randomizeMove como funções internas, não precisam de export se só este arquivo as usa)
-
-async function getJSONFromURL(url) {
-    const raw = await fetch(url);
-    return await raw.json();
-}
-
-// --- CONSTRUÇÃO DO OBJETO ---
-
-export async function buildSpeciesObj() {
-    let localSpecies = {};
-    localSpecies = await getSpecies(localSpecies);
-    localSpecies = await initializeSpeciesObj(localSpecies);
-    localSpecies = await getEvolution(localSpecies);
-
-    await Promise.all([
-        getBaseStats(localSpecies),
-        getLevelUpLearnsets(localSpecies),
-        getTMHMLearnsets(localSpecies),
-        getEggMovesLearnsets(localSpecies),
-        getTutorLearnsets(localSpecies),
-        getSprite(localSpecies),
-    ]);
-
-    localSpecies = await getReplaceAbilities(localSpecies);
-    // ... (restante da lógica de Draco Meteor, Enhancements e CleanSpecies)
-    
-    localSpecies = await applyEnhancements(localSpecies);
-    localSpecies = await fixFormAbilities(localSpecies);
-
-    return localSpecies;
-}
-
-export function initializeSpeciesObj(speciesObj) {
-    footerP("Initializing species");
-    for (const name of Object.keys(speciesObj)) {
-        speciesObj[name]["baseHP"] = 0;
-        speciesObj[name]["baseAttack"] = 0;
-        speciesObj[name]["baseDefense"] = 0;
-        speciesObj[name]["baseSpAttack"] = 0;
-        speciesObj[name]["baseSpDefense"] = 0;
-        speciesObj[name]["baseSpeed"] = 0;
-        speciesObj[name]["BST"] = 0;
-        speciesObj[name]["abilities"] = [];
-        speciesObj[name]["type1"] = "";
-        speciesObj[name]["type2"] = "";
-        speciesObj[name]["changes"] = [];
-        speciesObj[name]["levelUpLearnsets"] = [];
-        speciesObj[name]["TMHMLearnsets"] = [];
-        speciesObj[name]["eggMovesLearnsets"] = [];
-        speciesObj[name]["tutorLearnsets"] = [];
-        speciesObj[name]["evolution"] = [];
-        speciesObj[name]["evolutionLine"] = [name];
-        speciesObj[name]["forms"] = [];
-        speciesObj[name]["sprite"] = "";
-    }
-    return speciesObj;
-}
-
-// --- FUNÇÃO PRINCIPAL CHAMADA PELO APP ---
-
-export async function fetchSpeciesObj() {
-    let data;
-    if (!localStorage.getItem("species")) {
-        data = await buildSpeciesObj();
-    } else {
-        data = JSON.parse(LZString.decompressFromUTF16(localStorage.getItem("species")));
-    }
-
-    // Popula o objeto exportado do global.js sem perder a referência
-    Object.assign(species, data);
-
-    window.sprites = {}; // Se puder, mova para o global.js depois
-    const speciesTracker = [];
-
-    const keys = Object.keys(species);
-    for (let i = 0; i < keys.length; i++) {
-        speciesTracker[i] = {
-            key: keys[i],
-            filter: []
-        };
-    }
-
-    // Atualiza o tracker global (Note: tracker deve ser exportado com 'let' no global.js)
-    // Se tracker for exportado do global, você não pode reatribuí-lo assim: tracker = speciesTracker;
-    // Você deve fazer:
-    speciesTracker.forEach(item => tracker.push(item));
-}
-
-function randomizeAbility(
-    trainerIdFull,
-    trainerId,
-    trainerSecretId,
-    abilitiesCount,
-    abilitiesById,
-    abilitiesAlso,
-    bannedOldAbilities,
-    bannedNewAbilities,
-    pokemonId,
-    ability
-) {
-    if (ability === "ABILITY_NONE" || bannedOldAbilities.includes(ability)) {
-        return ability;
-    }
-    const abilityAlso = abilitiesAlso[ability];
-    const abilityId =
-        abilities[abilityAlso === undefined ? ability : abilityAlso].id;
-    const startAt = ((trainerId % abilitiesCount) >>> 0) + pokemonId;
-    const xorVal = trainerSecretId % 0xff;
-    let numAttempts = 0;
-    let newAbilityId = abilityId + startAt;
-    if (newAbilityId >= abilitiesCount) {
-        newAbilityId = newAbilityId - (abilitiesCount - 2);
-    }
-    newAbilityId ^= xorVal;
-    newAbilityId %= abilitiesCount;
-    let newAbility = abilitiesById[newAbilityId];
-    while (
-        (newAbility === undefined || bannedNewAbilities.includes(newAbility)) &&
-        numAttempts < 100
-    ) {
-        newAbilityId *= xorVal;
-        newAbilityId %= abilitiesCount;
-        newAbility = abilitiesById[newAbilityId];
-        numAttempts++;
-    }
-    if (
-        newAbility === undefined ||
-        ability === "ABILITY_NONE" ||
-        (numAttempts >= 100 && bannedNewAbilities.includes(newAbility))
-    ) {
-        newAbility = ability;
-    }
-    return newAbility;
-}
-
-function randomizeMove(
-    trainerIdFull,
-    trainerId,
-    trainerSecretId,
-    bannedNewMoves,
-    movesById,
-    move
-) {
-    if (move === "MOVE_NONE") {
-        return move;
-    }
-    const moveId = moves[move].id;
-    const movesCountRegular = moves["MOVE_GLACIALLANCE"].id + 1;
-    const startAt = (trainerId % movesCountRegular) >>> 0;
-    const xorVal = trainerSecretId % 0x300;
-    let numAttempts = 0;
-    let newMoveId = moveId + startAt;
-    if (newMoveId >= movesCountRegular) {
-        newMoveId = newMoveId - (movesCountRegular - 2);
-    }
-    newMoveId ^= xorVal;
-    newMoveId %= movesCountRegular;
-    let newMove = movesById.get(newMoveId);
-    while (
-        (newMove === undefined || bannedNewMoves.includes(newMove)) &&
-        numAttempts < 100
-    ) {
-        newMoveId *= xorVal;
-        newMoveId %= movesCountRegular;
-        newMove = movesById.get(newMoveId);
-        numAttempts++;
-    }
-    if (
-        newMove === undefined ||
-        (numAttempts >= 100 && bannedNewMoves.includes(newMove))
-    ) {
-        newMove = "MOVE_TACKLE";
-    }
-    return newMove;
-}

@@ -1,42 +1,62 @@
-async function displaySetup() {
+import { regexSpChar } from './config.js';
+import { settings } from './settings.js';
+import { footerP, sanitizeString, speciesCanLearnMove, refreshURLParams } from './utility.js';
+import { passAllFilters } from './tableFilters.js';
+import {
+    onlyShowStrategyPokemon,
+    locationsButton,
+    trainersButton,
+    changelogMode,
+    onlyShowChangedPokemon,
+    itemsButton,
+    tableFilter,
+    table,
+    utilityButton,
+    body,
+    speciesTable,
+    tracker,
+    setTracker,
+} from './domRefs.js';
+
+export async function displaySetup() {
     footerP("");
 
-    if (Object.keys(strategies).length === 0) {
+    if (Object.keys(window.strategies).length === 0) {
         onlyShowStrategyPokemon.classList.add("hide");
     }
-    if (Object.keys(locations).length === 0) {
+    if (Object.keys(window.locations).length === 0) {
         locationsButton.classList.add("hide");
     }
-    if (Object.keys(trainers).length === 0) {
+    if (Object.keys(window.trainers).length === 0) {
         trainersButton.classList.add("hide");
     }
-    const speciesKeyArray = Object.keys(species);
+    const speciesKeyArray = Object.keys(window.species);
     for (let i = 0; i < speciesKeyArray.length; i++) {
-        if (species[speciesKeyArray[i]]["changes"].length > 0) {
+        if (window.species[speciesKeyArray[i]]["changes"].length > 0) {
             changelogMode.classList.remove("hide");
             onlyShowChangedPokemon.classList.remove("hide");
             break;
         }
     }
-    if (Object.keys(items).length === 0) {
+    if (Object.keys(window.items).length === 0) {
         itemsButton.classList.add("hide");
     } else {
-        await setupItemsButtonFilters();
+        await window.setupItemsButtonFilters();
     }
-    if (typeof innatesDefined !== "undefined") {
+    if (typeof window.innatesDefined !== "undefined") {
         document
             .getElementsByClassName("innatesHeader")[0]
             .classList.remove("hide");
     }
-    if (typeof showShinyToggle !== "undefined") {
+    if (typeof window.showShinyToggle !== "undefined") {
         document.getElementById("shinyContainer").classList.remove("hide");
     }
 
     lazyLoading(true);
 
-    await tableInput.classList.remove("hide");
+    await window.tableInput.classList.remove("hide");
 
-    await tableButton.classList.remove("hide");
+    await window.tableButton.classList.remove("hide");
 
     await tableFilter.classList.remove("hide");
 
@@ -45,7 +65,7 @@ async function displaySetup() {
     await utilityButton.classList.remove("hide");
 }
 
-function allAreEqual(array) {
+export function allAreEqual(array) {
     if (array.length > 0) {
         const result = array.every((element) => {
             if (element === array[0]) {
@@ -57,7 +77,7 @@ function allAreEqual(array) {
     return false;
 }
 
-function sortTableByClassName(table, obj, key, classHeader, asc = true) {
+export function sortTableByClassName(tableEl, obj, key, classHeader, asc = true) {
     const dirModifier = asc ? 1 : -1;
 
     tracker.sort((a, b) => {
@@ -80,18 +100,18 @@ function sortTableByClassName(table, obj, key, classHeader, asc = true) {
     lazyLoading(true);
 
     // Remember how the column is currently sorted
-    table
+    tableEl
         .querySelectorAll("th")
         .forEach((th) => th.classList.remove("th-sort-asc", "th-sort-desc"));
-    table
+    tableEl
         .querySelector(`th.${classHeader}`)
         .classList.toggle("th-sort-asc", asc);
-    table
+    tableEl
         .querySelector(`th.${classHeader}`)
         .classList.toggle("th-sort-desc", !asc);
 }
 
-function sortTableByLearnsets(asc = true) {
+export function sortTableByLearnsets(asc = true) {
     const dirModifier = asc ? 1 : -1;
     const sortOrder = [
         "levelUpLearnsets",
@@ -101,9 +121,9 @@ function sortTableByLearnsets(asc = true) {
         "false",
     ];
 
-    speciesTracker.sort((a, b) => {
-        let stringA = `${speciesCanLearnMove(species[a["key"]], speciesMoveFilter)}`;
-        let stringB = `${speciesCanLearnMove(species[b["key"]], speciesMoveFilter)}`;
+    window.speciesTracker.sort((a, b) => {
+        let stringA = `${speciesCanLearnMove(window.species[a["key"]], window.speciesMoveFilter)}`;
+        let stringB = `${speciesCanLearnMove(window.species[b["key"]], window.speciesMoveFilter)}`;
 
         if (Number(stringA) && Number(stringB)) {
             return parseInt(stringA) > parseInt(stringB)
@@ -132,7 +152,7 @@ function sortTableByLearnsets(asc = true) {
     speciesTable.querySelector(`th.ID`).classList.toggle("th-sort-desc", !asc);
 }
 
-function filterTableInput(input, obj, keyArray) {
+export function filterTableInput(input, obj, keyArray) {
     const sanitizedInput = input
         .trim()
         .replaceAll(regexSpChar, "")
@@ -145,7 +165,7 @@ function filterTableInput(input, obj, keyArray) {
         for (let k = 0; k < keyArray.length; k++) {
             if (
                 keyArray[k] !== "innates" ||
-                typeof innatesDefined !== "undefined"
+                typeof window.innatesDefined !== "undefined"
             ) {
                 if (
                     regexInput.test(
@@ -166,7 +186,7 @@ function filterTableInput(input, obj, keyArray) {
     lazyLoading(true);
 }
 
-function filterLocationsTableInput(input, obj, keyArray) {
+export function filterLocationsTableInput(input, obj, keyArray) {
     const arraySanitizedInput = input
         .trim()
         .toLowerCase()
@@ -187,7 +207,7 @@ function filterLocationsTableInput(input, obj, keyArray) {
         let compareString = `${zone},${method},`
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "");
-        if (name in species) {
+        if (name in window.species) {
             for (let k = 0; k < keyArray.length; k++) {
                 compareString += (obj[name][keyArray[k]] + ",")
                     .replaceAll(regexSpChar, "")
@@ -196,7 +216,7 @@ function filterLocationsTableInput(input, obj, keyArray) {
                     .replace(/[\u0300-\u036f]/g, "")
                     .toLowerCase();
             }
-            for (splitInput of arraySanitizedInput) {
+            for (const splitInput of arraySanitizedInput) {
                 if (!compareString.includes(splitInput)) {
                     tracker[i]["filter"].push("input");
                     continue mainLoop;
@@ -211,15 +231,15 @@ function filterLocationsTableInput(input, obj, keyArray) {
     lazyLoading(true);
 }
 
-function filterTrainersTableInput(input) {
+export function filterTrainersTableInput(input) {
     const arraySanitizedInput = input
         .trim()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .split(/ /g);
 
-    mainLoop: for (let i = 0, j = trainersTracker.length; i < j; i++) {
-        delete trainersTracker[i]["show"];
+    mainLoop: for (let i = 0, j = window.trainersTracker.length; i < j; i++) {
+        delete window.trainersTracker[i]["show"];
         tracker[i]["filter"] = tracker[i]["filter"].filter(
             (value) => value !== "input"
         );
@@ -228,17 +248,17 @@ function filterTrainersTableInput(input) {
         const compareZone = zone.replaceAll(/ /g, "").toUpperCase();
         let compareArray = [
             compareZone,
-            trainers[zone][trainer]["ingameName"].toUpperCase(),
+            window.trainers[zone][trainer]["ingameName"].toUpperCase(),
         ];
 
-        const trainerDifficulty = checkTrainerDifficulty(zone, trainer);
+        const trainerDifficulty = window.checkTrainerDifficulty(zone, trainer);
         for (
             let k = 0;
-            k < trainers[zone][trainer]["party"][trainerDifficulty].length;
+            k < window.trainers[zone][trainer]["party"][trainerDifficulty].length;
             k++
         ) {
             compareArray.push(
-                trainers[zone][trainer]["party"][trainerDifficulty][k]["name"]
+                window.trainers[zone][trainer]["party"][trainerDifficulty][k]["name"]
             );
         }
         for (let k = 0; k < arraySanitizedInput.length; k++) {
@@ -250,27 +270,27 @@ function filterTrainersTableInput(input) {
                         .includes(arraySanitizedInput[k].toUpperCase())
                 )
             ) {
-                delete trainers[zone][trainer]["match"];
+                delete window.trainers[zone][trainer]["match"];
                 tracker[i]["filter"].push("input");
                 continue mainLoop;
             }
-            if (trainersTracker[i]["filter"].length === 0) {
-                trainers[zone][trainer]["match"] = true;
+            if (window.trainersTracker[i]["filter"].length === 0) {
+                window.trainers[zone][trainer]["match"] = true;
             }
         }
         if (
             input.trim().length === 0 &&
-            trainersFilterContainer.children.length === 0
+            window.trainersFilterContainer.children.length === 0
         ) {
-            delete trainers[zone][trainer]["match"];
+            delete window.trainers[zone][trainer]["match"];
         }
     }
-    showRematch();
+    window.showRematch();
 
     lazyLoading(true);
 }
 
-function filterItemsTableInput(input, keyArray) {
+export function filterItemsTableInput(input, keyArray) {
     const sanitizedInput = input
         .trim()
         .replaceAll(regexSpChar, "")
@@ -285,7 +305,7 @@ function filterItemsTableInput(input, keyArray) {
             if (
                 regexInput.test(
                     sanitizeString(
-                        "" + items[tracker[i]["key"]][keyArray[k]]
+                        "" + window.items[tracker[i]["key"]][keyArray[k]]
                     ).replaceAll(regexSpChar, "")
                 )
             ) {
@@ -295,11 +315,11 @@ function filterItemsTableInput(input, keyArray) {
                 break;
             }
         }
-        Object.keys(items[tracker[i]["key"]]["locations"]).forEach((method) => {
+        Object.keys(window.items[tracker[i]["key"]]["locations"]).forEach((method) => {
             if (
                 regexInput.test(
                     sanitizeString(
-                        "" + items[tracker[i]["key"]]["locations"][method]
+                        "" + window.items[tracker[i]["key"]]["locations"][method]
                     ).replaceAll(regexSpChar, "")
                 )
             ) {
@@ -315,7 +335,7 @@ function filterItemsTableInput(input, keyArray) {
     lazyLoading(true);
 }
 
-async function lazyLoading(reset = false) {
+export async function lazyLoading(reset = false) {
     const activeTable = document.querySelectorAll(".activeTable > tbody")[0];
     if (activeTable && typeof tracker !== "undefined") {
         if (reset) {
@@ -373,7 +393,7 @@ async function lazyLoading(reset = false) {
     }
 }
 
-async function tableButtonClick(input, fromDisplayParams = false) {
+export async function tableButtonClick(input, fromDisplayParams = false) {
     if (!fromDisplayParams) {
         body.classList.remove("fixed", "fixedPanel", "fixedAbilities");
     }
@@ -422,7 +442,8 @@ async function tableButtonClick(input, fromDisplayParams = false) {
     targetFilter.classList.remove("hide");
     targetFilter.classList.add("activeFilter");
 
-    tracker = window[`${input}Tracker`];
+    setTracker(window[`${input}Tracker`]);
 
     await lazyLoading(true);
 }
+

@@ -1,4 +1,6 @@
-function regexMovesDescription(textMovesDescription, moves) {
+import { sanitizeString } from '../../utils/utility.js';
+
+export function regexMovesDescription(textMovesDescription, moves) {
     const lines = textMovesDescription.split("\n");
     let move = [];
 
@@ -34,7 +36,7 @@ function regexMovesDescription(textMovesDescription, moves) {
     return moves;
 }
 
-function regexMoves(textMoves, moves) {
+export function regexMoves(textMoves, moves) {
     const lines = textMoves.split("\n");
     let move = null,
         change = false;
@@ -199,7 +201,7 @@ function setMove(move, change, input, output) {
     return move;
 }
 
-function regexMovesIngameName(textMovesIngameName, moves) {
+export function regexMovesIngameName(textMovesIngameName, moves) {
     const lines = textMovesIngameName.split("\n");
     let nameFound = false,
         movesArray = [],
@@ -234,7 +236,7 @@ function regexMovesIngameName(textMovesIngameName, moves) {
     return moves;
 }
 
-function regexVanillaMovesDescription(textVanillaMovesDescription, moves) {
+export function regexVanillaMovesDescription(textVanillaMovesDescription, moves) {
     const lines = textVanillaMovesDescription.split("\n");
     let conversionTable = {};
 
@@ -289,7 +291,7 @@ function regexVanillaMovesDescription(textVanillaMovesDescription, moves) {
     return moves;
 }
 
-function regexMovesFlags(jsonMovesFlags, jsonTutorFlags, moves) {
+export function regexMovesFlags(jsonMovesFlags, jsonTutorFlags, moves) {
     Object.keys(jsonMovesFlags).forEach((key) => {
         for (let i = 0; i < jsonMovesFlags[key].length; i++) {
             const move = jsonMovesFlags[key][i];

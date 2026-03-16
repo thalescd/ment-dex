@@ -1,4 +1,7 @@
-async function regexScripts(textScripts, tradeText, specialFunctions) {
+import { sanitizeString } from '../../utils/utility.js';
+import { repo1 } from '../../utils/config.js';
+
+export async function regexScripts(textScripts, tradeText, specialFunctions) {
     const tradeArray = tradeText.match(
         /INGAME_TRADE_\w+.*?.species.*?SPECIES_\w+/gis
     );
@@ -9,7 +12,7 @@ async function regexScripts(textScripts, tradeText, specialFunctions) {
 
     const scripts = textScripts.match(/data\/.*.inc/gi);
     for (let i = 0, j = scripts.length; i < j; i++) {
-        fetch(`https://raw.githubusercontent.com/${repo}/${scripts[i]}`).then(
+        fetch(`https://raw.githubusercontent.com/${repo1}/${scripts[i]}`).then(
             (promises) => {
                 promises.text().then((text) => {
                     regexScript(
@@ -25,7 +28,7 @@ async function regexScripts(textScripts, tradeText, specialFunctions) {
     }
 }
 
-async function regexItems(textItems) {
+export async function regexItems(textItems) {
     const lines = textItems.split("\n");
     const regex = /.name|.description|.holdEffectParam|.price|.pocket/i;
     let item = null,
@@ -39,7 +42,7 @@ async function regexItems(textItems) {
         } else if (regexMatch) {
             const match = regexMatch[0];
             if (match === ".name") {
-                items[item]["ingameName"] = line.match(/_\("(.*)"\)/)[1];
+                window.items[item]["ingameName"] = line.match(/_\("(.*)"\)/)[1];
             } else if (match === ".description") {
                 const descMatch = line.match(/s\w+Desc/i);
                 if (descMatch) {
@@ -51,11 +54,11 @@ async function regexItems(textItems) {
                     }
                 }
             } else if (match === ".holdEffectParam") {
-                items[item]["effect"] = line.match(/=\s*(.*)\s*,/)[1];
+                window.items[item]["effect"] = line.match(/=\s*(.*)\s*,/)[1];
             } else if (match === ".price") {
-                items[item]["price"] = line.match(/\d+/)[0];
+                window.items[item]["price"] = line.match(/\d+/)[0];
             } else if (match === ".pocket") {
-                items[item]["pocket"] = line.match(/POCKET_\w+/)[0];
+                window.items[item]["pocket"] = line.match(/POCKET_\w+/)[0];
             }
         }
     });
@@ -63,7 +66,7 @@ async function regexItems(textItems) {
     return conversionTable;
 }
 
-async function regexItemDescriptions(textItemDescriptions, conversionTable) {
+export async function regexItemDescriptions(textItemDescriptions, conversionTable) {
     const lines = textItemDescriptions.split("\n");
     let desc = null,
         description = "";
@@ -81,7 +84,7 @@ async function regexItemDescriptions(textItemDescriptions, conversionTable) {
 
         if (/"\s*\)\s*;/.test(line)) {
             conversionTable[desc].forEach((item) => {
-                items[item]["description"] = description;
+                window.items[item]["description"] = description;
             });
 
             desc = null;
@@ -90,7 +93,7 @@ async function regexItemDescriptions(textItemDescriptions, conversionTable) {
     });
 }
 
-async function regexTrainers(textTrainers) {
+export async function regexTrainers(textTrainers) {
     const lines = textTrainers.split("\n");
     let comment = false,
         trainer = null,
@@ -98,14 +101,14 @@ async function regexTrainers(textTrainers) {
         conversionTable = {},
         trainerToZone = {};
 
-    Object.keys(trainers).forEach((zone) => {
-        Object.keys(trainers[zone]).forEach((trainer) => {
+    Object.keys(window.trainers).forEach((zone) => {
+        Object.keys(window.trainers[zone]).forEach((trainer) => {
             trainerToZone[trainer] = zone;
         });
     });
 
     const rawRematch = await fetch(
-        `https://raw.githubusercontent.com/${repo}/src/battle_setup.c`
+        `https://raw.githubusercontent.com/${repo1}/src/battle_setup.c`
     );
     const textRematch = await rawRematch.text();
 
@@ -141,31 +144,31 @@ async function regexTrainers(textTrainers) {
                         zone = trainerToZone[rematch];
                     }
                     if (trainer && zone && rematch) {
-                        if (!trainers[zone][rematch]["rematchArray"]) {
-                            trainers[zone][rematch]["rematchArray"] = [];
+                        if (!window.trainers[zone][rematch]["rematchArray"]) {
+                            window.trainers[zone][rematch]["rematchArray"] = [];
                         }
                         try {
-                            trainers[zone][trainer]["rematch"] = rematch;
+                            window.trainers[zone][trainer]["rematch"] = rematch;
                         } catch {
-                            trainers[zone][trainer] = {};
-                            initTrainer(trainers, trainer, zone);
-                            trainers[zone][trainer]["rematch"] = rematch;
+                            window.trainers[zone][trainer] = {};
+                            initTrainer(window.trainers, trainer, zone);
+                            window.trainers[zone][trainer]["rematch"] = rematch;
                             trainerToZone[trainer] = zone;
                         }
-                        trainers[zone][rematch]["rematchArray"].push(trainer);
+                        window.trainers[zone][rematch]["rematchArray"].push(trainer);
                     }
                 }
             }
-            if (zone && trainers[zone][trainer]) {
+            if (zone && window.trainers[zone][trainer]) {
                 if (/.trainerPic *=/i.test(line)) {
                     const matchTrainerPic = line.match(/TRAINER_PIC_\w+/i);
                     if (matchTrainerPic) {
-                        trainers[zone][trainer]["sprite"] = matchTrainerPic[0];
+                        window.trainers[zone][trainer]["sprite"] = matchTrainerPic[0];
                     }
                 } else if (/.trainerName *=/i.test(line)) {
                     const matchTrainerName = line.match(/_\(\"(.*)\"\)/i);
                     if (matchTrainerName) {
-                        trainers[zone][trainer]["ingameName"] =
+                        window.trainers[zone][trainer]["ingameName"] =
                             matchTrainerName[1];
                     }
                 } else if (/.doubleBattle *=/i.test(line)) {
@@ -173,15 +176,15 @@ async function regexTrainers(textTrainers) {
                 else if(/.items/i.test(line)){
                     const matchItems = line.match(/ITEM_\w+/g)
                     if(matchItems){
-                        trainers[zone][trainer]["items"] = matchItems
+                        window.trainers[zone][trainer]["items"] = matchItems
                     }
                     else{
-                        trainers[zone][trainer]["items"] = []
+                        window.trainers[zone][trainer]["items"] = []
                     }
                 }
                 */
                     if (/TRUE *,/i.test(line)) {
-                        trainers[zone][trainer]["double"] = true;
+                        window.trainers[zone][trainer]["double"] = true;
                     }
                 } else if (/.partyInsane *=/i.test(line)) {
                     const matchParty = line.match(/sParty_\w+/i);
@@ -204,7 +207,7 @@ async function regexTrainers(textTrainers) {
     return [conversionTable, trainerToZone];
 }
 
-async function regexTrainersParties(
+export async function regexTrainersParties(
     textTrainersParties,
     [conversionTable, trainerToZone]
 ) {
@@ -216,7 +219,7 @@ async function regexTrainersParties(
         mon = {};
 
     const rawTrainerSpreads = await fetch(
-        `https://raw.githubusercontent.com/${repo}/src/data/trainer_spreads.h`
+        `https://raw.githubusercontent.com/${repo1}/src/data/trainer_spreads.h`
     );
     const textTrainerSpreads = await rawTrainerSpreads.text();
 
@@ -272,7 +275,7 @@ async function regexTrainersParties(
                     }
                 }
             }
-            if (zone && trainers[zone][trainer]) {
+            if (zone && window.trainers[zone][trainer]) {
                 if (/.lvl *=/i.test(line)) {
                     const matchLvl = line.match(/-?\d+/);
                     if (matchLvl) {
@@ -325,35 +328,35 @@ async function regexTrainersParties(
                         if (!mon["nature"]) {
                             mon["nature"] = "NATURE_DOCILE";
                         }
-                        if (!trainers[zone][trainer]["party"][difficulty]) {
-                            trainers[zone][trainer]["party"][difficulty] = [];
+                        if (!window.trainers[zone][trainer]["party"][difficulty]) {
+                            window.trainers[zone][trainer]["party"][difficulty] = [];
                         }
-                        trainers[zone][trainer]["party"][difficulty].push(mon);
+                        window.trainers[zone][trainer]["party"][difficulty].push(mon);
                     }
                     mon = {};
                 } else if (/^} *;$/.test(line)) {
-                    Object.keys(trainers[zone][trainer]["party"]).forEach(
+                    Object.keys(window.trainers[zone][trainer]["party"]).forEach(
                         (difficulty) => {
-                            trainers[zone][trainer]["party"][
+                            window.trainers[zone][trainer]["party"][
                                 difficulty
                             ].forEach((trainerSpeciesObj) => {
                                 let speciesName = trainerSpeciesObj["name"];
                                 for (
                                     let i = 0;
                                     i <
-                                    species[speciesName]["evolution"].length;
+                                    window.species[speciesName]["evolution"].length;
                                     i++
                                 ) {
                                     if (
-                                        species[speciesName]["evolution"][
+                                        window.species[speciesName]["evolution"][
                                             i
                                         ][0].includes("EVO_MEGA") &&
-                                        species[speciesName]["evolution"][
+                                        window.species[speciesName]["evolution"][
                                             i
                                         ][1] == trainerSpeciesObj["item"]
                                     ) {
                                         trainerSpeciesObj["name"] =
-                                            species[speciesName]["evolution"][
+                                            window.species[speciesName]["evolution"][
                                                 i
                                             ][2];
                                     }
@@ -371,7 +374,7 @@ async function regexTrainersParties(
     });
 }
 
-async function regexSpecialsFunctions(textSpecials) {
+export async function regexSpecialsFunctions(textSpecials) {
     const lines = textSpecials.split("\n");
     let functionName = null;
     let functions = {};
@@ -418,7 +421,7 @@ async function regexSpecialsFunctions(textSpecials) {
     return functions;
 }
 
-async function regexItemIcon(textItemIconTable, textItemsIcon) {
+export async function regexItemIcon(textItemIconTable, textItemsIcon) {
     let iconToItem = {};
 
     textItemIconTable
@@ -440,18 +443,18 @@ async function regexItemIcon(textItemIconTable, textItemsIcon) {
 
         if (iconToItem[itemIcon]) {
             iconToItem[itemIcon].forEach((itemName) => {
-                if (itemName in items) {
-                    items[itemName]["url"] =
-                        `https://raw.githubusercontent.com/${repo}/${itemPath}`;
+                if (itemName in window.items) {
+                    window.items[itemName]["url"] =
+                        `https://raw.githubusercontent.com/${repo1}/${itemPath}`;
                     if (/gItemIcon_(?:HM|TM)$/.test(itemIcon)) {
                         const moveMatch = itemName.match(
                             /ITEM_(?:HM\d+_|TM\d+_)(\w+)/
                         );
                         if (moveMatch) {
                             const move = `MOVE_${moveMatch[1]}`;
-                            if (move in moves) {
-                                items[itemName]["url"] =
-                                    `assets/TM_${moves[move]["type"]}.png`;
+                            if (move in window.moves) {
+                                window.items[itemName]["url"] =
+                                    `assets/TM_${window.moves[move]["type"]}.png`;
                             }
                         }
                     }
@@ -461,7 +464,7 @@ async function regexItemIcon(textItemIconTable, textItemsIcon) {
     });
 }
 
-async function regexItemBallSripts(textItemBallScripts, textScripts) {
+export async function regexItemBallSripts(textItemBallScripts, textScripts) {
     const zones = textScripts.match(/data\/.*.inc/gi).toString();
 
     textItemBallScripts
@@ -476,10 +479,10 @@ async function regexItemBallSripts(textItemBallScripts, textScripts) {
                     zones.includes(zone) ||
                     zones.includes(zone.replaceAll("_", ""))
                 ) {
-                    if (!items[itemName]["locations"]["Find"]) {
-                        items[itemName]["locations"]["Find"] = [];
+                    if (!window.items[itemName]["locations"]["Find"]) {
+                        window.items[itemName]["locations"]["Find"] = [];
                     }
-                    items[itemName]["locations"]["Find"].push(
+                    window.items[itemName]["locations"]["Find"].push(
                         zone
                             .replaceAll("_", "")
                             .replace(/([A-Z])/g, " $1")
@@ -492,22 +495,22 @@ async function regexItemBallSripts(textItemBallScripts, textScripts) {
         });
 }
 
-async function getHeldItems() {
-    Object.keys(species).forEach((speciesName) => {
-        if (species[speciesName]["item1"] != "") {
+export async function getHeldItems() {
+    Object.keys(window.species).forEach((speciesName) => {
+        if (window.species[speciesName]["item1"] != "") {
             if (
-                !("Held" in items[species[speciesName]["item1"]]["locations"])
+                !("Held" in window.items[window.species[speciesName]["item1"]]["locations"])
             ) {
-                items[species[speciesName]["item1"]]["locations"]["Held"] = [
+                window.items[window.species[speciesName]["item1"]]["locations"]["Held"] = [
                     "Held by wild Pokemon",
                 ];
             }
         }
-        if (species[speciesName]["item2"] != "") {
+        if (window.species[speciesName]["item2"] != "") {
             if (
-                !("Held" in items[species[speciesName]["item2"]]["locations"])
+                !("Held" in window.items[window.species[speciesName]["item2"]]["locations"])
             ) {
-                items[species[speciesName]["item2"]]["locations"]["Held"] = [
+                window.items[window.species[speciesName]["item2"]]["locations"]["Held"] = [
                     "Held by wild Pokemon",
                 ];
             }
@@ -515,8 +518,8 @@ async function getHeldItems() {
     });
 }
 
-async function regexHiddenItems(textFlags) {
-    const itemsKey = JSON.stringify(Object.keys(items));
+export async function regexHiddenItems(textFlags) {
+    const itemsKey = JSON.stringify(Object.keys(window.items));
 
     textFlags.match(/FLAG_.*FLAG_HIDDEN_ITEMS_START/g).forEach((flagMatch) => {
         const flag = flagMatch.match(/FLAG_\w+/)[0];
@@ -553,10 +556,10 @@ async function regexHiddenItems(textFlags) {
                         zone = "Unknown";
                     }
 
-                    if (!items[itemName]["locations"]["Hidden"]) {
-                        items[itemName]["locations"]["Hidden"] = [];
+                    if (!window.items[itemName]["locations"]["Hidden"]) {
+                        window.items[itemName]["locations"]["Hidden"] = [];
                     }
-                    items[itemName]["locations"]["Hidden"].push(
+                    window.items[itemName]["locations"]["Hidden"].push(
                         sanitizeString(zone)
                     );
                     break regexLoop;
@@ -581,31 +584,31 @@ function initTrainer(trainers, trainer, zone) {
 }
 
 function initItem(name) {
-    items[name] = {};
-    items[name]["name"] = name;
-    items[name]["url"] = "";
-    items[name]["description"] = "";
-    items[name]["locations"] = {};
-    items[name]["pocket"] = "";
-    items[name]["price"] = 0;
-    items[name]["ingameName"] = sanitizeString(name);
-    items[name]["effect"] = "";
+    window.items[name] = {};
+    window.items[name]["name"] = name;
+    window.items[name]["url"] = "";
+    window.items[name]["description"] = "";
+    window.items[name]["locations"] = {};
+    window.items[name]["pocket"] = "";
+    window.items[name]["price"] = 0;
+    window.items[name]["ingameName"] = sanitizeString(name);
+    window.items[name]["effect"] = "";
 }
 
 function initScriptsLocations(speciesName, zone, method) {
-    if (!locations[zone]) {
-        locations[zone] = {};
+    if (!window.locations[zone]) {
+        window.locations[zone] = {};
     }
-    if (!locations[zone][method]) {
-        locations[zone][method] = {};
+    if (!window.locations[zone][method]) {
+        window.locations[zone][method] = {};
     }
-    if (!locations[zone][method][species]) {
-        locations[zone][method][speciesName] = 100;
+    if (!window.locations[zone][method][species]) {
+        window.locations[zone][method][speciesName] = 100;
 
-        const counter = locationsTracker.length;
-        locationsTracker[counter] = {};
-        locationsTracker[counter]["key"] = `${zone}\\${method}\\${speciesName}`;
-        locationsTracker[counter]["filter"] = [];
+        const counter = window.locationsTracker.length;
+        window.locationsTracker[counter] = {};
+        window.locationsTracker[counter]["key"] = `${zone}\\${method}\\${speciesName}`;
+        window.locationsTracker[counter]["filter"] = [];
     }
 }
 
@@ -641,7 +644,7 @@ function regexScript(
             new Set(text.match(/TRAINER_\w+/g))
         );
         for (let k = 0; k < trainersFromScript.length; k++) {
-            initTrainer(trainers, trainersFromScript[k], zone);
+            initTrainer(window.trainers, trainersFromScript[k], zone);
         }
 
         if (/CreateEventLegalEnemyMon/i.test(text)) {
@@ -684,18 +687,18 @@ function regexScript(
         const tutorName = `ITEM_${tutorMatch[k].replace("MOVE_", "")}`;
         const move = tutorMatch[k].match(/TUTOR_(MOVE_\w+)/)[1];
         initItem(tutorName);
-        if (!items[tutorName]["locations"]["Tutor"]) {
-            items[tutorName]["locations"]["Tutor"] = [];
+        if (!window.items[tutorName]["locations"]["Tutor"]) {
+            window.items[tutorName]["locations"]["Tutor"] = [];
         }
-        items[tutorName]["url"] =
+        window.items[tutorName]["url"] =
             "https://raw.githubusercontent.com/ydarissep/dex-core/main/src/locations/sprites/Tutor.png";
-        if (move in moves) {
-            items[tutorName]["description"] =
-                moves[move]["description"].join("");
-            items[tutorName]["pocket"] = "POCKET_TUTOR";
-            items[tutorName]["url"] = `assets/TM_${moves[move]["type"]}.png`;
+        if (move in window.moves) {
+            window.items[tutorName]["description"] =
+                window.moves[move]["description"].join("");
+            window.items[tutorName]["pocket"] = "POCKET_TUTOR";
+            window.items[tutorName]["url"] = `assets/TM_${window.moves[move]["type"]}.png`;
         }
-        items[tutorName]["locations"]["Tutor"].push(zone);
+        window.items[tutorName]["locations"]["Tutor"].push(zone);
     }
 
     const giveitemMatch = Array.from(
@@ -703,19 +706,19 @@ function regexScript(
     );
     for (let k = 0; k < giveitemMatch.length; k++) {
         const itemName = giveitemMatch[k].match(/ITEM_\w+/)[0];
-        if (!items[itemName]["locations"]["Gift"]) {
-            items[itemName]["locations"]["Gift"] = [];
+        if (!window.items[itemName]["locations"]["Gift"]) {
+            window.items[itemName]["locations"]["Gift"] = [];
         }
-        items[itemName]["locations"]["Gift"].push(zone);
+        window.items[itemName]["locations"]["Gift"].push(zone);
     }
 
     const buyitemMatch = Array.from(new Set(text.match(/.2byte\s+ITEM_\w+/g)));
     for (let k = 0; k < buyitemMatch.length; k++) {
         const itemName = buyitemMatch[k].match(/ITEM_\w+/)[0];
-        if (!items[itemName]["locations"]["Buy"]) {
-            items[itemName]["locations"]["Buy"] = [];
+        if (!window.items[itemName]["locations"]["Buy"]) {
+            window.items[itemName]["locations"]["Buy"] = [];
         }
-        items[itemName]["locations"]["Buy"].push(zone);
+        window.items[itemName]["locations"]["Buy"].push(zone);
     }
 
     if (/\s+givemon\s+|\s+giveegg\s+/i.test(text)) {

@@ -1,3 +1,70 @@
+// --- ES Module Imports ---
+import {
+    sanitizeString,
+    getSpeciesSpriteSrc,
+    returnTargetSpeciesSprite,
+    refreshURLParams,
+    copyToClipboard,
+    speciesCanLearnMove,
+    getPokemonResistanceValueAgainstType,
+    getPokemonEffectivenessValueAgainstType,
+} from './utility.js';
+
+import { isSameColor } from '../modules/species/displaySpecies.js';
+
+import {
+    panelSpecies,
+    setPanelSpecies,
+    tracker,
+    setTracker,
+    speciesPanelMainContainer,
+    speciesPanelHistoryContainer,
+    speciesName as speciesNameEl,
+    speciesID,
+    speciesSprite,
+    speciesType1,
+    speciesType2,
+    speciesPanelLocationsButton,
+    speciesPanelInfoButton,
+    speciesAbilities,
+    speciesInnatesMainContainer,
+    speciesInnates,
+    speciesEvoTable,
+    speciesFormes,
+    speciesChanges,
+    speciesChangesContainer,
+    speciesDefensiveTypeChart,
+    speciesOffensiveTypeChart,
+    speciesStrategiesContainer,
+    speciesStrategies,
+    speciesPanelLevelUpFromPreviousEvoTable,
+    speciesPanelLevelUpTable,
+    speciesPanelTMHMTable,
+    speciesPanelTutorTable,
+    speciesPanelEggMovesTable,
+    shinyToggle,
+    body,
+    overlay,
+    overlaySpeciesPanel,
+    graph,
+    graphStats,
+    statDisplays,
+    speciesButton,
+    table,
+    utilityButton,
+    popup,
+} from './domRefs.js';
+
+import { tableButtonClick } from './tableUtility.js';
+import { deleteFiltersFromTable, createFilter } from './tableFilters.js';
+
+// --- DOM elements not in domRefs (grabbed locally) ---
+const speciesType3 = document.getElementById("speciesType3");
+const speciesAbilitiesMainContainer = document.getElementById("speciesAbilitiesMainContainer");
+const speciesEvolutionsMainContainer = document.getElementById("speciesEvolutionsMainContainer");
+const speciesFormesContainer = document.getElementById("speciesFormesContainer");
+
+// --- speciesPanelHistory (not yet converted, stays on window) ---
 if (localStorage.getItem("speciesPanelHistory")) {
     window.speciesPanelHistory = JSON.parse(
         localStorage.getItem("speciesPanelHistory")
@@ -6,52 +73,50 @@ if (localStorage.getItem("speciesPanelHistory")) {
     window.speciesPanelHistory = [];
 }
 
-async function createSpeciesPanel(name) {
+export async function createSpeciesPanel(name) {
     if (
         panelSpecies == name &&
         !speciesPanelMainContainer.classList.contains("hide")
     ) {
         return;
     }
-    panelSpecies = name;
+    setPanelSpecies(name);
     speciesPanel("show");
 
-    if (typeof refreshURLParams !== "undefined") {
-        refreshURLParams();
-    }
+    refreshURLParams();
 
     await manageSpeciesPanelHistory(name);
 
-    speciesName.innerText = sanitizeString(name);
-    speciesID.innerText = `#${species[name]["ID"]}`;
+    speciesNameEl.innerText = sanitizeString(name);
+    speciesID.innerText = `#${window.species[name]["ID"]}`;
 
     speciesSprite.className = `sprite${name}`;
     handleShiny();
     speciesSprite.src = getSpeciesSpriteSrc(name);
 
-    speciesType1.innerText = sanitizeString(species[name]["type1"]);
-    speciesType2.innerText = sanitizeString(species[name]["type2"]);
-    speciesType1.className = `${species[name]["type1"]} background`;
-    speciesType2.className = `${species[name]["type2"]} background`;
+    speciesType1.innerText = sanitizeString(window.species[name]["type1"]);
+    speciesType2.innerText = sanitizeString(window.species[name]["type2"]);
+    speciesType1.className = `${window.species[name]["type1"]} background`;
+    speciesType2.className = `${window.species[name]["type2"]} background`;
 
     if (speciesType1.innerText === speciesType2.innerText)
         speciesType2.classList.add("hide");
     else speciesType2.classList.remove("hide");
 
-    if (typeof species[name]["type3"] !== "undefined") {
+    if (typeof window.species[name]["type3"] !== "undefined") {
         if (
-            species[name]["type3"] !== species[name]["type1"] &&
-            species[name]["type3"] !== species[name]["type2"]
+            window.species[name]["type3"] !== window.species[name]["type1"] &&
+            window.species[name]["type3"] !== window.species[name]["type2"]
         ) {
-            speciesType3.innerText = sanitizeString(species[name]["type3"]);
-            speciesType3.className = `${species[name]["type3"]} background`;
+            speciesType3.innerText = sanitizeString(window.species[name]["type3"]);
+            speciesType3.className = `${window.species[name]["type3"]} background`;
             speciesType3.classList.remove("hide");
         }
     } else {
         speciesType3.classList.add("hide");
     }
 
-    if (name in locationsByPokemon) {
+    if (name in window.locationsByPokemon) {
         speciesPanelLocationsButton.classList.remove("hide");
     } else {
         speciesPanelLocationsButton.classList.add("hide");
@@ -60,26 +125,26 @@ async function createSpeciesPanel(name) {
     while (speciesAbilities.firstChild)
         speciesAbilities.removeChild(speciesAbilities.firstChild);
 
-    for (let i = 0; i < species[name]["abilities"].length; i++) {
-        const ability = species[name]["abilities"][i];
-        if (i === 1 && ability === species[name]["abilities"][0]) {
+    for (let i = 0; i < window.species[name]["abilities"].length; i++) {
+        const ability = window.species[name]["abilities"][i];
+        if (i === 1 && ability === window.species[name]["abilities"][0]) {
             continue;
         } else if (
             i === 2 &&
-            (ability === species[name]["abilities"][0] ||
+            (ability === window.species[name]["abilities"][0] ||
                 ability === "ABILITY_NONE") &&
-            (ability === species[name]["abilities"][1] ||
+            (ability === window.species[name]["abilities"][1] ||
                 ability === "ABILITY_NONE")
         ) {
             continue;
         }
-        if (ability !== "ABILITY_NONE" && abilities[ability]) {
+        if (ability !== "ABILITY_NONE" && window.abilities[ability]) {
             const abilityContainer = document.createElement("div");
             const abilityName = document.createElement("span");
             const abilityDescription = document.createElement("span");
 
-            abilityName.innerText = abilities[ability]["ingameName"];
-            abilityDescription.innerText = abilities[ability]["description"];
+            abilityName.innerText = window.abilities[ability]["ingameName"];
+            abilityDescription.innerText = window.abilities[ability]["description"];
 
             if (i === 2) {
                 abilityName.className = "bold";
@@ -93,12 +158,12 @@ async function createSpeciesPanel(name) {
 
             abilityName.addEventListener("click", async () => {
                 if (!speciesButton.classList.contains("activeButton")) {
-                    tracker = speciesTracker;
+                    setTracker(window.speciesTracker);
                     await tableButtonClick("species");
                 }
                 deleteFiltersFromTable();
 
-                createFilter(abilities[ability]["ingameName"], "Ability");
+                createFilter(window.abilities[ability]["ingameName"], "Ability");
                 speciesPanel("hide");
                 window.scrollTo({ top: 0 });
             });
@@ -114,20 +179,20 @@ async function createSpeciesPanel(name) {
         speciesAbilitiesMainContainer.classList.add("hide");
     }
 
-    if (typeof innatesDefined !== "undefined") {
+    if (typeof window.innatesDefined !== "undefined") {
         while (speciesInnates.firstChild)
             speciesInnates.removeChild(speciesInnates.firstChild);
 
-        for (let i = 0; i < species[name]["innates"].length; i++) {
-            const ability = species[name]["innates"][i];
-            if (species[name]["innates"][i] !== "ABILITY_NONE") {
+        for (let i = 0; i < window.species[name]["innates"].length; i++) {
+            const ability = window.species[name]["innates"][i];
+            if (window.species[name]["innates"][i] !== "ABILITY_NONE") {
                 const abilityContainer = document.createElement("div");
                 const abilityName = document.createElement("span");
                 const abilityDescription = document.createElement("span");
 
-                abilityName.innerText = abilities[ability]["ingameName"];
+                abilityName.innerText = window.abilities[ability]["ingameName"];
                 abilityDescription.innerText =
-                    abilities[ability]["description"];
+                    window.abilities[ability]["description"];
 
                 abilityName.classList.add("hyperlink");
 
@@ -137,12 +202,12 @@ async function createSpeciesPanel(name) {
 
                 abilityName.addEventListener("click", async () => {
                     if (!speciesButton.classList.contains("activeButton")) {
-                        tracker = speciesTracker;
+                        setTracker(window.speciesTracker);
                         await tableButtonClick("species");
                     }
                     deleteFiltersFromTable();
 
-                    createFilter(abilities[ability]["ingameName"], "Ability");
+                    createFilter(window.abilities[ability]["ingameName"], "Ability");
                     speciesPanel("hide");
                     window.scrollTo({ top: 0 });
                 });
@@ -152,7 +217,7 @@ async function createSpeciesPanel(name) {
                 speciesInnates.append(abilityContainer);
             }
         }
-        if (species[name]["innates"].length == 0) {
+        if (window.species[name]["innates"].length == 0) {
             speciesInnatesMainContainer.classList.add("hide");
         } else {
             speciesInnatesMainContainer.classList.remove("hide");
@@ -160,13 +225,13 @@ async function createSpeciesPanel(name) {
     }
 
     let monStats = [
-        species[name]["baseHP"],
-        species[name]["baseAttack"],
-        species[name]["baseDefense"],
-        species[name]["baseSpAttack"],
-        species[name]["baseSpDefense"],
-        species[name]["baseSpeed"],
-        species[name]["BST"],
+        window.species[name]["baseHP"],
+        window.species[name]["baseAttack"],
+        window.species[name]["baseDefense"],
+        window.species[name]["baseSpAttack"],
+        window.species[name]["baseSpDefense"],
+        window.species[name]["baseSpeed"],
+        window.species[name]["BST"],
     ];
 
     graphStats.forEach((stat, index) => {
@@ -185,13 +250,13 @@ async function createSpeciesPanel(name) {
         speciesEvoTable.removeChild(speciesEvoTable.firstChild);
     }
 
-    if (species[name]["evolutionLine"].length > 1) {
-        let speciesArray = [species[name]["evolutionLine"][0]];
+    if (window.species[name]["evolutionLine"].length > 1) {
+        let speciesArray = [window.species[name]["evolutionLine"][0]];
         let targetSpeciesArray = [];
         const rootContainer = document.createElement("td");
         rootContainer.append(
             createClickableImgAndName(
-                species[name]["evolutionLine"][0],
+                window.species[name]["evolutionLine"][0],
                 false,
                 false,
                 false
@@ -206,29 +271,29 @@ async function createSpeciesPanel(name) {
                 const targetSpecies = speciesArray[i];
                 for (
                     let j = 0;
-                    j < species[targetSpecies]["evolution"].length;
+                    j < window.species[targetSpecies]["evolution"].length;
                     j++
                 ) {
                     if (
-                        species[targetSpecies]["evolutionLine"].indexOf(
+                        window.species[targetSpecies]["evolutionLine"].indexOf(
                             targetSpecies
                         ) >=
-                        species[targetSpecies]["evolutionLine"].indexOf(
-                            species[targetSpecies]["evolution"][j][2]
+                        window.species[targetSpecies]["evolutionLine"].indexOf(
+                            window.species[targetSpecies]["evolution"][j][2]
                         )
                     ) {
                         // prevent infinite loop (dialga)
                         break mainLoop;
                     }
                     if (
-                        species[species[targetSpecies]["evolution"][j][2]][
+                        window.species[window.species[targetSpecies]["evolution"][j][2]][
                             "baseSpeed"
                         ] > 0
                     ) {
                         speciesEvoTableContainer.append(
                             createClickableImgAndName(
-                                species[targetSpecies]["evolution"][j][2],
-                                species[targetSpecies]["evolution"][j],
+                                window.species[targetSpecies]["evolution"][j][2],
+                                window.species[targetSpecies]["evolution"][j],
                                 false,
                                 false
                             )
@@ -236,7 +301,7 @@ async function createSpeciesPanel(name) {
                         speciesEvoTable.append(speciesEvoTableContainer);
 
                         targetSpeciesArray.push(
-                            species[targetSpecies]["evolution"][j][2]
+                            window.species[targetSpecies]["evolution"][j][2]
                         );
                     }
                 }
@@ -263,17 +328,17 @@ async function createSpeciesPanel(name) {
         speciesFormes.removeChild(speciesFormes.firstChild);
     }
 
-    if (species[name]["forms"].length > 1) {
-        for (let i = 0; i < species[name]["forms"].length; i++) {
+    if (window.species[name]["forms"].length > 1) {
+        for (let i = 0; i < window.species[name]["forms"].length; i++) {
             if (
-                (!species[name]["evolutionLine"].includes(
-                    species[name]["forms"][i]
+                (!window.species[name]["evolutionLine"].includes(
+                    window.species[name]["forms"][i]
                 ) ||
-                    species[name]["forms"][i] === name) &&
-                species[species[name]["forms"][i]]["baseSpeed"] > 0
+                    window.species[name]["forms"][i] === name) &&
+                window.species[window.species[name]["forms"][i]]["baseSpeed"] > 0
             ) {
                 speciesFormes.append(
-                    createClickableImgAndName(species[name]["forms"][i])
+                    createClickableImgAndName(window.species[name]["forms"][i])
                 );
             }
         }
@@ -287,11 +352,11 @@ async function createSpeciesPanel(name) {
     while (speciesChanges.firstChild)
         speciesChanges.removeChild(speciesChanges.firstChild);
 
-    if (species[name]["changes"].length !== 0) {
-        for (let i = 0; i < species[name]["changes"].length; i++) {
-            const stat = species[name]["changes"][i][0];
-            const oldStat = species[name]["changes"][i][1];
-            const newStat = species[name][stat];
+    if (window.species[name]["changes"].length !== 0) {
+        for (let i = 0; i < window.species[name]["changes"].length; i++) {
+            const stat = window.species[name]["changes"][i][0];
+            const oldStat = window.species[name]["changes"][i][1];
+            const newStat = window.species[name][stat];
             createChange(stat, oldStat, newStat, speciesChanges);
         }
     }
@@ -304,7 +369,7 @@ async function createSpeciesPanel(name) {
             speciesDefensiveTypeChart.firstChild
         );
 
-    Object.keys(typeChart).forEach((type) => {
+    Object.keys(window.typeChart).forEach((type) => {
         const defensiveTypeEffectivenessContainer =
             document.createElement("span");
         const checkType = document.createElement("span");
@@ -318,7 +383,7 @@ async function createSpeciesPanel(name) {
         checkType.className = `backgroundSmall ${type}`;
 
         defensiveTypeEffectivenessValue.innerText =
-            getPokemonResistanceValueAgainstType(species[name], type);
+            getPokemonResistanceValueAgainstType(window.species[name], type);
 
         defensiveTypeEffectivenessValue.className = `typeChartDefensive${defensiveTypeEffectivenessValue.innerText} backgroundSmall`;
         defensiveTypeEffectivenessContainer.append(checkType);
@@ -334,7 +399,7 @@ async function createSpeciesPanel(name) {
         );
 
     try {
-        Object.keys(typeChart).forEach((type) => {
+        Object.keys(window.typeChart).forEach((type) => {
             const offensiveTypeEffectivenessContainer =
                 document.createElement("span");
             const checkType = document.createElement("span");
@@ -349,7 +414,7 @@ async function createSpeciesPanel(name) {
             checkType.className = `backgroundSmall ${type}`;
 
             offensiveTypeEffectivenessValue.innerText =
-                getPokemonEffectivenessValueAgainstType(species[name], type);
+                getPokemonEffectivenessValueAgainstType(window.species[name], type);
 
             offensiveTypeEffectivenessValue.className = `typeChartOffensive${offensiveTypeEffectivenessValue.innerText} backgroundSmall`;
             offensiveTypeEffectivenessContainer.append(checkType);
@@ -366,14 +431,14 @@ async function createSpeciesPanel(name) {
         );
     }
 
-    if (strategies[name]) {
+    if (window.strategies[name]) {
         speciesStrategiesContainer.classList.remove("hide");
         while (speciesStrategies.firstChild) {
             speciesStrategies.removeChild(speciesStrategies.firstChild);
         }
-        for (let i = 0; i < strategies[name].length; i++) {
+        for (let i = 0; i < window.strategies[name].length; i++) {
             speciesStrategies.append(
-                createSpeciesStrategy(strategies[name][i], name)
+                createSpeciesStrategy(window.strategies[name][i], name)
             );
         }
     } else {
@@ -387,7 +452,7 @@ async function createSpeciesPanel(name) {
         [speciesPanelEggMovesTable, "eggMovesLearnsets"],
     ].forEach((learnsets) => {
         try {
-            if (typeof species[name][learnsets[1]][0] == "string") {
+            if (typeof window.species[name][learnsets[1]][0] == "string") {
                 buildSpeciesPanelSingleLearnsetsTable(learnsets[0], name, [
                     learnsets[1],
                 ]);
@@ -444,7 +509,7 @@ function createClickableImgAndName(
         container.append(evoCondition);
     }
     if (showName) {
-        name.innerText = sanitizeString(species[speciesName]["name"]);
+        name.innerText = sanitizeString(window.species[speciesName]["name"]);
         name.className = "underline";
     }
 
@@ -458,13 +523,13 @@ function createClickableImgAndName(
     return container;
 }
 
-function fetchShinySprite(clicked = false) {
+export function fetchShinySprite(clicked = false) {
     const targetSpecies = returnTargetSpeciesSprite(panelSpecies);
     if (clicked) {
         shinyToggle.classList.toggle("toggled");
     }
     if (!shinyToggle.classList.contains("toggled")) {
-        speciesSprite.src = sprites[targetSpecies];
+        speciesSprite.src = window.sprites[targetSpecies];
     } else {
         applyShinyVar(targetSpecies);
     }
@@ -480,7 +545,7 @@ async function applyShinyVar(speciesName) {
     let sprite = new Image();
     let canvas = document.createElement("canvas");
 
-    sprite.src = sprites[speciesName];
+    sprite.src = window.sprites[speciesName];
 
     canvas.width = sprite.width;
     canvas.height = sprite.height;
@@ -522,12 +587,12 @@ async function applyShinyVar(speciesName) {
 
 async function fetchSpeciesPal(speciesName, type = "normal") {
     let rawPal = await fetch(
-        `${species[speciesName]["sprite"].replace(/\w+\.png/, `${type}.pal`)}`
+        `${window.species[speciesName]["sprite"].replace(/\w+\.png/, `${type}.pal`)}`
     );
     if (rawPal.status === 404) {
-        if (species[speciesName]["forms"].length > 1) {
+        if (window.species[speciesName]["forms"].length > 1) {
             rawPal = await fetch(
-                `${species[species[speciesName]["forms"][0]]["sprite"].replace(/\w+\.png/, `${type}.pal`)}`
+                `${window.species[window.species[speciesName]["forms"][0]]["sprite"].replace(/\w+\.png/, `${type}.pal`)}`
             );
         }
     }
@@ -555,19 +620,19 @@ async function fetchSpeciesPal(speciesName, type = "normal") {
 }
 
 async function manageSpeciesPanelHistory(speciesName) {
-    for (let i = 0; i < speciesPanelHistory.length; i++) {
+    for (let i = 0; i < window.speciesPanelHistory.length; i++) {
         if (
-            !(speciesPanelHistory[i][0] in species) ||
-            species[speciesPanelHistory[i][0]]["baseSpeed"] == 0
+            !(window.speciesPanelHistory[i][0] in window.species) ||
+            window.species[window.speciesPanelHistory[i][0]]["baseSpeed"] == 0
         ) {
-            speciesPanelHistory.splice(i, 1);
+            window.speciesPanelHistory.splice(i, 1);
             i--;
         }
     }
 
     if (
         speciesPanelHistoryContainer.children.length !=
-        speciesPanelHistory.length
+        window.speciesPanelHistory.length
     ) {
         displaySpeciesPanelHistory();
     }
@@ -590,8 +655,8 @@ async function manageSpeciesPanelHistory(speciesName) {
     const maxHistory = 12;
     let index = -1;
     let locked = 0;
-    for (let i = 0; i < speciesPanelHistory.length; i++) {
-        if (speciesPanelHistory[i][1] == true) {
+    for (let i = 0; i < window.speciesPanelHistory.length; i++) {
+        if (window.speciesPanelHistory[i][1] == true) {
             locked++;
         } else if (index < 0) {
             index = i;
@@ -600,28 +665,28 @@ async function manageSpeciesPanelHistory(speciesName) {
 
     if (
         locked >= maxHistory ||
-        speciesPanelHistory.some((el) => el[0] == speciesName)
+        window.speciesPanelHistory.some((el) => el[0] == speciesName)
     ) {
         return;
     }
 
-    for (let i = 0; i < speciesPanelHistory.length; i++) {
+    for (let i = 0; i < window.speciesPanelHistory.length; i++) {
         if (
-            species[speciesPanelHistory[i][0]]["evolutionLine"].includes(
+            window.species[window.speciesPanelHistory[i][0]]["evolutionLine"].includes(
                 speciesName
             ) ||
-            species[speciesPanelHistory[i][0]]["forms"].includes(speciesName)
+            window.species[window.speciesPanelHistory[i][0]]["forms"].includes(speciesName)
         ) {
-            speciesPanelHistory[i][0] = speciesName;
+            window.speciesPanelHistory[i][0] = speciesName;
             for (let j = i; j > locked; j--) {
-                const temp = speciesPanelHistory[j - 1];
-                speciesPanelHistory[j - 1] = speciesPanelHistory[j];
-                speciesPanelHistory[j] = temp;
+                const temp = window.speciesPanelHistory[j - 1];
+                window.speciesPanelHistory[j - 1] = window.speciesPanelHistory[j];
+                window.speciesPanelHistory[j] = temp;
             }
             displaySpeciesPanelHistory();
             localStorage.setItem(
                 "speciesPanelHistory",
-                JSON.stringify(speciesPanelHistory)
+                JSON.stringify(window.speciesPanelHistory)
             );
             return;
         }
@@ -631,14 +696,14 @@ async function manageSpeciesPanelHistory(speciesName) {
         index = locked;
     }
 
-    speciesPanelHistory.splice(index, 0, [speciesName, false]);
-    while (speciesPanelHistory.length > maxHistory) {
-        speciesPanelHistory.splice(-1, 1);
+    window.speciesPanelHistory.splice(index, 0, [speciesName, false]);
+    while (window.speciesPanelHistory.length > maxHistory) {
+        window.speciesPanelHistory.splice(-1, 1);
     }
     displaySpeciesPanelHistory();
     localStorage.setItem(
         "speciesPanelHistory",
-        JSON.stringify(speciesPanelHistory)
+        JSON.stringify(window.speciesPanelHistory)
     );
 }
 
@@ -649,15 +714,15 @@ function displaySpeciesPanelHistory() {
         );
     }
 
-    for (let i = 0; i < speciesPanelHistory.length; i++) {
+    for (let i = 0; i < window.speciesPanelHistory.length; i++) {
         const spriteContainer = document.createElement("span");
         const sprite = document.createElement("img");
-        const speciesName = speciesPanelHistory[i][0];
+        const speciesName = window.speciesPanelHistory[i][0];
 
         spriteContainer.className = "historyAnimation";
         sprite.src = getSpeciesSpriteSrc(speciesName);
         sprite.className = `sprite${returnTargetSpeciesSprite(speciesName)}`;
-        if (speciesPanelHistory[i][1] == true) {
+        if (window.speciesPanelHistory[i][1] == true) {
             spriteContainer.classList.add("locked");
         }
         if (speciesName == panelSpecies) {
@@ -698,10 +763,10 @@ function displaySpeciesPanelHistory() {
 
         function lockSpecies() {
             spriteContainer.classList.toggle("locked");
-            if (speciesPanelHistory[i][1] == false) {
-                speciesPanelHistory[i][1] = true;
+            if (window.speciesPanelHistory[i][1] == false) {
+                window.speciesPanelHistory[i][1] = true;
             } else {
-                speciesPanelHistory[i][1] = false;
+                window.speciesPanelHistory[i][1] = false;
             }
             updateSpeciesPanelHistoryOrder();
         }
@@ -729,27 +794,27 @@ function displaySpeciesPanelHistory() {
 }
 
 function updateSpeciesPanelHistoryOrder() {
-    for (let i = 0; i < speciesPanelHistory.length; i++) {
-        if (speciesPanelHistory[i][1] == true) {
+    for (let i = 0; i < window.speciesPanelHistory.length; i++) {
+        if (window.speciesPanelHistory[i][1] == true) {
             for (let j = i; j > 0; j--) {
-                if (speciesPanelHistory[j - 1][1] == true) {
+                if (window.speciesPanelHistory[j - 1][1] == true) {
                     break;
                 } else {
-                    const temp = speciesPanelHistory[j - 1];
-                    speciesPanelHistory[j - 1] = speciesPanelHistory[j];
-                    speciesPanelHistory[j] = temp;
+                    const temp = window.speciesPanelHistory[j - 1];
+                    window.speciesPanelHistory[j - 1] = window.speciesPanelHistory[j];
+                    window.speciesPanelHistory[j] = temp;
                 }
             }
         }
     }
     localStorage.setItem(
         "speciesPanelHistory",
-        JSON.stringify(speciesPanelHistory)
+        JSON.stringify(window.speciesPanelHistory)
     );
     displaySpeciesPanelHistory();
 }
 
-function createPopupForLocations() {
+export function createPopupForLocations() {
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
@@ -761,21 +826,21 @@ function createPopupForLocations() {
     pokemonName.style.fontSize = "35px";
     popup.append(pokemonName);
 
-    Object.keys(locationsByPokemon[panelSpecies]).forEach((location) => {
+    Object.keys(window.locationsByPokemon[panelSpecies]).forEach((location) => {
         const locationName = document.createElement("div");
         locationName.classList.add("bold");
         locationName.innerText = location;
         locationName.style.padding = "25px 0px 10px 0px";
         locationName.style.fontSize = "25px";
         popup.append(locationName);
-        locationsByPokemon[panelSpecies][location].forEach((method) => {
+        window.locationsByPokemon[panelSpecies][location].forEach((method) => {
             const locationContainer = document.createElement("div");
             locationContainer.style.fontSize = "20px";
             const locationMethod = document.createElement("span");
             locationMethod.innerText = `${method} `;
             const locationRarity = document.createElement("span");
-            locationRarity.innerText = `${locations[location][method][panelSpecies]}%`;
-            locationRarity.style.color = `hsl(${locations[location][method][panelSpecies] * 2},85%,45%)`;
+            locationRarity.innerText = `${window.locations[location][method][panelSpecies]}%`;
+            locationRarity.style.color = `hsl(${window.locations[location][method][panelSpecies] * 2},85%,45%)`;
             locationContainer.append(locationMethod);
             locationContainer.append(locationRarity);
             popup.append(locationContainer);
@@ -783,7 +848,7 @@ function createPopupForLocations() {
     });
 }
 
-function createPopupForInfo() {
+export function createPopupForInfo() {
     while (popup.firstChild) {
         popup.removeChild(popup.firstChild);
     }
@@ -803,23 +868,23 @@ function createPopupForInfo() {
     eggGroupHeader.style.color = "var(--theme-color)";
     popup.append(eggGroupHeader);
     const eggGroup1 = document.createElement("div");
-    eggGroup1.innerText = sanitizeString(species[panelSpecies]["eggGroup1"]);
+    eggGroup1.innerText = sanitizeString(window.species[panelSpecies]["eggGroup1"]);
     popup.append(eggGroup1);
     if (
-        species[panelSpecies]["eggGroup1"] != species[panelSpecies]["eggGroup2"]
+        window.species[panelSpecies]["eggGroup1"] != window.species[panelSpecies]["eggGroup2"]
     ) {
         const eggGroup2 = document.createElement("div");
         eggGroup2.innerText = sanitizeString(
-            species[panelSpecies]["eggGroup2"]
+            window.species[panelSpecies]["eggGroup2"]
         );
         popup.append(eggGroup2);
     }
 
     if (
-        (species[panelSpecies]["item1"] &&
-            species[panelSpecies]["item1"] != "ITEM_NONE") ||
-        (species[panelSpecies]["item2"] &&
-            species[panelSpecies]["item2"] != "ITEM_NONE")
+        (window.species[panelSpecies]["item1"] &&
+            window.species[panelSpecies]["item1"] != "ITEM_NONE") ||
+        (window.species[panelSpecies]["item2"] &&
+            window.species[panelSpecies]["item2"] != "ITEM_NONE")
     ) {
         const heldItemHeader = document.createElement("div");
         heldItemHeader.innerText = "Held Items:";
@@ -830,19 +895,19 @@ function createPopupForInfo() {
         popup.append(heldItemHeader);
 
         if (
-            species[panelSpecies]["item1"] &&
-            species[panelSpecies]["item1"] != "ITEM_NONE"
+            window.species[panelSpecies]["item1"] &&
+            window.species[panelSpecies]["item1"] != "ITEM_NONE"
         ) {
             const heldItem1 = document.createElement("div");
-            heldItem1.innerText = `50% ${sanitizeString(species[panelSpecies]["item1"])}`;
+            heldItem1.innerText = `50% ${sanitizeString(window.species[panelSpecies]["item1"])}`;
             popup.append(heldItem1);
         }
         if (
-            species[panelSpecies]["item2"] &&
-            species[panelSpecies]["item2"] != "ITEM_NONE"
+            window.species[panelSpecies]["item2"] &&
+            window.species[panelSpecies]["item2"] != "ITEM_NONE"
         ) {
             const heldItem2 = document.createElement("div");
-            heldItem2.innerText = `5% ${sanitizeString(species[panelSpecies]["item2"])}`;
+            heldItem2.innerText = `5% ${sanitizeString(window.species[panelSpecies]["item2"])}`;
             popup.append(heldItem2);
         }
     }
@@ -861,15 +926,15 @@ function createChange(stat, oldStat = [""], newStat = [""], obj) {
             statContainer.innerText = replaceStatString(`${stat}${i}`);
 
             if (newStat[i] !== oldStat[i]) {
-                if (oldStat[i] in abilities) {
+                if (oldStat[i] in window.abilities) {
                     oldStatContainer.innerText =
-                        abilities[oldStat[i]]["ingameName"];
+                        window.abilities[oldStat[i]]["ingameName"];
                 } else {
                     oldStatContainer.innerText = `${sanitizeString(oldStat[i])}`;
                 }
-                if (newStat[i] in abilities) {
+                if (newStat[i] in window.abilities) {
                     newStatContainer.innerText =
-                        abilities[newStat[i]]["ingameName"];
+                        window.abilities[newStat[i]]["ingameName"];
                 } else {
                     newStatContainer.innerText = `${sanitizeString(newStat[i])}`;
                 }
@@ -1162,15 +1227,15 @@ function buildSpeciesPanelLevelUpFromPreviousEvoTable(
 ) {
     let evolutionLineArray = [name];
     for (
-        let i = species[name]["evolutionLine"].indexOf(name) - 1;
+        let i = window.species[name]["evolutionLine"].indexOf(name) - 1;
         i >= 0;
         i--
     ) {
-        const targetSpecies = species[name]["evolutionLine"][i];
-        for (let j = 0; j < species[targetSpecies]["evolution"].length; j++) {
+        const targetSpecies = window.species[name]["evolutionLine"][i];
+        for (let j = 0; j < window.species[targetSpecies]["evolution"].length; j++) {
             if (
                 evolutionLineArray.includes(
-                    species[targetSpecies]["evolution"][j][2]
+                    window.species[targetSpecies]["evolution"][j][2]
                 ) &&
                 !evolutionLineArray.includes(targetSpecies)
             ) {
@@ -1195,12 +1260,12 @@ function buildSpeciesPanelLevelUpFromPreviousEvoTable(
     for (let i = 1; i < evolutionLineArray.length; i++) {
         sortLearnsetsArray(
             THead,
-            species[evolutionLineArray[i]]["levelUpLearnsets"],
+            window.species[evolutionLineArray[i]]["levelUpLearnsets"],
             label,
             asc
         ).forEach((move) => {
             if (
-                speciesCanLearnMove(species[name], move[0]) === false &&
+                speciesCanLearnMove(window.species[name], move[0]) === false &&
                 !movesArray.includes(move[0])
             ) {
                 movesArray.push(move[0]);
@@ -1208,31 +1273,31 @@ function buildSpeciesPanelLevelUpFromPreviousEvoTable(
                 const row = document.createElement("tr");
 
                 const moveName = document.createElement("td");
-                moveName.innerText = moves[move[0]]["ingameName"];
+                moveName.innerText = window.moves[move[0]]["ingameName"];
                 moveName.className = "bold";
                 row.append(moveName);
 
                 const typeContainer = document.createElement("td");
                 const type = document.createElement("div");
-                type.innerText = sanitizeString(moves[move[0]]["type"]).slice(
+                type.innerText = sanitizeString(window.moves[move[0]]["type"]).slice(
                     0,
                     3
                 );
-                type.className = `${moves[move[0]]["type"]} backgroundSmall`;
+                type.className = `${window.moves[move[0]]["type"]} backgroundSmall`;
                 typeContainer.append(type);
                 row.append(typeContainer);
 
                 const splitContainer = document.createElement("td");
                 const splitIcon = document.createElement("img");
-                splitIcon.src = `assets/${moves[move[0]]["split"]}.png`;
-                splitIcon.className = `${sanitizeString(moves[move[0]]["split"])} splitIcon`;
+                splitIcon.src = `assets/${window.moves[move[0]]["split"]}.png`;
+                splitIcon.className = `${sanitizeString(window.moves[move[0]]["split"])} splitIcon`;
                 splitContainer.append(splitIcon);
                 row.append(splitContainer);
 
                 const power = document.createElement("td");
                 power.className = "speciesPanelLearnsetsPower";
-                if (moves[move[0]]["power"] > 0) {
-                    power.innerText = moves[move[0]]["power"];
+                if (window.moves[move[0]]["power"] > 0) {
+                    power.innerText = window.moves[move[0]]["power"];
                 } else {
                     power.innerText = "-";
                 }
@@ -1240,8 +1305,8 @@ function buildSpeciesPanelLevelUpFromPreviousEvoTable(
 
                 const accuracy = document.createElement("td");
                 accuracy.className = "speciesPanelLearnsetsAccuracy";
-                if (moves[move[0]]["accuracy"] > 0) {
-                    accuracy.innerText = moves[move[0]]["accuracy"];
+                if (window.moves[move[0]]["accuracy"] > 0) {
+                    accuracy.innerText = window.moves[move[0]]["accuracy"];
                 } else {
                     accuracy.innerText = "-";
                 }
@@ -1249,16 +1314,16 @@ function buildSpeciesPanelLevelUpFromPreviousEvoTable(
 
                 const PP = document.createElement("td");
                 PP.className = "speciesPanelLearnsetsPP";
-                PP.innerText = moves[move[0]]["PP"];
+                PP.innerText = window.moves[move[0]]["PP"];
                 row.append(PP);
 
                 const movedescription = document.createElement("td");
                 movedescription.className = "speciesPanelLearnsetsEffect";
                 movedescription.innerText =
-                    moves[move[0]]["description"].join("");
+                    window.moves[move[0]]["description"].join("");
 
                 row.addEventListener("click", function () {
-                    createPopupForMove(moves[move[0]]);
+                    window.createPopupForMove(window.moves[move[0]]);
                     overlay.style.display = "flex";
                 });
 
@@ -1294,7 +1359,7 @@ function buildSpeciesPanelDoubleLearnsetsTable(
         Tbody.removeChild(Tbody.firstChild);
     }
 
-    sortLearnsetsArray(THead, species[name][input], label, asc).forEach(
+    sortLearnsetsArray(THead, window.species[name][input], label, asc).forEach(
         (move) => {
             const row = document.createElement("tr");
 
@@ -1303,28 +1368,28 @@ function buildSpeciesPanelDoubleLearnsetsTable(
             row.append(level);
 
             const moveName = document.createElement("td");
-            moveName.innerText = moves[move[0]]["ingameName"];
+            moveName.innerText = window.moves[move[0]]["ingameName"];
             moveName.className = "bold";
             row.append(moveName);
 
             const typeContainer = document.createElement("td");
             const type = document.createElement("div");
-            type.innerText = sanitizeString(moves[move[0]]["type"]).slice(0, 3);
-            type.className = `${moves[move[0]]["type"]} backgroundSmall`;
+            type.innerText = sanitizeString(window.moves[move[0]]["type"]).slice(0, 3);
+            type.className = `${window.moves[move[0]]["type"]} backgroundSmall`;
             typeContainer.append(type);
             row.append(typeContainer);
 
             const splitContainer = document.createElement("td");
             const splitIcon = document.createElement("img");
-            splitIcon.src = `assets/${moves[move[0]]["split"]}.png`;
-            splitIcon.className = `${sanitizeString(moves[move[0]]["split"])} splitIcon`;
+            splitIcon.src = `assets/${window.moves[move[0]]["split"]}.png`;
+            splitIcon.className = `${sanitizeString(window.moves[move[0]]["split"])} splitIcon`;
             splitContainer.append(splitIcon);
             row.append(splitContainer);
 
             const power = document.createElement("td");
             power.className = "speciesPanelLearnsetsPower";
-            if (moves[move[0]]["power"] > 0) {
-                power.innerText = moves[move[0]]["power"];
+            if (window.moves[move[0]]["power"] > 0) {
+                power.innerText = window.moves[move[0]]["power"];
             } else {
                 power.innerText = "-";
             }
@@ -1332,8 +1397,8 @@ function buildSpeciesPanelDoubleLearnsetsTable(
 
             const accuracy = document.createElement("td");
             accuracy.className = "speciesPanelLearnsetsAccuracy";
-            if (moves[move[0]]["accuracy"] > 0) {
-                accuracy.innerText = moves[move[0]]["accuracy"];
+            if (window.moves[move[0]]["accuracy"] > 0) {
+                accuracy.innerText = window.moves[move[0]]["accuracy"];
             } else {
                 accuracy.innerText = "-";
             }
@@ -1341,15 +1406,15 @@ function buildSpeciesPanelDoubleLearnsetsTable(
 
             const PP = document.createElement("td");
             PP.className = "speciesPanelLearnsetsPP";
-            PP.innerText = moves[move[0]]["PP"];
+            PP.innerText = window.moves[move[0]]["PP"];
             row.append(PP);
 
             const movedescription = document.createElement("td");
             movedescription.className = "speciesPanelLearnsetsEffect";
-            movedescription.innerText = moves[move[0]]["description"].join("");
+            movedescription.innerText = window.moves[move[0]]["description"].join("");
 
             row.addEventListener("click", function () {
-                createPopupForMove(moves[move[0]]);
+                window.createPopupForMove(window.moves[move[0]]);
                 overlay.style.display = "flex";
             });
 
@@ -1378,33 +1443,33 @@ function buildSpeciesPanelSingleLearnsetsTable(
         Tbody.removeChild(Tbody.firstChild);
     }
 
-    sortLearnsetsArray(THead, species[name][input], label, asc).forEach(
+    sortLearnsetsArray(THead, window.species[name][input], label, asc).forEach(
         (move) => {
             const row = document.createElement("tr");
 
             const moveName = document.createElement("td");
-            moveName.innerText = moves[move]["ingameName"];
+            moveName.innerText = window.moves[move]["ingameName"];
             moveName.className = "bold";
             row.append(moveName);
 
             const typeContainer = document.createElement("td");
             const type = document.createElement("div");
-            type.innerText = sanitizeString(moves[move]["type"]).slice(0, 3);
-            type.className = `${moves[move]["type"]} backgroundSmall`;
+            type.innerText = sanitizeString(window.moves[move]["type"]).slice(0, 3);
+            type.className = `${window.moves[move]["type"]} backgroundSmall`;
             typeContainer.append(type);
             row.append(typeContainer);
 
             const splitContainer = document.createElement("td");
             const splitIcon = document.createElement("img");
-            splitIcon.src = `assets/${moves[move]["split"]}.png`;
-            splitIcon.className = `${sanitizeString(moves[move]["split"])} splitIcon`;
+            splitIcon.src = `assets/${window.moves[move]["split"]}.png`;
+            splitIcon.className = `${sanitizeString(window.moves[move]["split"])} splitIcon`;
             splitContainer.append(splitIcon);
             row.append(splitContainer);
 
             const power = document.createElement("td");
             power.className = "speciesPanelLearnsetsPower";
-            if (moves[move]["power"] > 0) {
-                power.innerText = moves[move]["power"];
+            if (window.moves[move]["power"] > 0) {
+                power.innerText = window.moves[move]["power"];
             } else {
                 power.innerText = "-";
             }
@@ -1412,8 +1477,8 @@ function buildSpeciesPanelSingleLearnsetsTable(
 
             const accuracy = document.createElement("td");
             accuracy.className = "speciesPanelLearnsetsAccuracy";
-            if (moves[move]["accuracy"] > 0) {
-                accuracy.innerText = moves[move]["accuracy"];
+            if (window.moves[move]["accuracy"] > 0) {
+                accuracy.innerText = window.moves[move]["accuracy"];
             } else {
                 accuracy.innerText = "-";
             }
@@ -1421,15 +1486,15 @@ function buildSpeciesPanelSingleLearnsetsTable(
 
             const PP = document.createElement("td");
             PP.className = "speciesPanelLearnsetsPP";
-            PP.innerText = moves[move]["PP"];
+            PP.innerText = window.moves[move]["PP"];
             row.append(PP);
 
             const movedescription = document.createElement("td");
             movedescription.className = "speciesPanelLearnsetsEffect";
-            movedescription.innerText += moves[move]["description"].join("");
+            movedescription.innerText += window.moves[move]["description"].join("");
 
             row.addEventListener("click", function () {
-                createPopupForMove(moves[move]);
+                window.createPopupForMove(window.moves[move]);
                 overlay.style.display = "flex";
             });
 
@@ -1486,24 +1551,24 @@ function sortLearnsetsArray(thead, learnsetsArray, label, asc) {
             stringA = parseInt(a[1]);
             stringB = parseInt(b[1]);
         } else if (Array.isArray(a)) {
-            stringA += moves[a[0]][index];
-            stringB += moves[b[0]][index];
+            stringA += window.moves[a[0]][index];
+            stringB += window.moves[b[0]][index];
 
             if (!isNaN(stringA)) {
-                stringA = parseInt(moves[a[0]][index]);
+                stringA = parseInt(window.moves[a[0]][index]);
             }
             if (!isNaN(stringB)) {
-                stringB = parseInt(moves[b[0]][index]);
+                stringB = parseInt(window.moves[b[0]][index]);
             }
         } else {
-            stringA += moves[a][index];
-            stringB += moves[b][index];
+            stringA += window.moves[a][index];
+            stringB += window.moves[b][index];
 
             if (!isNaN(stringA)) {
-                stringA = parseInt(moves[a][index]);
+                stringA = parseInt(window.moves[a][index]);
             }
             if (!isNaN(stringB)) {
-                stringB = parseInt(moves[b][index]);
+                stringB = parseInt(window.moves[b][index]);
             }
         }
 
@@ -1548,7 +1613,7 @@ let interval = setInterval(function () {
                         ].forEach((learnsets) => {
                             try {
                                 if (
-                                    typeof species[panelSpecies][
+                                    typeof window.species[panelSpecies][
                                         learnsets[1]
                                     ][0] == "string"
                                 ) {
@@ -1589,7 +1654,7 @@ let interval = setInterval(function () {
                         ].forEach((learnsets) => {
                             try {
                                 if (
-                                    typeof species[panelSpecies][
+                                    typeof window.species[panelSpecies][
                                         learnsets[1]
                                     ][0] == "string"
                                 ) {
@@ -1628,19 +1693,17 @@ let interval = setInterval(function () {
         });
 }, 100);
 
-async function speciesPanel(param) {
+export async function speciesPanel(param) {
     if (typeof speciesPanelMainContainer !== "undefined") {
-        if (param === "hide" || species[panelSpecies]["baseSpeed"] <= 0) {
+        if (param === "hide" || window.species[panelSpecies]["baseSpeed"] <= 0) {
             body.classList.remove("fixedPanel");
             overlaySpeciesPanel.style.display = "none";
             speciesPanelMainContainer.classList.add("hide");
-            if (typeof refreshURLParams !== "undefined") {
-                refreshURLParams();
-            }
+            refreshURLParams();
             if (table.getBoundingClientRect().top < 0) {
-                utilityButton.innerText = "↑";
+                utilityButton.innerText = "\u2191";
             } else {
-                utilityButton.innerText = "☰";
+                utilityButton.innerText = "\u2630";
             }
         } else if (param === "show") {
             utilityButton.innerText = "X";
@@ -1652,13 +1715,11 @@ async function speciesPanel(param) {
             if (speciesPanelMainContainer.classList.contains("hide")) {
                 overlaySpeciesPanel.style.display = "none";
                 body.classList.remove("fixedPanel");
-                if (typeof refreshURLParams !== "undefined") {
-                    refreshURLParams();
-                }
+                refreshURLParams();
                 if (table.getBoundingClientRect().top < 0) {
-                    utilityButton.innerText = "↑";
+                    utilityButton.innerText = "\u2191";
                 } else {
-                    utilityButton.innerText = "☰";
+                    utilityButton.innerText = "\u2630";
                 }
             } else {
                 utilityButton.innerText = "X";
@@ -1668,3 +1729,4 @@ async function speciesPanel(param) {
         }
     }
 }
+

@@ -1,7 +1,11 @@
+import { sanitizeString, speciesCanLearnMove, getSpeciesSpriteSrc, returnTargetSpeciesSprite } from '../../utils/utility.js';
+import { locationsTableTbody, locationsFilterContainer } from '../../utils/domRefs.js';
+import { createSpeciesPanel } from '../../utils/speciesPanelUtility.js';
+
 window.locationsMoveFilter = null;
 
-function updateLocationsMoveFilter() {
-    locationsMoveFilter = null;
+export function updateLocationsMoveFilter() {
+    window.locationsMoveFilter = null;
     const moveFiltersContainer =
         locationsFilterContainer.getElementsByClassName(
             "locationsFilterMoveContainer"
@@ -10,12 +14,12 @@ function updateLocationsMoveFilter() {
         const filters = moveFiltersContainer.getElementsByClassName("filter");
         if (filters.length == 1) {
             if (filters[0].parentNode.children[0].value != "NOT") {
-                locationsMoveFilter = filters[0].innerText
+                window.locationsMoveFilter = filters[0].innerText
                     .replace(" ", "")
                     .split(":")[1];
-                Object.keys(moves).forEach((moveName) => {
-                    if (moves[moveName]["ingameName"] === locationsMoveFilter) {
-                        locationsMoveFilter = moveName;
+                Object.keys(window.moves).forEach((moveName) => {
+                    if (window.moves[moveName]["ingameName"] === window.locationsMoveFilter) {
+                        window.locationsMoveFilter = moveName;
                     }
                 });
             }
@@ -23,13 +27,13 @@ function updateLocationsMoveFilter() {
     }
 }
 
-function appendLocationsToTable(key) {
+export function appendLocationsToTable(key) {
     const timeRegex = /Day|Night|Morning|Evening|Dusk|Dawn/i;
     const location = key.split("\\")[0];
     const method = key.split("\\")[1];
     const speciesKey = key.split("\\")[2];
 
-    if (!(speciesKey in species)) {
+    if (!(speciesKey in window.species)) {
         return false;
     }
 
@@ -75,10 +79,10 @@ function appendSpeciesEl(location, method, speciesKey, methodTable) {
 
     const rarity = document.createElement("td");
     rarity.classList = "locationRarity";
-    if (locationsMoveFilter) {
-        moveMethod = speciesCanLearnMove(
-            species[speciesKey],
-            locationsMoveFilter
+    if (window.locationsMoveFilter) {
+        const moveMethod = speciesCanLearnMove(
+            window.species[speciesKey],
+            window.locationsMoveFilter
         );
         const moveFilter = document.createElement("div");
         moveFilter.className = "bold";
@@ -97,12 +101,12 @@ function appendSpeciesEl(location, method, speciesKey, methodTable) {
         }
         rarity.append(moveFilter);
     } else {
-        rarity.innerText = locations[location][method][speciesKey];
+        rarity.innerText = window.locations[location][method][speciesKey];
         if (
-            Number.isInteger(parseInt(locations[location][method][speciesKey]))
+            Number.isInteger(parseInt(window.locations[location][method][speciesKey]))
         ) {
             rarity.innerText += "%";
-            rarity.style.color = `hsl(${locations[location][method][speciesKey] * 2},85%,45%)`;
+            rarity.style.color = `hsl(${window.locations[location][method][speciesKey] * 2},85%,45%)`;
         }
     }
 
@@ -248,3 +252,7 @@ function returnMethodSprite(method) {
         return method;
     }
 }
+
+// Shims temporários: chamadas dinâmicas via window.*
+window.appendLocationsToTable = appendLocationsToTable;
+window.updateLocationsMoveFilter = updateLocationsMoveFilter;

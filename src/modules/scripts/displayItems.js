@@ -1,17 +1,24 @@
+import { sanitizeString } from '../../utils/utility.js';
+import { LZString } from '../../utils/lz-string.js';
+import { itemsTableTbody } from '../../utils/domRefs.js';
+import { lazyLoading } from '../../utils/tableUtility.js';
+import { settings } from '../../utils/settings.js';
+import { getItemSpriteSrc } from './fetchScripts.js';
+
 let itemsLocations = [];
 if (localStorage.getItem("itemsLocations")) {
     itemsLocations = JSON.parse(localStorage.getItem("itemsLocations"));
 }
 
-function appendItemsToTable(key) {
+export function appendItemsToTable(key) {
     if (
-        items[key]["description"] == "" ||
-        items[key]["sprite"] === "" ||
-        /_MAIL$|ITEM_NONE/i.test(items[key]["name"])
+        window.items[key]["description"] == "" ||
+        window.items[key]["sprite"] === "" ||
+        /_MAIL$|ITEM_NONE/i.test(window.items[key]["name"])
     ) {
         return false;
     }
-    if (settings.includes(items[key]["pocket"])) {
+    if (settings.includes(window.items[key]["pocket"])) {
         return false;
     }
 
@@ -43,15 +50,15 @@ function returnItemTableThead(key) {
     itemSprite.classList = `itemSprite sprite${key}`;
     const itemNameDescContainer = document.createElement("th");
     const itemName = document.createElement("span");
-    itemName.innerText = items[key]["ingameName"];
+    itemName.innerText = window.items[key]["ingameName"];
     itemName.classList = "itemName";
     if (/^TM\d+$|^HM\d+$/i.test(itemName.innerText)) {
-        itemName.innerText = sanitizeString(items[key]["name"])
+        itemName.innerText = sanitizeString(window.items[key]["name"])
             .replace("Tm", "TM")
             .replace("Hm", "HM");
     }
     const itemDescription = document.createElement("th");
-    itemDescription.innerText = items[key]["description"];
+    itemDescription.innerText = window.items[key]["description"];
     itemDescription.classList = "itemDescription";
 
     itemSpriteContainer.append(itemSprite);
@@ -68,28 +75,28 @@ function returnItemTableThead(key) {
 function returnItemTableTbody(key) {
     const itemsTableTbody = document.createElement("tbody");
 
-    Object.keys(items[key]["locations"]).forEach((method) => {
+    Object.keys(window.items[key]["locations"]).forEach((method) => {
         if (!settings.includes(method)) {
-            for (let i = 0; i < items[key]["locations"][method].length; i++) {
+            for (let i = 0; i < window.items[key]["locations"][method].length; i++) {
                 if (
                     (!settings.includes("hideCrossedItems") ||
                         !itemsLocations.includes(
-                            `${key}${method}${items[key]["locations"][method][i]}`
+                            `${key}${method}${window.items[key]["locations"][method][i]}`
                         )) &&
-                    items[key]["locations"][method][i] !== "Debug"
+                    window.items[key]["locations"][method][i] !== "Debug"
                 ) {
                     const row = document.createElement("tr");
                     const methodContainer = document.createElement("td");
                     methodContainer.innerText = method;
                     const location = document.createElement("td");
-                    location.innerText = items[key]["locations"][method][i];
+                    location.innerText = window.items[key]["locations"][method][i];
 
                     row.append(methodContainer);
                     row.append(location);
 
                     if (
                         itemsLocations.includes(
-                            `${key}${method}${items[key]["locations"][method][i]}`
+                            `${key}${method}${window.items[key]["locations"][method][i]}`
                         )
                     ) {
                         row.classList.add("itemCrossed");
@@ -99,7 +106,7 @@ function returnItemTableTbody(key) {
 
                     row.addEventListener("click", () => {
                         row.classList.toggle("itemCrossed");
-                        const itemLocationMethodString = `${key}${method}${items[key]["locations"][method][i]}`;
+                        const itemLocationMethodString = `${key}${method}${window.items[key]["locations"][method][i]}`;
 
                         if (row.classList.contains("itemCrossed")) {
                             itemsLocations.push(itemLocationMethodString);
@@ -165,9 +172,8 @@ let getItemsButtons = setInterval(function () {
             if (hideCrossedItems.classList.contains("activeSetting")) {
                 settings.push("hideCrossedItems");
             } else {
-                settings = settings.filter(
-                    (filter) => filter !== "hideCrossedItems"
-                );
+                const idx = settings.indexOf("hideCrossedItems");
+                if (idx !== -1) settings.splice(idx, 1);
             }
 
             localStorage.setItem("DEXsettings", JSON.stringify(settings));
@@ -181,7 +187,8 @@ let getItemsButtons = setInterval(function () {
         if (hideEmptyItems.classList.contains("activeSetting")) {
             settings.push("hideEmptyItems");
         } else {
-            settings = settings.filter((filter) => filter !== "hideEmptyItems");
+            const idx = settings.indexOf("hideEmptyItems");
+            if (idx !== -1) settings.splice(idx, 1);
         }
 
         localStorage.setItem("DEXsettings", JSON.stringify(settings));
@@ -248,7 +255,7 @@ let getItemsButtons = setInterval(function () {
     });
 }, 100);
 
-async function setupItemsButtonFilters() {
+export async function setupItemsButtonFilters() {
     if (settings.includes("hideCrossedItems")) {
         document
             .getElementById("hideCrossedItems")
@@ -265,14 +272,14 @@ async function setupItemsButtonFilters() {
 
     let pocketsName = [];
     let methods = [];
-    Object.keys(items).forEach((itemName) => {
+    Object.keys(window.items).forEach((itemName) => {
         if (
-            !pocketsName.includes(items[itemName]["pocket"]) &&
+            !pocketsName.includes(window.items[itemName]["pocket"]) &&
             itemName != "ITEM_NONE"
         ) {
-            pocketsName.push(items[itemName]["pocket"]);
+            pocketsName.push(window.items[itemName]["pocket"]);
         }
-        Object.keys(items[itemName]["locations"]).forEach((method) => {
+        Object.keys(window.items[itemName]["locations"]).forEach((method) => {
             if (!methods.includes(method)) {
                 methods.push(method);
             }
@@ -291,7 +298,8 @@ async function setupItemsButtonFilters() {
             pocketButton.classList.toggle("activeSetting");
 
             if (pocketButton.classList.contains("activeSetting")) {
-                settings = settings.filter((filter) => filter !== pocketName);
+                const idx = settings.indexOf(pocketName);
+                if (idx !== -1) settings.splice(idx, 1);
             } else {
                 settings.push(pocketName);
             }
@@ -318,7 +326,8 @@ async function setupItemsButtonFilters() {
                 methodButton.classList.toggle("activeSetting");
 
                 if (methodButton.classList.contains("activeSetting")) {
-                    settings = settings.filter((filter) => filter !== method);
+                    const idx = settings.indexOf(method);
+                    if (idx !== -1) settings.splice(idx, 1);
                 } else {
                     settings.push(method);
                 }
@@ -334,13 +343,13 @@ async function setupItemsButtonFilters() {
     });
 }
 
-async function spriteRemoveItemBgReturnBase64(itemName) {
+export async function spriteRemoveItemBgReturnBase64(itemName) {
     let sprite = new Image();
     let canvas = document.createElement("canvas");
     canvas.width = 24;
     canvas.height = 24;
     sprite.crossOrigin = "anonymous";
-    sprite.src = items[itemName]["url"];
+    sprite.src = window.items[itemName]["url"];
 
     const context = canvas.getContext("2d");
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -373,7 +382,7 @@ async function spriteRemoveItemBgReturnBase64(itemName) {
                     `${itemName}`,
                     LZString.compressToUTF16(canvas.toDataURL())
                 );
-                sprites[itemName] = canvas.toDataURL();
+                window.sprites[itemName] = canvas.toDataURL();
             }
             if (
                 document.getElementsByClassName(`sprite${itemName}`).length > 0
@@ -388,3 +397,7 @@ async function spriteRemoveItemBgReturnBase64(itemName) {
         }
     };
 }
+
+// Shims temporários
+window.appendItemsToTable = appendItemsToTable;
+window.setupItemsButtonFilters = setupItemsButtonFilters;

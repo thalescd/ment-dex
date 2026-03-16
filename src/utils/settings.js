@@ -1,6 +1,6 @@
-import { 
-    speciesPanelHistoryContainer, 
-    hideLevelUpFromPreviousEvolution, 
+import {
+    speciesPanelHistoryContainer,
+    hideLevelUpFromPreviousEvolution,
     speciesPanelLevelUpFromPreviousEvoTableTbody,
     hideLevelUp,
     speciesPanelLevelUpTableTbody,
@@ -11,7 +11,7 @@ import {
     hideEggMoves,
     speciesPanelEggMovesTableTbody,
     popup
-} from './global.js';
+} from './domRefs.js';
 
 export let settings = [];
 

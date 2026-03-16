@@ -1,6 +1,9 @@
-function regexAbilities(textAbilities, abilities) {
+import { sanitizeString } from '../../utils/utility.js';
+
+export function regexAbilities(textAbilities, abilities) {
     const lines = textAbilities.split("\n");
     let idx = 0;
+    let ability;
 
     lines.forEach((line) => {
         const matchAbility = line.match(/ (ABILITY_\w+)/i);
@@ -43,7 +46,7 @@ function regexAbilities(textAbilities, abilities) {
     return abilities;
 }
 
-function regexVanillaAbilitiesDescription(textAbilitiesIngameName, abilities) {
+export function regexVanillaAbilitiesDescription(textAbilitiesIngameName, abilities) {
     const lines = textAbilitiesIngameName.split("\n");
     let conversionTable = {};
     let idx = Object.entries(abilities).filter(
@@ -118,7 +121,7 @@ function regexVanillaAbilitiesDescription(textAbilitiesIngameName, abilities) {
     return abilities;
 }
 
-function regexAbilitiesIngameName(textAbilitiesIngameName, abilities) {
+export function regexAbilitiesIngameName(textAbilitiesIngameName, abilities) {
     const lines = textAbilitiesIngameName.split("\n");
     let abilityFound = false,
         abilitySanitizedFound = false,
@@ -150,7 +153,7 @@ function regexAbilitiesIngameName(textAbilitiesIngameName, abilities) {
     return abilities;
 }
 
-function regexAbilitiesDescription(textAbilitiesDescription, abilities) {
+export function regexAbilitiesDescription(textAbilitiesDescription, abilities) {
     const lines = textAbilitiesDescription.split("\n");
     let abilityArray = [];
 
@@ -186,7 +189,7 @@ function regexAbilitiesDescription(textAbilitiesDescription, abilities) {
     return abilities;
 }
 
-function regexNewAbilities(replaceAbilities, abilities) {
+export function regexNewAbilities(replaceAbilities, abilities) {
     Object.keys(replaceAbilities).forEach((oldAbility) => {
         Object.keys(replaceAbilities[oldAbility]).forEach((newAbility) => {
             if (newAbility == "ABILITY_DRILLBEAK") {
@@ -210,7 +213,7 @@ function regexNewAbilities(replaceAbilities, abilities) {
     return abilities;
 }
 
-function replaceAbilityString(ability) {
+export function replaceAbilityString(ability) {
     const replaceStringObject = {
         test: "test",
     };

@@ -1,20 +1,26 @@
+import { sanitizeString, getSpeciesSpriteSrc, returnTargetSpeciesSprite, speciesCanLearnMove } from '../../utils/utility.js';
+import { LZString } from '../../utils/lz-string.js';
+import { speciesTableTbody, changelogMode, panelSpecies } from '../../utils/domRefs.js';
+import { createSpeciesPanel, speciesPanel } from '../../utils/speciesPanelUtility.js';
+import { sortTableByLearnsets } from '../../utils/tableUtility.js';
+
 window.speciesMoveFilter = null;
 
-function updateSpeciesMoveFilter(sortTable = false) {
-    speciesMoveFilter = null;
-    const moveFiltersContainer = speciesFilterContainer.getElementsByClassName(
+export function updateSpeciesMoveFilter(sortTable = false) {
+    window.speciesMoveFilter = null;
+    const moveFiltersContainer = window.speciesFilterContainer.getElementsByClassName(
         "speciesFilterMoveContainer"
     )[0];
     if (moveFiltersContainer) {
         const filters = moveFiltersContainer.getElementsByClassName("filter");
         if (filters.length == 1) {
             if (filters[0].parentNode.children[0].value != "NOT") {
-                speciesMoveFilter = filters[0].innerText
+                window.speciesMoveFilter = filters[0].innerText
                     .replace(" ", "")
                     .split(":")[1];
-                Object.keys(moves).forEach((moveName) => {
-                    if (moves[moveName]["ingameName"] === speciesMoveFilter) {
-                        speciesMoveFilter = moveName;
+                Object.keys(window.moves).forEach((moveName) => {
+                    if (window.moves[moveName]["ingameName"] === window.speciesMoveFilter) {
+                        window.speciesMoveFilter = moveName;
                         if (sortTable) {
                             sortTableByLearnsets(true);
                         }
@@ -25,8 +31,8 @@ function updateSpeciesMoveFilter(sortTable = false) {
     }
 }
 
-function appendSpeciesToTable(speciesName) {
-    if (species[speciesName]["baseSpeed"] <= 0) {
+export function appendSpeciesToTable(speciesName) {
+    if (window.species[speciesName]["baseSpeed"] <= 0) {
         return false;
     }
     let moveMethod = null;
@@ -40,10 +46,10 @@ function appendSpeciesToTable(speciesName) {
     let IDcontainer = document.createElement("td");
     let ID = document.createElement("div");
     IDcontainer.className = "ID";
-    if (speciesMoveFilter) {
+    if (window.speciesMoveFilter) {
         moveMethod = speciesCanLearnMove(
-            species[speciesName],
-            speciesMoveFilter
+            window.species[speciesName],
+            window.speciesMoveFilter
         );
         let moveFilter = document.createElement("div");
         moveFilter.className = "bold";
@@ -62,7 +68,7 @@ function appendSpeciesToTable(speciesName) {
         }
         IDcontainer.append(moveFilter);
     } else {
-        ID.innerText = species[speciesName]["ID"];
+        ID.innerText = window.species[speciesName]["ID"];
     }
     IDcontainer.append(ID);
     row.append(IDcontainer);
@@ -82,9 +88,9 @@ function appendSpeciesToTable(speciesName) {
     let ingameName = document.createElement("div");
     nameContainer.className = "nameContainer";
     name.className = "key hide";
-    name.innerText = species[speciesName]["name"];
+    name.innerText = window.species[speciesName]["name"];
     ingameName.className = "species";
-    ingameName.innerText = sanitizeString(species[speciesName]["name"]);
+    ingameName.innerText = sanitizeString(window.species[speciesName]["name"]);
     nameContainer.append(ingameName);
     nameContainer.append(name);
     row.append(nameContainer);
@@ -95,24 +101,24 @@ function appendSpeciesToTable(speciesName) {
     let type2 = document.createElement("div");
     let type3 = document.createElement("div");
     typesContainer.className = "types";
-    type1.innerText = `${sanitizeString(species[speciesName]["type1"])} `;
-    type2.innerText = `${sanitizeString(species[speciesName]["type2"])} `;
-    type1.className = `${species[speciesName]["type1"]} background`;
-    type2.className = `${species[speciesName]["type2"]} background`;
+    type1.innerText = `${sanitizeString(window.species[speciesName]["type1"])} `;
+    type2.innerText = `${sanitizeString(window.species[speciesName]["type2"])} `;
+    type1.className = `${window.species[speciesName]["type1"]} background`;
+    type2.className = `${window.species[speciesName]["type2"]} background`;
 
-    for (let k = 0; k < species[speciesName]["changes"].length; k++) {
-        if (species[speciesName]["changes"][k][0] === "type1") {
+    for (let k = 0; k < window.species[speciesName]["changes"].length; k++) {
+        if (window.species[speciesName]["changes"][k][0] === "type1") {
             if (
-                species[speciesName]["type1"] !==
-                    species[speciesName]["changes"][k][1] &&
+                window.species[speciesName]["type1"] !==
+                    window.species[speciesName]["changes"][k][1] &&
                 changelogMode.classList.contains("activeSetting")
             ) {
                 type1.classList.add("typeChanged");
             }
-        } else if (species[speciesName]["changes"][k][0] === "type2") {
+        } else if (window.species[speciesName]["changes"][k][0] === "type2") {
             if (
-                species[speciesName]["type2"] !==
-                    species[speciesName]["changes"][k][1] &&
+                window.species[speciesName]["type2"] !==
+                    window.species[speciesName]["changes"][k][1] &&
                 changelogMode.classList.contains("activeSetting")
             ) {
                 type2.classList.add("typeChanged");
@@ -121,16 +127,16 @@ function appendSpeciesToTable(speciesName) {
     }
 
     types.append(type1);
-    if (species[speciesName]["type1"] !== species[speciesName]["type2"]) {
+    if (window.species[speciesName]["type1"] !== window.species[speciesName]["type2"]) {
         types.append(type2);
     }
-    if (typeof species[speciesName]["type3"] !== "undefined") {
+    if (typeof window.species[speciesName]["type3"] !== "undefined") {
         if (
-            species[speciesName]["type3"] !== species[speciesName]["type1"] &&
-            species[speciesName]["type3"] !== species[speciesName]["type2"]
+            window.species[speciesName]["type3"] !== window.species[speciesName]["type1"] &&
+            window.species[speciesName]["type3"] !== window.species[speciesName]["type2"]
         ) {
-            type3.innerText = `${sanitizeString(species[speciesName]["type3"])} `;
-            type3.className = `${species[speciesName]["type3"]} background`;
+            type3.innerText = `${sanitizeString(window.species[speciesName]["type3"])} `;
+            type3.className = `${window.species[speciesName]["type3"]} background`;
             types.append(type3);
         }
     }
@@ -139,31 +145,31 @@ function appendSpeciesToTable(speciesName) {
 
     let abilitiesContainer = document.createElement("td");
     abilitiesContainer.className = "abilities";
-    for (let j = 0; j < species[speciesName]["abilities"].length; j++) {
+    for (let j = 0; j < window.species[speciesName]["abilities"].length; j++) {
         let ability = document.createElement("div");
-        let abilityName = species[speciesName]["abilities"][j];
-        if (j === 1 && abilityName === species[speciesName]["abilities"][0]) {
+        let abilityName = window.species[speciesName]["abilities"][j];
+        if (j === 1 && abilityName === window.species[speciesName]["abilities"][0]) {
             continue;
         } else if (
             j === 2 &&
-            (abilityName === species[speciesName]["abilities"][0] ||
+            (abilityName === window.species[speciesName]["abilities"][0] ||
                 abilityName === "ABILITY_NONE") &&
-            (abilityName === species[speciesName]["abilities"][1] ||
+            (abilityName === window.species[speciesName]["abilities"][1] ||
                 abilityName === "ABILITY_NONE")
         ) {
             continue;
         }
-        if (abilityName !== "ABILITY_NONE" && abilities[abilityName]) {
-            ability.innerText = `${abilities[abilityName]["ingameName"]} `;
+        if (abilityName !== "ABILITY_NONE" && window.abilities[abilityName]) {
+            ability.innerText = `${window.abilities[abilityName]["ingameName"]} `;
             if (j === 2) {
                 ability.style.fontWeight = "bold";
             }
 
-            for (let k = 0; k < species[speciesName]["changes"].length; k++) {
-                if (species[speciesName]["changes"][k][0] === "abilities") {
+            for (let k = 0; k < window.species[speciesName]["changes"].length; k++) {
+                if (window.species[speciesName]["changes"][k][0] === "abilities") {
                     if (
-                        species[speciesName]["abilities"][j] !==
-                            species[speciesName]["changes"][k][1][j] &&
+                        window.species[speciesName]["abilities"][j] !==
+                            window.species[speciesName]["changes"][k][1][j] &&
                         changelogMode.classList.contains("activeSetting")
                     ) {
                         const changelogAbilities =
@@ -180,12 +186,12 @@ function appendSpeciesToTable(speciesName) {
     }
     row.append(abilitiesContainer);
 
-    if (typeof innatesDefined !== "undefined") {
+    if (typeof window.innatesDefined !== "undefined") {
         let innatesContainer = document.createElement("td");
         innatesContainer.className = "innates";
-        for (let j = 0; j < species[speciesName]["innates"].length; j++) {
+        for (let j = 0; j < window.species[speciesName]["innates"].length; j++) {
             let innates = document.createElement("div");
-            let innatesName = species[speciesName]["innates"][j];
+            let innatesName = window.species[speciesName]["innates"][j];
 
             if (innatesName !== "ABILITY_NONE") {
                 innates.innerText = `${sanitizeString(innatesName)} `;
@@ -211,7 +217,7 @@ function appendSpeciesToTable(speciesName) {
             createBaseStatsContainer(
                 statInfo[0],
                 statInfo[1],
-                species[speciesName]
+                window.species[speciesName]
             )
         );
     });
@@ -264,7 +270,7 @@ function createBaseStatsContainer(headerText, stats, speciesObj) {
     return baseStatsContainer;
 }
 
-async function spriteRemoveBgReturnBase64(speciesName, species) {
+export async function spriteRemoveBgReturnBase64(speciesName, species) {
     let sprite = new Image();
     let canvas = document.createElement("canvas");
     canvas.width = 64;
@@ -337,7 +343,7 @@ async function spriteRemoveBgReturnBase64(speciesName, species) {
                 speciesName,
                 LZString.compressToUTF16(spriteDataString)
             );
-            sprites[speciesName] = canvas.toDataURL();
+            window.sprites[speciesName] = canvas.toDataURL();
         }
         const els = document.getElementsByClassName(`sprite${speciesName}`);
         if (els.length > 0) {
@@ -348,7 +354,7 @@ async function spriteRemoveBgReturnBase64(speciesName, species) {
     };
 }
 
-function isSameColor(r1, g1, b1, r2, g2, b2, tolerance = 1) {
+export function isSameColor(r1, g1, b1, r2, g2, b2, tolerance = 1) {
     return (
         Math.abs(r1 - r2) <= tolerance &&
         Math.abs(g1 - g2) <= tolerance &&
@@ -356,7 +362,7 @@ function isSameColor(r1, g1, b1, r2, g2, b2, tolerance = 1) {
     );
 }
 
-function decodeSpriteDataString(spriteDataString) {
+export function decodeSpriteDataString(spriteDataString) {
     let canvas = document.createElement("canvas");
 
     const spriteData = spriteDataString.split("&");
@@ -383,3 +389,8 @@ function decodeSpriteDataString(spriteDataString) {
 
     return canvas.toDataURL();
 }
+
+// Compatibilidade temporaria com window.*
+window.appendSpeciesToTable = appendSpeciesToTable;
+window.spriteRemoveBgReturnBase64 = spriteRemoveBgReturnBase64;
+window.decodeSpriteDataString = decodeSpriteDataString;

@@ -578,3 +578,6 @@ if (typeof define === "function" && define.amd) {
         return LZString;
     });
 }
+
+export { LZString };
+window.LZString = LZString;

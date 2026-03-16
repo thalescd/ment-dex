@@ -1,3 +1,8 @@
+import { repo1 } from '../../utils/config.js';
+import { LZString } from '../../utils/lz-string.js';
+import { footerP } from '../../utils/utility.js';
+import { regexWildLocations, regexRaidLocations } from './regexLocations.js';
+
 async function getWildLocations(locations) {
     footerP("Fetching wild locations");
     const rawWildLocations = await fetch(
@@ -31,7 +36,7 @@ async function buildLocationsObj() {
     return locations;
 }
 
-async function fetchLocationsObj() {
+export async function fetchLocationsObj() {
     if (!localStorage.getItem("locations")) {
         window.locations = await buildLocationsObj();
     } else {
@@ -42,13 +47,13 @@ async function fetchLocationsObj() {
 
     let counter = 0;
     window.locationsTracker = [];
-    Object.keys(locations).forEach((zone) => {
-        Object.keys(locations[zone]).forEach((method) => {
-            Object.keys(locations[zone][method]).forEach((speciesName) => {
-                locationsTracker[counter] = {};
-                locationsTracker[counter]["key"] =
+    Object.keys(window.locations).forEach((zone) => {
+        Object.keys(window.locations[zone]).forEach((method) => {
+            Object.keys(window.locations[zone][method]).forEach((speciesName) => {
+                window.locationsTracker[counter] = {};
+                window.locationsTracker[counter]["key"] =
                     `${zone}\\${method}\\${speciesName}`;
-                locationsTracker[counter]["filter"] = [];
+                window.locationsTracker[counter]["filter"] = [];
                 counter++;
             });
         });

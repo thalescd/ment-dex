@@ -1,4 +1,6 @@
-function regexSpecies(textSpecies, species) {
+import { repo2 } from '../../utils/config.js';
+
+export function regexSpecies(textSpecies, species) {
     const lines = textSpecies.split("\n");
     let ID = 0;
 
@@ -7,7 +9,7 @@ function regexSpecies(textSpecies, species) {
         if (matchSpecies) {
             const name = matchSpecies[1];
 
-            matchID = line.match(/0[xX][0-9a-fA-F]+/i);
+            const matchID = line.match(/0[xX][0-9a-fA-F]+/i);
             if (matchID) {
                 ID = parseInt(matchID[0]);
 
@@ -21,7 +23,7 @@ function regexSpecies(textSpecies, species) {
     return species;
 }
 
-function regexBaseStats(textBaseStats, species) {
+export function regexBaseStats(textBaseStats, species) {
     const lines = textBaseStats.split("\n");
 
     const regex =
@@ -87,7 +89,7 @@ function regexBaseStats(textBaseStats, species) {
     return getBST(species);
 }
 
-function regexChanges(textChanges, species, abilitiesArrayForChanges) {
+export function regexChanges(textChanges, species, abilitiesArrayForChanges) {
     const lines = textChanges.split("\n");
 
     const regex =
@@ -154,7 +156,7 @@ function regexChanges(textChanges, species, abilitiesArrayForChanges) {
     return species;
 }
 
-async function regexAbilitiesArrayForChanges(textAbilitiesForChanges) {
+export async function regexAbilitiesArrayForChanges(textAbilitiesForChanges) {
     const lines = textAbilitiesForChanges.split("\n");
     let abilitiesArrayForChanges = [];
 
@@ -168,7 +170,7 @@ async function regexAbilitiesArrayForChanges(textAbilitiesForChanges) {
     return abilitiesArrayForChanges;
 }
 
-function getLevelUpLearnsetsConversionTable(textLevelUpLearnsetsPointers) {
+export function getLevelUpLearnsetsConversionTable(textLevelUpLearnsetsPointers) {
     const lines = textLevelUpLearnsetsPointers.split("\n");
     let conversionTable = {};
 
@@ -191,7 +193,7 @@ function getLevelUpLearnsetsConversionTable(textLevelUpLearnsetsPointers) {
     return conversionTable;
 }
 
-function regexLevelUpLearnsets(textLevelUpLearnsets, conversionTable, species) {
+export function regexLevelUpLearnsets(textLevelUpLearnsets, conversionTable, species) {
     const lines = textLevelUpLearnsets.split("\n");
     let speciesArray = [];
 
@@ -226,7 +228,7 @@ function regexLevelUpLearnsets(textLevelUpLearnsets, conversionTable, species) {
     return species;
 }
 
-async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end) {
+export async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end) {
     const lines = textTMHMLearnsets.split("\n");
     let name = null,
         startFound = false,
@@ -241,7 +243,7 @@ async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end) {
         if (startFound) {
             const matchMove = line.trim().match(/^MOVE_\w+/i);
             if (matchMove) {
-                let move = moves[matchMove[0]]["ingameName"];
+                let move = window.moves[matchMove[0]]["ingameName"];
                 count++;
 
                 if (move === "Solar Beam") move = "Solarbeam";
@@ -277,7 +279,7 @@ async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end) {
     //return altFormsLearnsets(species, "forms", "TMHMLearnsets")
 }
 
-async function regexTutorLearnsets(textTutorLearnsets, species, start, end) {
+export async function regexTutorLearnsets(textTutorLearnsets, species, start, end) {
     const lines = textTutorLearnsets.split("\n");
     let startFound = false,
         count = 0;
@@ -290,7 +292,7 @@ async function regexTutorLearnsets(textTutorLearnsets, species, start, end) {
         if (startFound) {
             const matchMove = line.trim().match(/^MOVE_\w+/i);
             if (matchMove) {
-                let move = moves[matchMove[0]]["ingameName"];
+                let move = window.moves[matchMove[0]]["ingameName"];
                 count++;
 
                 if (move === "Jealous Burn") move = "Burning Jealousy";
@@ -323,10 +325,10 @@ async function regexTutorLearnsets(textTutorLearnsets, species, start, end) {
                     .then((text) => {
                         if (
                             !/Tutor/.test(
-                                moves[matchMove[0]]["flags"].toString()
+                                window.moves[matchMove[0]]["flags"].toString()
                             )
                         ) {
-                            moves[matchMove[0]]["flags"].push("BF Tutor");
+                            window.moves[matchMove[0]]["flags"].push("BF Tutor");
                         }
 
                         text.split("\n").forEach((line) => {
@@ -348,7 +350,7 @@ async function regexTutorLearnsets(textTutorLearnsets, species, start, end) {
     //return altFormsLearnsets(species, "forms", "tutorLearnsets")
 }
 
-function regexEvolution(textEvolution, species) {
+export function regexEvolution(textEvolution, species) {
     const lines = textEvolution.split("\n");
     let name;
 
@@ -410,7 +412,7 @@ async function getEvolutionLine(species) {
     return species;
 }
 
-function regexForms(textForms, species) {
+export function regexForms(textForms, species) {
     const lines = textForms.split("\n");
     let speciesArray = [];
 
@@ -429,7 +431,7 @@ function regexForms(textForms, species) {
     return species;
 }
 
-function regexEggMovesLearnsets(textEggMoves, species) {
+export function regexEggMovesLearnsets(textEggMoves, species) {
     const lines = textEggMoves.split("\n");
     const speciesString = JSON.stringify(Object.keys(species));
     let name = null;
@@ -454,7 +456,7 @@ function regexEggMovesLearnsets(textEggMoves, species) {
     return altFormsLearnsets(species, "evolutionLine", "eggMovesLearnsets");
 }
 
-function regexReplaceAbilities(replaceAbilities, species) {
+export function regexReplaceAbilities(replaceAbilities, species) {
     Object.keys(replaceAbilities).forEach((oldAbility) => {
         Object.keys(replaceAbilities[oldAbility]).forEach((newAbility) => {
             for (
@@ -480,7 +482,7 @@ function regexReplaceAbilities(replaceAbilities, species) {
     return species;
 }
 
-function regexSprite(textSprite, species) {
+export function regexSprite(textSprite, species) {
     const lines = textSprite.split("\n");
 
     lines.forEach((line) => {
@@ -512,7 +514,7 @@ function regexSprite(textSprite, species) {
     return species;
 }
 
-function altFormsLearnsets(species, input, output) {
+export function altFormsLearnsets(species, input, output) {
     for (const name of Object.keys(species)) {
         if (species[name][input].length >= 2) {
             for (let j = 0; j < species[name][input].length; j++) {

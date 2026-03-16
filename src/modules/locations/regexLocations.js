@@ -1,4 +1,6 @@
-function regexWildLocations(wildEncounters, locations) {
+import { sanitizeString } from '../../utils/utility.js';
+
+export function regexWildLocations(wildEncounters, locations) {
     const methodArrayWild = [
         "grassAnytime",
         "grassDay",
@@ -55,7 +57,7 @@ function regexWildLocations(wildEncounters, locations) {
     return locations;
 }
 
-function regexRaidLocations(textRaidLocations, locations) {
+export function regexRaidLocations(textRaidLocations, locations) {
     const lines = textRaidLocations.split("\n");
     let zone = null,
         method = "Raid";

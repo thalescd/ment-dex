@@ -1,4 +1,4 @@
-async function regexStrategies(textStrategies, strategies) {
+export async function regexStrategies(textStrategies, strategies) {
     const lines = textStrategies.split("\n");
     let name = null,
         inBracket = false,
@@ -17,12 +17,12 @@ async function regexStrategies(textStrategies, strategies) {
             pushLine = false;
             name = null;
         } else if (!inBracket) {
-            matchSpecies = line.match(/SPECIES_\w+/i);
+            const matchSpecies = line.match(/SPECIES_\w+/i);
             if (matchSpecies) {
                 name = matchSpecies[0];
             } else if (
                 `SPECIES_${line.toUpperCase().replaceAll(/-|'| |_/g, "_")}` in
-                species
+                window.species
             ) {
                 name = `SPECIES_${line.toUpperCase().replaceAll(/-|'| |_/g, "_")}`;
             }
@@ -40,7 +40,7 @@ async function regexStrategies(textStrategies, strategies) {
             } else if (/ability *=/i.test(line)) {
                 if (/= *\d+/i.test(line)) {
                     strategies[name][i]["ability"] =
-                        species[name]["abilities"][
+                        window.species[name]["abilities"][
                             parseInt(line.match(/\d+/)[0])
                         ];
                 } else {

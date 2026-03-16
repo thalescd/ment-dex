@@ -1,3 +1,14 @@
+import { repo1 } from '../../utils/config.js';
+import { LZString } from '../../utils/lz-string.js';
+import { footerP } from '../../utils/utility.js';
+import {
+    regexAbilities,
+    regexVanillaAbilitiesDescription,
+    regexAbilitiesIngameName,
+    regexAbilitiesDescription,
+    regexNewAbilities
+} from './regexAbilities.js';
+
 async function getAbilities(abilities) {
     footerP("Fetching abilities");
     const rawAbilities = await fetch(
@@ -86,7 +97,7 @@ async function buildAbilitiesObj() {
     return abilities;
 }
 
-async function fetchAbilitiesObj() {
+export async function fetchAbilitiesObj() {
     if (!localStorage.getItem("abilities")) {
         window.abilities = await buildAbilitiesObj();
     } else {
@@ -96,9 +107,9 @@ async function fetchAbilitiesObj() {
     }
 
     window.abilitiesTracker = [];
-    for (let i = 0, j = Object.keys(abilities).length; i < j; i++) {
-        abilitiesTracker[i] = {};
-        abilitiesTracker[i]["key"] = Object.keys(abilities)[i];
-        abilitiesTracker[i]["filter"] = [];
+    for (let i = 0, j = Object.keys(window.abilities).length; i < j; i++) {
+        window.abilitiesTracker[i] = {};
+        window.abilitiesTracker[i]["key"] = Object.keys(window.abilities)[i];
+        window.abilitiesTracker[i]["filter"] = [];
     }
 }

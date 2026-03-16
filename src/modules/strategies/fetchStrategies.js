@@ -1,3 +1,7 @@
+import { LZString } from '../../utils/lz-string.js';
+import { footerP } from '../../utils/utility.js';
+import { regexStrategies } from './regexStrategies.js';
+
 async function getStrategies(strategies) {
     footerP("Fetching strategies");
     const rawStrategies = await fetch(
@@ -28,7 +32,7 @@ async function buildStrategiesObj() {
     return strategies;
 }
 
-async function fetchStrategiesObj() {
+export async function fetchStrategiesObj() {
     if (!localStorage.getItem("strategies"))
         window.strategies = await buildStrategiesObj();
     else
