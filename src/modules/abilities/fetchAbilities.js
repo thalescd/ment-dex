@@ -1,6 +1,7 @@
 import { repo1 } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
+import { gameData, trackers } from '../../utils/state.js';
 import {
     regexAbilities,
     regexVanillaAbilitiesDescription,
@@ -62,54 +63,60 @@ async function getNewAbilities(abilities) {
 }
 
 async function buildAbilitiesObj() {
-    let abilities = {};
-    abilities = await getAbilities(abilities);
+    try {
+        let abilities = {};
+        abilities = await getAbilities(abilities);
 
-    abilities = await getVanillaAbilitiesDescription(abilities);
-    await Promise.all([
-        getAbilitiesIngameName(abilities),
-        getAbilitiesDescription(abilities),
-        getNewAbilities(abilities),
-    ]);
+        abilities = await getVanillaAbilitiesDescription(abilities);
+        await Promise.all([
+            getAbilitiesIngameName(abilities),
+            getAbilitiesDescription(abilities),
+            getNewAbilities(abilities),
+        ]);
 
-    abilities["ABILITY_NEUTRALIZINGGAS"]["description"] =
-        "All Abilities are nullified.";
-    abilities["ABILITY_FULLMETALBODY"]["description"] =
-        "Prevents ability reduction.";
-    abilities["ABILITY_EVAPORATE"]["description"] =
-        "Nullifies all water to up Sp. Atk.";
-    abilities["ABILITY_GRASS_DASH"]["description"] =
-        "Grass-type moves hit first.";
-    abilities["ABILITY_SLIPPERY_TAIL"]["description"] = "Tail moves hit first.";
-    abilities["ABILITY_DRILL_BEAK"]["description"] =
-        "Drill moves land critical hits.";
+        abilities["ABILITY_NEUTRALIZINGGAS"]["description"] =
+            "All Abilities are nullified.";
+        abilities["ABILITY_FULLMETALBODY"]["description"] =
+            "Prevents ability reduction.";
+        abilities["ABILITY_EVAPORATE"]["description"] =
+            "Nullifies all water to up Sp. Atk.";
+        abilities["ABILITY_GRASS_DASH"]["description"] =
+            "Grass-type moves hit first.";
+        abilities["ABILITY_SLIPPERY_TAIL"]["description"] = "Tail moves hit first.";
+        abilities["ABILITY_DRILL_BEAK"]["description"] =
+            "Drill moves land critical hits.";
 
-    Object.keys(abilities).forEach((ability) => {
-        if (abilities[ability]["description"] == "") {
-            delete abilities[ability];
-        }
-    });
+        Object.keys(abilities).forEach((ability) => {
+            if (abilities[ability]["description"] === "") {
+                delete abilities[ability];
+            }
+        });
 
-    await localStorage.setItem(
-        "abilities",
-        LZString.compressToUTF16(JSON.stringify(abilities))
-    );
-    return abilities;
+        localStorage.setItem(
+            "abilities",
+            LZString.compressToUTF16(JSON.stringify(abilities))
+        );
+        return abilities;
+    } catch (e) {
+        console.error("Failed to build abilities data:", e.message, e.stack);
+        footerP("Error fetching abilities data. Please refresh the page.");
+        throw e;
+    }
 }
 
 export async function fetchAbilitiesObj() {
     if (!localStorage.getItem("abilities")) {
-        window.abilities = await buildAbilitiesObj();
+        gameData.abilities = await buildAbilitiesObj();
     } else {
-        window.abilities = await JSON.parse(
+        gameData.abilities = await JSON.parse(
             LZString.decompressFromUTF16(localStorage.getItem("abilities"))
         );
     }
 
-    window.abilitiesTracker = [];
-    for (let i = 0, j = Object.keys(window.abilities).length; i < j; i++) {
-        window.abilitiesTracker[i] = {};
-        window.abilitiesTracker[i]["key"] = Object.keys(window.abilities)[i];
-        window.abilitiesTracker[i]["filter"] = [];
+    trackers.abilities = [];
+    for (let i = 0, j = Object.keys(gameData.abilities).length; i < j; i++) {
+        trackers.abilities[i] = {};
+        trackers.abilities[i]["key"] = Object.keys(gameData.abilities)[i];
+        trackers.abilities[i]["filter"] = [];
     }
 }

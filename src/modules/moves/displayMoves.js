@@ -1,3 +1,5 @@
+import { gameData, trackers } from '../../utils/state.js';
+import { clearChildren } from '../../utils/domUtils.js';
 import { sanitizeString } from '../../utils/utility.js';
 import {
     movesTableTbody,
@@ -14,9 +16,9 @@ import { speciesPanel } from '../../utils/speciesPanelUtility.js';
 
 export function appendMovesToTable(moveName) {
     if (
-        !window.moves[moveName]["description"] ||
-        window.moves[moveName]["PP"] <= 0 ||
-        window.moves[moveName]["description"]?.length <= 0
+        !gameData.moves[moveName]["description"] ||
+        gameData.moves[moveName]["PP"] <= 0 ||
+        gameData.moves[moveName]["description"]?.length <= 0
     ) {
         return false;
     }
@@ -27,10 +29,10 @@ export function appendMovesToTable(moveName) {
 
     row.setAttribute("id", `${moveName}`);
 
-    if (window.moves[moveName]["ID"]) {
+    if (gameData.moves[moveName]["ID"]) {
         let movesID = document.createElement("td");
         movesID.className = "moveID";
-        movesID.innerText = window.moves[moveName]["ID"];
+        movesID.innerText = gameData.moves[moveName]["ID"];
         row.append(movesID);
     }
 
@@ -39,9 +41,9 @@ export function appendMovesToTable(moveName) {
     let ingameName = document.createElement("div");
     nameContainer.className = "nameContainer";
     name.className = "key hide";
-    name.innerText = window.moves[moveName]["name"];
+    name.innerText = gameData.moves[moveName]["name"];
     ingameName.className = "move";
-    ingameName.innerText = window.moves[moveName]["ingameName"];
+    ingameName.innerText = gameData.moves[moveName]["ingameName"];
     nameContainer.append(name);
     nameContainer.append(ingameName);
 
@@ -51,9 +53,9 @@ export function appendMovesToTable(moveName) {
     let type = document.createElement("div");
     let hiddenSplit = document.createElement("div");
     typeContainer.className = "type";
-    type.className = `${window.moves[moveName]["type"]} background`;
-    type.innerText = sanitizeString(window.moves[moveName]["type"]);
-    hiddenSplit.innerText = sanitizeString(window.moves[moveName]["split"]);
+    type.className = `${gameData.moves[moveName]["type"]} background`;
+    type.innerText = sanitizeString(gameData.moves[moveName]["type"]);
+    hiddenSplit.innerText = sanitizeString(gameData.moves[moveName]["split"]);
     hiddenSplit.className = "hide";
     typeContainer.append(type);
     typeContainer.append(hiddenSplit);
@@ -65,17 +67,17 @@ export function appendMovesToTable(moveName) {
     let splitIcon = document.createElement("img");
     splitContainer.className = "split";
     split.className = "hide";
-    split.innerText = sanitizeString(window.moves[moveName]["split"]);
-    hiddenType.innerText = window.moves[moveName]["type"];
+    split.innerText = sanitizeString(gameData.moves[moveName]["split"]);
+    hiddenType.innerText = gameData.moves[moveName]["type"];
     hiddenType.className = "hide";
-    splitIcon.className = `${sanitizeString(window.moves[moveName]["split"])} splitIcon`;
-    splitIcon.src = `assets/${window.moves[moveName]["split"]}.png`;
+    splitIcon.className = `${sanitizeString(gameData.moves[moveName]["split"])} splitIcon`;
+    splitIcon.src = `assets/${gameData.moves[moveName]["split"]}.png`;
     splitContainer.append(split);
     splitContainer.append(hiddenType);
     splitContainer.append(splitIcon);
     row.append(splitContainer);
 
-    const moveObj = window.moves[moveName];
+    const moveObj = gameData.moves[moveName];
 
     row.append(createInputContainer("Power", "power", moveObj));
 
@@ -88,16 +90,16 @@ export function appendMovesToTable(moveName) {
 
     descriptionContainer.className = "description";
     let description = document.createElement("div");
-    description.innerText = window.moves[moveName]["description"].join("");
+    description.innerText = gameData.moves[moveName]["description"].join("");
     descriptionContainer.append(description);
 
     effectContainer.append(descriptionContainer);
 
     let effect = document.createElement("div");
     effect.className = "effect";
-    effect.innerText = `${sanitizeString(window.moves[moveName]["effect"])}`;
+    effect.innerText = `${sanitizeString(gameData.moves[moveName]["effect"])}`;
 
-    let chance = window.moves[moveName]["chance"];
+    let chance = gameData.moves[moveName]["chance"];
     if (chance > 0 && chance < 100) {
         effect.innerText += ` ${chance}%`;
     } else {
@@ -109,7 +111,7 @@ export function appendMovesToTable(moveName) {
     row.append(effectContainer);
 
     row.addEventListener("click", function () {
-        createPopupForMove(window.moves[moveName]);
+        createPopupForMove(gameData.moves[moveName]);
         overlay.style.display = "flex";
         body.classList.add("fixed");
     });
@@ -141,9 +143,7 @@ function createInputContainer(headerText, input, moveObj) {
 }
 
 export function createPopupForMove(move, interactAble = true) {
-    while (popup.firstChild) {
-        popup.removeChild(popup.firstChild);
-    }
+    clearChildren(popup);
 
     const moveName = document.createElement("h2");
     moveName.classList.add("bold");
@@ -187,13 +187,13 @@ export function createPopupForMove(move, interactAble = true) {
     const target = document.createElement("div");
     target.innerText = `Target: ${sanitizeString(move["target"])}`;
     target.className = "bold popupTrainerTarget";
-    if (move["target"] != "") {
+    if (move["target"] !== "") {
         if (interactAble) {
             target.classList.add("hyperlink");
 
             target.addEventListener("click", async () => {
                 if (!movesButton.classList.contains("activeButton")) {
-                    setTracker(window.movesTracker);
+                    setTracker(trackers.moves);
                     await tableButtonClick("moves");
                 }
                 deleteFiltersFromTable();
@@ -209,11 +209,11 @@ export function createPopupForMove(move, interactAble = true) {
     }
 
     if (
-        window.moves[move["name"]]["chance"] > 0 &&
-        window.moves[move["name"]]["chance"] < 100
+        gameData.moves[move["name"]]["chance"] > 0 &&
+        gameData.moves[move["name"]]["chance"] < 100
     ) {
         const moveEffect = document.createElement("div");
-        moveEffect.innerText = `${sanitizeString(window.moves[move["name"]]["effect"])} ${window.moves[move["name"]]["chance"]}%`;
+        moveEffect.innerText = `${sanitizeString(gameData.moves[move["name"]]["effect"])} ${gameData.moves[move["name"]]["chance"]}%`;
         moveEffect.className = "bold popupTrainerMoveEffect";
         popup.append(moveEffect);
     } else {
@@ -237,7 +237,7 @@ export function createPopupForMove(move, interactAble = true) {
 
                 flagName.addEventListener("click", async () => {
                     if (!movesButton.classList.contains("activeButton")) {
-                        setTracker(window.movesTracker);
+                        setTracker(trackers.moves);
                         await tableButtonClick("moves");
                     }
                     deleteFiltersFromTable();
@@ -266,7 +266,7 @@ export function createPopupForMove(move, interactAble = true) {
 
         filterButton.addEventListener("click", async () => {
             if (!speciesButton.classList.contains("activeButton")) {
-                setTracker(window.speciesTracker);
+                setTracker(trackers.species);
                 await tableButtonClick("species");
             }
             overlay.style.display = "none";
@@ -280,6 +280,3 @@ export function createPopupForMove(move, interactAble = true) {
     }
 }
 
-// Shims temporários: chamadas dinâmicas via window.*
-window.appendMovesToTable = appendMovesToTable;
-window.createPopupForMove = createPopupForMove;

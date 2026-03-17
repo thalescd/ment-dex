@@ -1,3 +1,5 @@
+import { gameData } from '../../utils/state.js';
+
 export async function regexStrategies(textStrategies, strategies) {
     const lines = textStrategies.split("\n");
     let name = null,
@@ -22,7 +24,7 @@ export async function regexStrategies(textStrategies, strategies) {
                 name = matchSpecies[0];
             } else if (
                 `SPECIES_${line.toUpperCase().replaceAll(/-|'| |_/g, "_")}` in
-                window.species
+                gameData.species
             ) {
                 name = `SPECIES_${line.toUpperCase().replaceAll(/-|'| |_/g, "_")}`;
             }
@@ -40,7 +42,7 @@ export async function regexStrategies(textStrategies, strategies) {
             } else if (/ability *=/i.test(line)) {
                 if (/= *\d+/i.test(line)) {
                     strategies[name][i]["ability"] =
-                        window.species[name]["abilities"][
+                        gameData.species[name]["abilities"][
                             parseInt(line.match(/\d+/)[0])
                         ];
                 } else {

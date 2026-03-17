@@ -1,25 +1,27 @@
 import { sanitizeString, speciesCanLearnMove, getSpeciesSpriteSrc, returnTargetSpeciesSprite } from '../../utils/utility.js';
 import { locationsTableTbody, locationsFilterContainer } from '../../utils/domRefs.js';
 import { createSpeciesPanel } from '../../utils/speciesPanelUtility.js';
+import { gameData, uiState } from '../../utils/state.js';
+import { getMoveMethodLabel } from '../../utils/domUtils.js';
 
-window.locationsMoveFilter = null;
+uiState.locationsMoveFilter = null;
 
 export function updateLocationsMoveFilter() {
-    window.locationsMoveFilter = null;
+    uiState.locationsMoveFilter = null;
     const moveFiltersContainer =
         locationsFilterContainer.getElementsByClassName(
             "locationsFilterMoveContainer"
         )[0];
     if (moveFiltersContainer) {
         const filters = moveFiltersContainer.getElementsByClassName("filter");
-        if (filters.length == 1) {
-            if (filters[0].parentNode.children[0].value != "NOT") {
-                window.locationsMoveFilter = filters[0].innerText
+        if (filters.length === 1) {
+            if (filters[0].parentNode.children[0].value !== "NOT") {
+                uiState.locationsMoveFilter = filters[0].innerText
                     .replace(" ", "")
                     .split(":")[1];
-                Object.keys(window.moves).forEach((moveName) => {
-                    if (window.moves[moveName]["ingameName"] === window.locationsMoveFilter) {
-                        window.locationsMoveFilter = moveName;
+                Object.keys(gameData.moves).forEach((moveName) => {
+                    if (gameData.moves[moveName]["ingameName"] === uiState.locationsMoveFilter) {
+                        uiState.locationsMoveFilter = moveName;
                     }
                 });
             }
@@ -33,7 +35,7 @@ export function appendLocationsToTable(key) {
     const method = key.split("\\")[1];
     const speciesKey = key.split("\\")[2];
 
-    if (!(speciesKey in window.species)) {
+    if (!(speciesKey in gameData.species)) {
         return false;
     }
 
@@ -51,7 +53,7 @@ export function appendLocationsToTable(key) {
     }
 
     let methodTable = document.getElementById(`${location}${method}`);
-    if (time == method) {
+    if (time === method) {
         methodTable = document.getElementById(`${location}Land${method}`);
     }
     if (!methodTable) {
@@ -61,7 +63,7 @@ export function appendLocationsToTable(key) {
 
     appendSpeciesEl(location, method, speciesKey, methodTable);
 
-    if (locationTable.children[1].children.length == 1) {
+    if (locationTable.children[1].children.length === 1) {
         locationTable.classList.remove("locationScale");
         locationTable.classList.add("locationFixed");
     } else {
@@ -79,34 +81,26 @@ function appendSpeciesEl(location, method, speciesKey, methodTable) {
 
     const rarity = document.createElement("td");
     rarity.classList = "locationRarity";
-    if (window.locationsMoveFilter) {
+    if (uiState.locationsMoveFilter) {
         const moveMethod = speciesCanLearnMove(
-            window.species[speciesKey],
-            window.locationsMoveFilter
+            gameData.species[speciesKey],
+            uiState.locationsMoveFilter
         );
         const moveFilter = document.createElement("div");
         moveFilter.className = "bold";
-        if (Number.isInteger(moveMethod)) {
-            moveFilter.innerText = `Lv ${moveMethod}`;
-            moveFilter.classList.add("levelUpLearnsets");
-        } else if (moveMethod === "eggMovesLearnsets") {
-            moveFilter.innerText = "Egg";
-            moveFilter.classList.add("eggMovesLearnsets");
-        } else if (moveMethod === "TMHMLearnsets") {
-            moveFilter.innerText = "TM";
-            moveFilter.classList.add("TMHMLearnsets");
-        } else if (moveMethod === "tutorLearnsets") {
-            moveFilter.innerText = "Tutor";
-            moveFilter.classList.add("tutorLearnsets");
+        const label = getMoveMethodLabel(moveMethod);
+        if (label) {
+            moveFilter.innerText = label.text;
+            moveFilter.classList.add(label.className);
         }
         rarity.append(moveFilter);
     } else {
-        rarity.innerText = window.locations[location][method][speciesKey];
+        rarity.innerText = gameData.locations[location][method][speciesKey];
         if (
-            Number.isInteger(parseInt(window.locations[location][method][speciesKey]))
+            Number.isInteger(parseInt(gameData.locations[location][method][speciesKey]))
         ) {
             rarity.innerText += "%";
-            rarity.style.color = `hsl(${window.locations[location][method][speciesKey] * 2},85%,45%)`;
+            rarity.style.color = `hsl(${gameData.locations[location][method][speciesKey] * 2},85%,45%)`;
         }
     }
 
@@ -147,7 +141,7 @@ function returnMethodTable(location, method, time) {
     const methodTable = document.createElement("table");
     methodTable.setAttribute("ID", `${location}${method}`);
     methodTable.classList = "methodTable";
-    if (time == method) {
+    if (time === method) {
         methodTable.setAttribute("ID", `${location}Land${method}`);
     }
     const methodTableTbody = document.createElement("tbody");
@@ -178,7 +172,7 @@ function returnMethodTableThead(method, time) {
         methodContainer.innerText = methodContainer.innerText
             .replace(time, "")
             .trim();
-        if (time == method) {
+        if (time === method) {
             methodContainer.innerText = "Land";
         }
     }
@@ -253,6 +247,3 @@ function returnMethodSprite(method) {
     }
 }
 
-// Shims temporários: chamadas dinâmicas via window.*
-window.appendLocationsToTable = appendLocationsToTable;
-window.updateLocationsMoveFilter = updateLocationsMoveFilter;

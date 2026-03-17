@@ -1,3 +1,4 @@
+import { gameData, trackers } from '../../utils/state.js';
 import { repo1 } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
@@ -61,48 +62,54 @@ async function getMovesFlags(moves) {
 }
 
 async function buildMovesObj() {
-    let moves = {};
-    moves = await getMoves(moves);
-    //moves = await getFlags(moves) // file missing for unbound
-    await Promise.all([
-        getVanillaMovesDescription(moves),
-        getMovesDescription(moves),
-        getMovesIngameName(moves),
-        getMovesFlags(moves),
-    ]);
+    try {
+        let moves = {};
+        moves = await getMoves(moves);
+        //moves = await getFlags(moves) // file missing for unbound
+        await Promise.all([
+            getVanillaMovesDescription(moves),
+            getMovesDescription(moves),
+            getMovesIngameName(moves),
+            getMovesFlags(moves),
+        ]);
 
-    Object.keys(moves).forEach((move) => {
-        if (moves[move]["priority"] > 0) {
-            moves[move]["flags"].push(
-                `FLAG_PRIORITY_PLUS_${moves[move]["priority"]}`
-            );
-        } else if (moves[move]["priority"] < 0) {
-            moves[move]["flags"].push(
-                `FLAG_PRIORITY_MINUS_${Math.abs(moves[move]["priority"])}`
-            );
-        }
-    });
+        Object.keys(moves).forEach((move) => {
+            if (moves[move]["priority"] > 0) {
+                moves[move]["flags"].push(
+                    `FLAG_PRIORITY_PLUS_${moves[move]["priority"]}`
+                );
+            } else if (moves[move]["priority"] < 0) {
+                moves[move]["flags"].push(
+                    `FLAG_PRIORITY_MINUS_${Math.abs(moves[move]["priority"])}`
+                );
+            }
+        });
 
-    await localStorage.setItem(
-        "moves",
-        LZString.compressToUTF16(JSON.stringify(moves))
-    );
-    return moves;
+        localStorage.setItem(
+            "moves",
+            LZString.compressToUTF16(JSON.stringify(moves))
+        );
+        return moves;
+    } catch (e) {
+        console.error("Failed to build moves data:", e.message, e.stack);
+        footerP("Error fetching moves data. Please refresh the page.");
+        throw e;
+    }
 }
 
 export async function fetchMovesObj() {
     if (!localStorage.getItem("moves")) {
-        window.moves = await buildMovesObj();
+        gameData.moves = await buildMovesObj();
     } else {
-        window.moves = await JSON.parse(
+        gameData.moves = await JSON.parse(
             LZString.decompressFromUTF16(localStorage.getItem("moves"))
         );
     }
 
-    window.movesTracker = [];
-    for (let i = 0, j = Object.keys(window.moves).length; i < j; i++) {
-        window.movesTracker[i] = {};
-        window.movesTracker[i]["key"] = Object.keys(window.moves)[i];
-        window.movesTracker[i]["filter"] = [];
+    trackers.moves = [];
+    for (let i = 0, j = Object.keys(gameData.moves).length; i < j; i++) {
+        trackers.moves[i] = {};
+        trackers.moves[i]["key"] = Object.keys(gameData.moves)[i];
+        trackers.moves[i]["filter"] = [];
     }
 }

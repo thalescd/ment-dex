@@ -1,4 +1,5 @@
 import { repo2 } from '../../utils/config.js';
+import { gameData } from '../../utils/state.js';
 
 export function regexSpecies(textSpecies, species) {
     const lines = textSpecies.split("\n");
@@ -243,7 +244,7 @@ export async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end)
         if (startFound) {
             const matchMove = line.trim().match(/^MOVE_\w+/i);
             if (matchMove) {
-                let move = window.moves[matchMove[0]]["ingameName"];
+                let move = gameData.moves[matchMove[0]]["ingameName"];
                 count++;
 
                 if (move === "Solar Beam") move = "Solarbeam";
@@ -292,7 +293,7 @@ export async function regexTutorLearnsets(textTutorLearnsets, species, start, en
         if (startFound) {
             const matchMove = line.trim().match(/^MOVE_\w+/i);
             if (matchMove) {
-                let move = window.moves[matchMove[0]]["ingameName"];
+                let move = gameData.moves[matchMove[0]]["ingameName"];
                 count++;
 
                 if (move === "Jealous Burn") move = "Burning Jealousy";
@@ -325,10 +326,10 @@ export async function regexTutorLearnsets(textTutorLearnsets, species, start, en
                     .then((text) => {
                         if (
                             !/Tutor/.test(
-                                window.moves[matchMove[0]]["flags"].toString()
+                                gameData.moves[matchMove[0]]["flags"].toString()
                             )
                         ) {
-                            window.moves[matchMove[0]]["flags"].push("BF Tutor");
+                            gameData.moves[matchMove[0]]["flags"].push("BF Tutor");
                         }
 
                         text.split("\n").forEach((line) => {

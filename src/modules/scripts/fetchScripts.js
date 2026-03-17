@@ -1,23 +1,22 @@
 import { repo1 } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
+import { gameData, trackers, uiState } from '../../utils/state.js';
 import { difficultyButtonContainer, trainersTableTbody, trainersInput, overlay, body } from '../../utils/domRefs.js';
 import { lazyLoading, filterTrainersTableInput } from '../../utils/tableUtility.js';
 import { trainerSpeciesMatchFilter } from '../../utils/tableFilters.js';
-import { spriteRemoveBgReturnBase64 } from '../species/displaySpecies.js';
+import { spriteRemoveBgReturnBase64 } from '../../utils/spriteUtils.js';
 import { spriteRemoveItemBgReturnBase64 } from './displayItems.js';
+import { regexTrainers, regexTrainersParties } from './regexTrainers.js';
 import {
-    regexScripts,
     regexItems,
     regexItemDescriptions,
-    regexTrainers,
-    regexTrainersParties,
-    regexSpecialsFunctions,
     regexItemIcon,
     regexItemBallSripts,
     getHeldItems,
     regexHiddenItems
-} from './regexScripts.js';
+} from './regexItems.js';
+import { regexScripts, regexSpecialsFunctions } from './regexScriptLocations.js';
 
 async function getScripts() {
     footerP("Fetching scripts");
@@ -116,78 +115,84 @@ async function getTrainers() {
 }
 
 async function buildScriptsObjs() {
-    window.trainers = {};
-    window.items = {};
+    try {
+        gameData.trainers = {};
+        gameData.items = {};
 
-    /*
-    await getItems()
+        /*
+        await getItems()
 
-    await getScripts()
+        await getScripts()
 
-    await getTrainers()
+        await getTrainers()
 
-    await Promise.all([
-        getItemsIcon(),
-        getHiddenItems(),
-        getHeldItems(),
-        bugFixTrainers()
-    ])
-    */
+        await Promise.all([
+            getItemsIcon(),
+            getHiddenItems(),
+            getHeldItems(),
+            bugFixTrainers()
+        ])
+        */
 
-    localStorage.setItem(
-        "trainers",
-        LZString.compressToUTF16(JSON.stringify(window.trainers))
-    );
-    localStorage.setItem(
-        "items",
-        LZString.compressToUTF16(JSON.stringify(window.items))
-    );
-    localStorage.setItem(
-        "locations",
-        LZString.compressToUTF16(JSON.stringify(window.locations))
-    );
+        localStorage.setItem(
+            "trainers",
+            LZString.compressToUTF16(JSON.stringify(gameData.trainers))
+        );
+        localStorage.setItem(
+            "items",
+            LZString.compressToUTF16(JSON.stringify(gameData.items))
+        );
+        localStorage.setItem(
+            "locations",
+            LZString.compressToUTF16(JSON.stringify(gameData.locations))
+        );
+    } catch (e) {
+        console.error("Failed to build scripts data:", e.message, e.stack);
+        footerP("Error fetching scripts data. Please refresh the page.");
+        throw e;
+    }
 }
 
 export async function fetchScripts() {
     if (!localStorage.getItem("trainers") || !localStorage.getItem("items")) {
         await buildScriptsObjs();
     } else {
-        window.items = await JSON.parse(
+        gameData.items = await JSON.parse(
             LZString.decompressFromUTF16(localStorage.getItem("items"))
         );
-        window.trainers = await JSON.parse(
+        gameData.trainers = await JSON.parse(
             LZString.decompressFromUTF16(localStorage.getItem("trainers"))
         );
     }
 
-    window.itemsTracker = [];
-    Object.keys(window.items).forEach(async (name) => {
+    trackers.items = [];
+    Object.keys(gameData.items).forEach((name) => {
         if (localStorage.getItem(`${name}`)) {
-            window.sprites[name] = await LZString.decompressFromUTF16(
+            gameData.sprites[name] = LZString.decompressFromUTF16(
                 localStorage.getItem(`${name}`)
             );
-            if (window.sprites[name].length < 500) {
+            if (gameData.sprites[name].length < 500) {
                 localStorage.removeItem(name);
                 spriteRemoveItemBgReturnBase64(name);
             }
         }
     });
-    for (let i = 0, j = Object.keys(window.items).length; i < j; i++) {
-        window.itemsTracker[i] = {};
-        window.itemsTracker[i]["key"] = Object.keys(window.items)[i];
-        window.itemsTracker[i]["filter"] = [];
+    for (let i = 0, j = Object.keys(gameData.items).length; i < j; i++) {
+        trackers.items[i] = {};
+        trackers.items[i]["key"] = Object.keys(gameData.items)[i];
+        trackers.items[i]["filter"] = [];
     }
 
     let counter = 0;
-    window.trainersTracker = [];
-    Object.keys(window.trainers).forEach((zone) => {
-        Object.keys(window.trainers[zone]).forEach((trainer) => {
-            window.trainersTracker[counter] = {};
-            window.trainersTracker[counter]["key"] = `${zone}\\${trainer}`;
-            window.trainersTracker[counter]["filter"] = [];
+    trackers.trainers = [];
+    Object.keys(gameData.trainers).forEach((zone) => {
+        Object.keys(gameData.trainers[zone]).forEach((trainer) => {
+            trackers.trainers[counter] = {};
+            trackers.trainers[counter]["key"] = `${zone}\\${trainer}`;
+            trackers.trainers[counter]["filter"] = [];
             counter++;
 
-            for (let difficulty in window.trainers[zone][trainer]["party"]) {
+            for (let difficulty in gameData.trainers[zone][trainer]["party"]) {
                 if (
                     difficulty !== "Normal" &&
                     !document.getElementById(`difficulty${difficulty}`)
@@ -201,7 +206,7 @@ export async function fetchScripts() {
 
                     newDifficulty.addEventListener("click", () => {
                         if (newDifficulty.classList.contains("activeSetting")) {
-                            window.trainersDifficulty = "Normal";
+                            uiState.trainersDifficulty = "Normal";
                             newDifficulty.classList.remove("activeSetting");
                         } else {
                             for (const difficultyButton of difficultyButtonContainer.children) {
@@ -210,7 +215,7 @@ export async function fetchScripts() {
                                 );
                             }
                             newDifficulty.classList.add("activeSetting");
-                            window.trainersDifficulty = newDifficulty.innerText;
+                            uiState.trainersDifficulty = newDifficulty.innerText;
                         }
                         trainerSpeciesMatchFilter(true);
                         filterTrainersTableInput(trainersInput.value);
@@ -218,12 +223,12 @@ export async function fetchScripts() {
                 }
             }
 
-            const sprite = window.trainers[zone][trainer]["sprite"];
+            const sprite = gameData.trainers[zone][trainer]["sprite"];
             if (localStorage.getItem(sprite)) {
-                window.sprites[sprite] = LZString.decompressFromUTF16(
+                gameData.sprites[sprite] = LZString.decompressFromUTF16(
                     localStorage.getItem(sprite)
                 );
-                if (window.sprites[sprite].length < 500) {
+                if (gameData.sprites[sprite].length < 500) {
                     localStorage.removeItem(sprite);
                     spriteRemoveBgReturnBase64(
                         sprite,
@@ -236,29 +241,29 @@ export async function fetchScripts() {
 }
 
 export function getItemSpriteSrc(itemName) {
-    if (window.sprites[itemName]) {
-        if (window.sprites[itemName].length < 500) {
+    if (gameData.sprites[itemName]) {
+        if (gameData.sprites[itemName].length < 500) {
             localStorage.removeItem(itemName);
             spriteRemoveItemBgReturnBase64(itemName);
-            return window.items[itemName]["url"];
+            return gameData.items[itemName]["url"];
         } else {
-            return window.sprites[itemName];
+            return gameData.sprites[itemName];
         }
     } else {
         spriteRemoveItemBgReturnBase64(itemName);
-        return window.items[itemName]["url"];
+        return gameData.items[itemName]["url"];
     }
 }
 
 export function getTrainerSpriteSrc(trainerSprite) {
     const url = `https://raw.githubusercontent.com/${repo1}/graphics/trainers/front_pics/${trainerSprite.replace(/^TRAINER_PIC_/, "").toLowerCase()}_front_pic.png`;
-    if (window.sprites[trainerSprite]) {
-        if (window.sprites[trainerSprite].length < 500) {
+    if (gameData.sprites[trainerSprite]) {
+        if (gameData.sprites[trainerSprite].length < 500) {
             localStorage.removeItem(trainerSprite);
             spriteRemoveTrainerBgReturnBase64(trainerSprite, url);
             return url;
         } else {
-            return window.sprites[trainerSprite];
+            return gameData.sprites[trainerSprite];
         }
     } else {
         spriteRemoveTrainerBgReturnBase64(trainerSprite, url);
@@ -270,8 +275,8 @@ async function bugFixTrainers() {
     let trainerToZone = {};
     let stop = false;
     let correctZone = false;
-    Object.keys(window.trainers).forEach((zone) => {
-        Object.keys(window.trainers[zone]).forEach((trainer) => {
+    Object.keys(gameData.trainers).forEach((zone) => {
+        Object.keys(gameData.trainers[zone]).forEach((trainer) => {
             if (!trainerToZone[trainer]) {
                 trainerToZone[trainer] = zone;
             } else {
@@ -283,7 +288,7 @@ async function bugFixTrainers() {
                     .split("_")
                     .slice(0, -1)
                     .join("_");
-                Object.keys(window.trainers[zone]).forEach((trainerName) => {
+                Object.keys(gameData.trainers[zone]).forEach((trainerName) => {
                     if (
                         trainerName.split("_").splice(0, 2).join("_") ==
                             baseTrainerName &&
@@ -295,7 +300,7 @@ async function bugFixTrainers() {
                     }
                 });
                 if (!stop) {
-                    Object.keys(window.trainers[trainerToZone[trainer]]).forEach(
+                    Object.keys(gameData.trainers[trainerToZone[trainer]]).forEach(
                         (trainerName) => {
                             if (
                                 trainerName.split("_").splice(0, 2).join("_") ==
@@ -314,26 +319,26 @@ async function bugFixTrainers() {
             if (correctZone) {
                 if (correctZone === zone) {
                     if (
-                        Object.keys(window.trainers[zone][trainer]["party"]).length ===
+                        Object.keys(gameData.trainers[zone][trainer]["party"]).length ===
                         0
                     ) {
-                        window.trainers[zone][trainer] = JSON.parse(
+                        gameData.trainers[zone][trainer] = JSON.parse(
                             JSON.stringify(
-                                window.trainers[trainerToZone[trainer]][trainer]
+                                gameData.trainers[trainerToZone[trainer]][trainer]
                             )
                         );
-                        delete window.trainers[trainerToZone[trainer]][trainer];
+                        delete gameData.trainers[trainerToZone[trainer]][trainer];
                     }
                 } else {
                     if (
                         Object.keys(
-                            window.trainers[trainerToZone[trainer]][trainer]["party"]
+                            gameData.trainers[trainerToZone[trainer]][trainer]["party"]
                         ).length === 0
                     ) {
-                        window.trainers[trainerToZone[trainer]][trainer] = JSON.parse(
-                            JSON.stringify(window.trainers[zone][trainer])
+                        gameData.trainers[trainerToZone[trainer]][trainer] = JSON.parse(
+                            JSON.stringify(gameData.trainers[zone][trainer])
                         );
-                        delete window.trainers[zone][trainer];
+                        delete gameData.trainers[zone][trainer];
                     }
                 }
                 correctZone = false;
@@ -341,42 +346,39 @@ async function bugFixTrainers() {
         });
     });
 
-    Object.keys(window.trainers).forEach((zone) => {
+    Object.keys(gameData.trainers).forEach((zone) => {
         let rematchObj = {};
         let sortedZoneObj = {};
-        Object.keys(window.trainers[zone])
+        Object.keys(gameData.trainers[zone])
             .sort(function (a, b) {
                 return a < b ? -1 : a > b ? 1 : 0;
             })
             .forEach((trainer) => {
-                sortedZoneObj[trainer] = window.trainers[zone][trainer];
+                sortedZoneObj[trainer] = gameData.trainers[zone][trainer];
             });
-        window.trainers[zone] = JSON.parse(JSON.stringify(sortedZoneObj));
+        gameData.trainers[zone] = JSON.parse(JSON.stringify(sortedZoneObj));
 
-        Object.keys(window.trainers[zone]).forEach((trainer) => {
-            if (window.trainers[zone][trainer]["rematch"]) {
+        Object.keys(gameData.trainers[zone]).forEach((trainer) => {
+            if (gameData.trainers[zone][trainer]["rematch"]) {
                 rematchObj[trainer.split("_").slice(0, -1).join("_")] =
-                    window.trainers[zone][trainer]["rematch"];
+                    gameData.trainers[zone][trainer]["rematch"];
             } else if (
                 rematchObj[trainer.split("_").slice(0, -1).join("_")] &&
-                !window.trainers[zone][trainer]["rematch"]
+                !gameData.trainers[zone][trainer]["rematch"]
             ) {
-                window.trainers[zone][trainer]["rematch"] =
+                gameData.trainers[zone][trainer]["rematch"] =
                     rematchObj[trainer.split("_").slice(0, -1).join("_")];
-                window.trainers[zone][
+                gameData.trainers[zone][
                     rematchObj[trainer.split("_").slice(0, -1).join("_")]
                 ]["rematchArray"].push(trainer);
             }
-            if (Object.keys(window.trainers[zone][trainer]["party"]).length === 0) {
-                delete window.trainers[zone][trainer];
-                if (Object.keys(window.trainers[zone]).length === 0) {
-                    delete window.trainers[zone];
+            if (Object.keys(gameData.trainers[zone][trainer]["party"]).length === 0) {
+                delete gameData.trainers[zone][trainer];
+                if (Object.keys(gameData.trainers[zone]).length === 0) {
+                    delete gameData.trainers[zone];
                 }
             }
         });
     });
 }
 
-// Shim temporário
-window.getItemSpriteSrc = getItemSpriteSrc;
-window.getTrainerSpriteSrc = getTrainerSpriteSrc;

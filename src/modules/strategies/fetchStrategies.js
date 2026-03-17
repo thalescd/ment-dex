@@ -1,5 +1,6 @@
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
+import { gameData } from '../../utils/state.js';
 import { regexStrategies } from './regexStrategies.js';
 
 async function getStrategies(strategies) {
@@ -15,17 +16,12 @@ async function getStrategies(strategies) {
 async function buildStrategiesObj() {
     let strategies = {};
 
-    setTimeout(() => {
-        timeout = true;
-    }, "3000");
-
     try {
         /*await Promise.all([
             getStrategies(strategies)
         ])*/
     } catch (e) {
-        console.log(e.message);
-        console.log(e.stack);
+        console.error("Failed to fetch strategies:", e.message, e.stack);
     }
 
     //await localStorage.setItem("strategies", LZString.compressToUTF16(JSON.stringify(strategies)))
@@ -34,9 +30,9 @@ async function buildStrategiesObj() {
 
 export async function fetchStrategiesObj() {
     if (!localStorage.getItem("strategies"))
-        window.strategies = await buildStrategiesObj();
+        gameData.strategies = await buildStrategiesObj();
     else
-        window.strategies = await JSON.parse(
+        gameData.strategies = await JSON.parse(
             LZString.decompressFromUTF16(localStorage.getItem("strategies"))
         );
 }

@@ -1,3 +1,4 @@
+import { gameData, trackers } from '../../utils/state.js';
 import { repo1, repo2, repoDex } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { setTracker } from '../../utils/domRefs.js';
@@ -140,7 +141,7 @@ async function fixFormAbilities(species) {
     Object.entries(species)
         .filter(
             ([name, pokemon]) =>
-                species[name + "_F"] != undefined && pokemon.forms.length == 2
+                species[name + "_F"] !== undefined && pokemon.forms.length === 2
         )
         .forEach(([name, male]) => {
             const female = species[name + "_F"];
@@ -150,8 +151,8 @@ async function fixFormAbilities(species) {
     Object.entries(species)
         .filter(
             ([name, pokemon]) =>
-                species[name + "_FEMALE"] != undefined &&
-                pokemon.forms.length == 2
+                species[name + "_FEMALE"] !== undefined &&
+                pokemon.forms.length === 2
         )
         .forEach(([name, male]) => {
             const female = species[name + "_FEMALE"];
@@ -245,49 +246,55 @@ async function cleanSpecies(species) {
 // --- CONSTRUÇÃO DO OBJETO ---
 
 async function buildSpeciesObj() {
-    let species = {};
-    species = await getSpecies(species);
+    try {
+        let species = {};
+        species = await getSpecies(species);
 
-    species = await initializeSpeciesObj(species);
-    species = await getEvolution(species);
-    //species = await getForms(species) // should be called in that order until here    // done in getLevelUpLearnsets for CFRU
-    await Promise.all([
-        getBaseStats(species),
-        getLevelUpLearnsets(species),
-        getTMHMLearnsets(species),
-        getEggMovesLearnsets(species),
-        getTutorLearnsets(species),
-        getSprite(species),
-    ]);
-    species = await getReplaceAbilities(species);
-    species = await altFormsLearnsets(species, "forms", "tutorLearnsets");
-    species = await altFormsLearnsets(species, "forms", "TMHMLearnsets");
-    ((species = await getChanges(
-        species,
-        "https://raw.githubusercontent.com/Skeli789/Dynamic-Pokemon-Expansion/master/src/Base_Stats.c"
-    )),
-        (species = await cleanSpecies(species)));
+        species = await initializeSpeciesObj(species);
+        species = await getEvolution(species);
+        //species = await getForms(species) // should be called in that order until here    // done in getLevelUpLearnsets for CFRU
+        await Promise.all([
+            getBaseStats(species),
+            getLevelUpLearnsets(species),
+            getTMHMLearnsets(species),
+            getEggMovesLearnsets(species),
+            getTutorLearnsets(species),
+            getSprite(species),
+        ]);
+        species = await getReplaceAbilities(species);
+        species = await altFormsLearnsets(species, "forms", "tutorLearnsets");
+        species = await altFormsLearnsets(species, "forms", "TMHMLearnsets");
+        ((species = await getChanges(
+            species,
+            "https://raw.githubusercontent.com/Skeli789/Dynamic-Pokemon-Expansion/master/src/Base_Stats.c"
+        )),
+            (species = await cleanSpecies(species)));
 
-    Object.keys(species).forEach((name) => {
-        if (
-            (species[name]["type1"] === "TYPE_DRAGON" ||
-                species[name]["type2"] === "TYPE_DRAGON") &&
-            !species[name]["tutorLearnsets"].includes("MOVE_DRACOMETEOR")
-        ) {
-            species[name]["tutorLearnsets"].push("MOVE_DRACOMETEOR");
-        }
-    });
+        Object.keys(species).forEach((name) => {
+            if (
+                (species[name]["type1"] === "TYPE_DRAGON" ||
+                    species[name]["type2"] === "TYPE_DRAGON") &&
+                !species[name]["tutorLearnsets"].includes("MOVE_DRACOMETEOR")
+            ) {
+                species[name]["tutorLearnsets"].push("MOVE_DRACOMETEOR");
+            }
+        });
 
-    species = await fixFormAbilities(species);
-    await localStorage.setItem(
-        "species",
-        LZString.compressToUTF16(JSON.stringify(species))
-    );
-    await localStorage.setItem(
-        "moves",
-        LZString.compressToUTF16(JSON.stringify(window.moves))
-    );
-    return species;
+        species = await fixFormAbilities(species);
+        localStorage.setItem(
+            "species",
+            LZString.compressToUTF16(JSON.stringify(species))
+        );
+        localStorage.setItem(
+            "moves",
+            LZString.compressToUTF16(JSON.stringify(gameData.moves))
+        );
+        return species;
+    } catch (e) {
+        console.error("Failed to build species data:", e.message, e.stack);
+        footerP("Error fetching species data. Please refresh the page.");
+        throw e;
+    }
 }
 
 function initializeSpeciesObj(species) {
@@ -324,21 +331,21 @@ function initializeSpeciesObj(species) {
 
 export async function fetchSpeciesObj() {
     if (!localStorage.getItem("species"))
-        window.species = await buildSpeciesObj();
+        gameData.species = await buildSpeciesObj();
     else
-        window.species = await JSON.parse(
+        gameData.species = await JSON.parse(
             LZString.decompressFromUTF16(localStorage.getItem("species"))
         );
 
-    window.sprites = {};
-    window.speciesTracker = [];
+    gameData.sprites = {};
+    trackers.species = [];
 
-    for (let i = 0, j = Object.keys(window.species).length; i < j; i++) {
-        window.speciesTracker[i] = {};
-        window.speciesTracker[i]["key"] = Object.keys(window.species)[i];
-        window.speciesTracker[i]["filter"] = [];
+    for (let i = 0, j = Object.keys(gameData.species).length; i < j; i++) {
+        trackers.species[i] = {};
+        trackers.species[i]["key"] = Object.keys(gameData.species)[i];
+        trackers.species[i]["filter"] = [];
     }
 
-    setTracker(window.speciesTracker);
+    setTracker(trackers.species);
 }
 

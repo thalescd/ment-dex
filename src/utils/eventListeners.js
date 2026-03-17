@@ -1,12 +1,14 @@
 // Event listeners e observers - modulo de side-effect (nao exporta nada)
 
-import { appTitle, footerText } from './config.js';
+import { appTitle, footerText, TYPING_DEBOUNCE_MS } from './config.js';
 import { changeSetting, manageSettings } from './settings.js';
 import { sortTableByClassName, sortTableByLearnsets, filterTableInput, filterLocationsTableInput, filterTrainersTableInput, filterItemsTableInput, lazyLoading, tableButtonClick } from './tableUtility.js';
 import { filterFilters } from './tableFilters.js';
 import { fetchShinySprite, createSpeciesPanel, speciesPanel, createPopupForLocations, createPopupForInfo } from './speciesPanelUtility.js';
 import { refreshURLParams, clearLocalStorage } from './utility.js';
+import { clearChildren } from './domUtils.js';
 import { displayHistoryObj, fetchData } from './app.js';
+import { gameData, trackers, uiState } from './state.js';
 import {
     panelSpecies,
     historyObj,
@@ -122,7 +124,7 @@ hideEggMoves.addEventListener("click", () => {
 headerAbilitiesName.addEventListener("click", () => {
     sortTableByClassName(
         abilitiesTable,
-        window.abilities,
+        gameData.abilities,
         ["name"],
         "ability",
         (asc = headerAbilitiesName.classList.contains("th-sort-desc"))
@@ -131,7 +133,7 @@ headerAbilitiesName.addEventListener("click", () => {
 headerAbilitiesDescription.addEventListener("click", () => {
     sortTableByClassName(
         abilitiesTable,
-        window.abilities,
+        gameData.abilities,
         ["description"],
         "description",
         (asc = headerAbilitiesDescription.classList.contains("th-sort-desc"))
@@ -142,7 +144,7 @@ headerAbilitiesDescription.addEventListener("click", () => {
 headerMovesMove.addEventListener("click", () => {
     sortTableByClassName(
         movesTable,
-        window.moves,
+        gameData.moves,
         ["name"],
         "move",
         (asc = headerMovesMove.classList.contains("th-sort-desc"))
@@ -151,7 +153,7 @@ headerMovesMove.addEventListener("click", () => {
 headerMovesType.addEventListener("click", () => {
     sortTableByClassName(
         movesTable,
-        window.moves,
+        gameData.moves,
         ["type", "split"],
         "type",
         (asc = headerMovesType.classList.contains("th-sort-desc"))
@@ -160,7 +162,7 @@ headerMovesType.addEventListener("click", () => {
 headerMovesSplit.addEventListener("click", () => {
     sortTableByClassName(
         movesTable,
-        window.moves,
+        gameData.moves,
         ["split", "type"],
         "split",
         (asc = headerMovesSplit.classList.contains("th-sort-desc"))
@@ -169,7 +171,7 @@ headerMovesSplit.addEventListener("click", () => {
 headerMovesPower.addEventListener("click", () => {
     sortTableByClassName(
         movesTable,
-        window.moves,
+        gameData.moves,
         ["power"],
         "power",
         (asc = headerMovesPower.classList.contains("th-sort-desc"))
@@ -178,7 +180,7 @@ headerMovesPower.addEventListener("click", () => {
 headerMovesAccuracy.addEventListener("click", () => {
     sortTableByClassName(
         movesTable,
-        window.moves,
+        gameData.moves,
         ["accuracy"],
         "accuracy",
         (asc = headerMovesAccuracy.classList.contains("th-sort-desc"))
@@ -187,7 +189,7 @@ headerMovesAccuracy.addEventListener("click", () => {
 headerMovesPP.addEventListener("click", () => {
     sortTableByClassName(
         movesTable,
-        window.moves,
+        gameData.moves,
         ["PP"],
         "PP",
         (asc = headerMovesPP.classList.contains("th-sort-desc"))
@@ -196,7 +198,7 @@ headerMovesPP.addEventListener("click", () => {
 headerMovesEffect.addEventListener("click", () => {
     sortTableByClassName(
         movesTable,
-        window.moves,
+        gameData.moves,
         ["effect"],
         "effect",
         (asc = headerMovesEffect.classList.contains("th-sort-desc"))
@@ -205,14 +207,14 @@ headerMovesEffect.addEventListener("click", () => {
 
 // --- Header sort listeners: Species ---
 headerSpeciesID.addEventListener("click", () => {
-    if (window.speciesMoveFilter) {
+    if (uiState.speciesMoveFilter) {
         sortTableByLearnsets(
             (asc = !headerSpeciesID.classList.contains("th-sort-asc"))
         );
     } else {
         sortTableByClassName(
             speciesTable,
-            window.species,
+            gameData.species,
             ["ID"],
             "ID",
             (asc = headerSpeciesID.classList.contains("th-sort-desc"))
@@ -222,7 +224,7 @@ headerSpeciesID.addEventListener("click", () => {
 headerSpeciesSprite.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["ID"],
         "ID",
         (asc = headerSpeciesSprite.classList.contains("th-sort-desc"))
@@ -231,7 +233,7 @@ headerSpeciesSprite.addEventListener("click", () => {
 headerSpeciesName.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["name"],
         "species",
         (asc = headerSpeciesName.classList.contains("th-sort-desc"))
@@ -240,7 +242,7 @@ headerSpeciesName.addEventListener("click", () => {
 headerSpeciesTypes.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["type1", "type2"],
         "types",
         (asc = headerSpeciesTypes.classList.contains("th-sort-desc"))
@@ -249,7 +251,7 @@ headerSpeciesTypes.addEventListener("click", () => {
 headerSpeciesAbilities.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["abilities"],
         "abilities",
         (asc = headerSpeciesAbilities.classList.contains("th-sort-desc"))
@@ -258,7 +260,7 @@ headerSpeciesAbilities.addEventListener("click", () => {
 headerSpeciesInnates.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["innates"],
         "innates",
         (asc = headerSpeciesInnates.classList.contains("th-sort-desc"))
@@ -267,7 +269,7 @@ headerSpeciesInnates.addEventListener("click", () => {
 headerSpeciesHP.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["baseHP"],
         "baseHP",
         (asc = headerSpeciesHP.classList.contains("th-sort-desc"))
@@ -276,7 +278,7 @@ headerSpeciesHP.addEventListener("click", () => {
 headerSpeciesAtk.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["baseAttack"],
         "baseAttack",
         (asc = headerSpeciesAtk.classList.contains("th-sort-desc"))
@@ -285,7 +287,7 @@ headerSpeciesAtk.addEventListener("click", () => {
 headerSpeciesDef.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["baseDefense"],
         "baseDefense",
         (asc = headerSpeciesDef.classList.contains("th-sort-desc"))
@@ -294,7 +296,7 @@ headerSpeciesDef.addEventListener("click", () => {
 headerSpeciesSpA.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["baseSpAttack"],
         "baseSpAttack",
         (asc = headerSpeciesSpA.classList.contains("th-sort-desc"))
@@ -303,7 +305,7 @@ headerSpeciesSpA.addEventListener("click", () => {
 headerSpeciesSpD.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["baseSpDefense"],
         "baseSpDefense",
         (asc = headerSpeciesSpD.classList.contains("th-sort-desc"))
@@ -312,7 +314,7 @@ headerSpeciesSpD.addEventListener("click", () => {
 headerSpeciesSpe.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["baseSpeed"],
         "baseSpeed",
         (asc = headerSpeciesSpe.classList.contains("th-sort-desc"))
@@ -321,7 +323,7 @@ headerSpeciesSpe.addEventListener("click", () => {
 headerSpeciesBST.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
-        window.species,
+        gameData.species,
         ["BST"],
         "BST",
         (asc = headerSpeciesBST.classList.contains("th-sort-desc"))
@@ -330,24 +332,24 @@ headerSpeciesBST.addEventListener("click", () => {
 
 // --- Input listeners (busca com debounce) ---
 let typingTimer;
-let doneTypingInterval = 300;
+const doneTypingInterval = TYPING_DEBOUNCE_MS;
 speciesInput.addEventListener("input", (e) => {
     clearTimeout(typingTimer);
     typingTimer = setTimeout(function () {
         const value = e.target.value;
         filterFilters(value);
-        filterTableInput(value, window.species, ["name", "abilities", "innates"]);
+        filterTableInput(value, gameData.species, ["name", "abilities", "innates"]);
     }, doneTypingInterval);
 });
 abilitiesInput.addEventListener("input", (e) => {
     clearTimeout(typingTimer);
     typingTimer = setTimeout(function () {
         const value = e.target.value;
-        if (window.abilitiesIngameNameArray.includes(value)) {
+        if (uiState.abilitiesIngameNameArray.includes(value)) {
             abilitiesInput.blur();
         }
         filterFilters(value);
-        filterTableInput(value, window.abilities, [
+        filterTableInput(value, gameData.abilities, [
             "name",
             "ingameName",
             "description",
@@ -359,7 +361,7 @@ movesInput.addEventListener("input", (e) => {
     typingTimer = setTimeout(function () {
         const value = e.target.value;
         filterFilters(value);
-        filterTableInput(value, window.moves, [
+        filterTableInput(value, gameData.moves, [
             "name",
             "ingameName",
             "effect",
@@ -372,7 +374,7 @@ locationsInput.addEventListener("input", (e) => {
     typingTimer = setTimeout(function () {
         const value = e.target.value;
         filterFilters(value);
-        filterLocationsTableInput(value, window.species, ["evolutionLine"]);
+        filterLocationsTableInput(value, gameData.species, ["evolutionLine"]);
     }, doneTypingInterval);
 });
 trainersInput.addEventListener("input", (e) => {
@@ -393,7 +395,7 @@ itemsInput.addEventListener("input", (e) => {
 });
 speciesPanelInputSpecies.addEventListener("input", async (e) => {
     const value = e.target.value;
-    if (window.speciesIngameNameArray.includes(value)) {
+    if (uiState.speciesIngameNameArray.includes(value)) {
         const panelSpeciesName = `SPECIES_${value.replaceAll(" ", "_").toUpperCase()}`;
         await createSpeciesPanel(panelSpeciesName);
         speciesPanelInputSpecies.blur();
@@ -442,13 +444,13 @@ changelogMode.addEventListener("click", () => {
 onlyShowChangedPokemon.addEventListener("click", () => {
     onlyShowChangedPokemon.classList.toggle("activeSetting");
 
-    for (let i = 0, j = window.speciesTracker.length; i < j; i++) {
+    for (let i = 0, j = trackers.species.length; i < j; i++) {
         if (onlyShowChangedPokemon.classList.contains("activeSetting")) {
-            if (window.species[window.speciesTracker[i]["key"]]["changes"].length === 0) {
-                window.speciesTracker[i]["filter"].push("changed");
+            if (gameData.species[trackers.species[i]["key"]]["changes"].length === 0) {
+                trackers.species[i]["filter"].push("changed");
             }
         } else {
-            window.tracker[i]["filter"] = window.tracker[i]["filter"].filter(
+            trackers.species[i]["filter"] = trackers.species[i]["filter"].filter(
                 (value) => value !== "changed"
             );
         }
@@ -457,13 +459,13 @@ onlyShowChangedPokemon.addEventListener("click", () => {
 });
 onlyShowStrategyPokemon.addEventListener("click", () => {
     onlyShowStrategyPokemon.classList.toggle("activeSetting");
-    for (let i = 0, j = window.speciesTracker.length; i < j; i++) {
+    for (let i = 0, j = trackers.species.length; i < j; i++) {
         if (onlyShowStrategyPokemon.classList.contains("activeSetting")) {
-            if (!window.strategies[window.speciesTracker[i]["key"]]) {
-                window.speciesTracker[i]["filter"].push("strategy");
+            if (!gameData.strategies[trackers.species[i]["key"]]) {
+                trackers.species[i]["filter"].push("strategy");
             }
         } else {
-            window.tracker[i]["filter"] = window.tracker[i]["filter"].filter(
+            trackers.species[i]["filter"] = trackers.species[i]["filter"].filter(
                 (value) => value !== "strategy"
             );
         }
@@ -575,7 +577,7 @@ utilityButton.onclick = () => {
 document.addEventListener("keydown", (e) => {
     if (
         speciesPanelMainContainer.classList.contains("hide") &&
-        (e.code == "F3" || (e.ctrlKey && e.code == "KeyF"))
+        (e.code === "F3" || (e.ctrlKey && e.code === "KeyF"))
     ) {
         e.preventDefault();
         document
@@ -619,9 +621,7 @@ overlaySpeciesPanel.addEventListener("click", function (event) {
 
 // --- Settings popup ---
 settingsButton.addEventListener("click", async () => {
-    while (popup.firstChild) {
-        popup.removeChild(popup.firstChild);
-    }
+    clearChildren(popup);
 
     manageSettings();
 
@@ -631,9 +631,7 @@ settingsButton.addEventListener("click", async () => {
 
 // --- Credits popup ---
 credits.addEventListener("click", () => {
-    while (popup.firstChild) {
-        popup.removeChild(popup.firstChild);
-    }
+    clearChildren(popup);
     const creditMainContainer = document.createElement("div");
     const creditRis = document.createElement("div");
     creditRis.className = "credits";

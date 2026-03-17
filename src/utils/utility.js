@@ -1,5 +1,7 @@
 import { checkUpdate } from './config.js';
 import { LZString } from './lz-string.js';
+import { gameData, uiState } from './state.js';
+import { spriteRemoveBgReturnBase64, decodeSpriteDataString } from './spriteUtils.js';
 import {
     speciesPanelMainContainer,
     speciesPanelInputSpeciesDataList,
@@ -41,19 +43,19 @@ export function sanitizeString(string, removeSpecial = true) {
 // fetchData, fetchTypeChart, getLocationsByPokemon, displayParams,
 // displayHistoryObj, exportData foram movidos para app.js
 
-export async function forceUpdate() {
-    if (localStorage.getItem("update") != `${checkUpdate}`) {
-        await clearLocalStorage();
-        await localStorage.setItem("update", `${checkUpdate}`);
-        await footerP("Fetching data please wait... this is only run once");
+export function forceUpdate() {
+    if (localStorage.getItem("update") !== `${checkUpdate}`) {
+        clearLocalStorage();
+        localStorage.setItem("update", `${checkUpdate}`);
+        footerP("Fetching data please wait... this is only run once");
     }
 }
 
-export async function clearLocalStorage() {
+export function clearLocalStorage() {
     Object.keys(localStorage).forEach((key) => {
         if (
-            key != "speciesPanelHistory" &&
-            key != "itemsLocations" &&
+            key !== "speciesPanelHistory" &&
+            key !== "itemsLocations" &&
             !/settings/i.test(key)
         ) {
             localStorage.removeItem(key);
@@ -74,7 +76,7 @@ export function footerP(input) {
 }
 
 export function copyToClipboard(text) {
-    var dummy = document.createElement("textarea");
+    const dummy = document.createElement("textarea");
     document.body.appendChild(dummy);
     dummy.value = text;
     dummy.select();
@@ -92,28 +94,28 @@ export function getTextWidth(text) {
 }
 
 export async function setDataList() {
-    window.speciesIngameNameArray = [];
-    for (const name in window.species) {
-        if (window.species[name]["baseSpeed"] <= 0) {
+    uiState.speciesIngameNameArray = [];
+    for (const name in gameData.species) {
+        if (gameData.species[name]["baseSpeed"] <= 0) {
             continue;
         }
         const option = document.createElement("option");
         option.innerText = sanitizeString(name);
-        window.speciesIngameNameArray.push(sanitizeString(name));
+        uiState.speciesIngameNameArray.push(sanitizeString(name));
         speciesPanelInputSpeciesDataList.append(option);
     }
 
-    window.abilitiesIngameNameArray = [];
-    for (const abilityName in window.abilities) {
+    uiState.abilitiesIngameNameArray = [];
+    for (const abilityName in gameData.abilities) {
         if (
-            !window.abilities[abilityName]["description"] ||
-            !/[1-9aA-zZ]/.test(window.abilities[abilityName]["ingameName"])
+            !gameData.abilities[abilityName]["description"] ||
+            !/[1-9aA-zZ]/.test(gameData.abilities[abilityName]["ingameName"])
         ) {
             continue;
         }
         const option = document.createElement("option");
-        option.innerText = window.abilities[abilityName]["ingameName"];
-        window.abilitiesIngameNameArray.push(window.abilities[abilityName]["ingameName"]);
+        option.innerText = gameData.abilities[abilityName]["ingameName"];
+        uiState.abilitiesIngameNameArray.push(gameData.abilities[abilityName]["ingameName"]);
         abilitiesInputDataList.append(option);
     }
 }
@@ -122,33 +124,33 @@ export function getSpeciesSpriteSrc(speciesName) {
     speciesName = returnTargetSpeciesSprite(speciesName);
 
     if (localStorage.getItem(speciesName)) {
-        if (speciesName in window.sprites) {
-            if (window.sprites[speciesName].length < 500) {
+        if (speciesName in gameData.sprites) {
+            if (gameData.sprites[speciesName].length < 500) {
                 localStorage.removeItem(speciesName);
-                window.spriteRemoveBgReturnBase64(speciesName, window.species);
-                return window.species[speciesName]["sprite"];
+                spriteRemoveBgReturnBase64(speciesName, gameData.species);
+                return gameData.species[speciesName]["sprite"];
             } else {
-                return window.sprites[speciesName];
+                return gameData.sprites[speciesName];
             }
         } else {
-            window.sprites[speciesName] = window.decodeSpriteDataString(
+            gameData.sprites[speciesName] = decodeSpriteDataString(
                 LZString.decompressFromUTF16(localStorage.getItem(speciesName))
             );
-            return window.sprites[speciesName];
+            return gameData.sprites[speciesName];
         }
     } else {
-        window.spriteRemoveBgReturnBase64(speciesName, window.species);
-        return window.species[speciesName]["sprite"];
+        spriteRemoveBgReturnBase64(speciesName, gameData.species);
+        return gameData.species[speciesName]["sprite"];
     }
 }
 
 export function returnTargetSpeciesSprite(speciesName) {
     if (
-        window.species[speciesName]["forms"].length > 1 &&
-        window.species[speciesName]["sprite"] ==
-            window.species[window.species[speciesName]["forms"][0]]["sprite"]
+        gameData.species[speciesName]["forms"].length > 1 &&
+        gameData.species[speciesName]["sprite"] ===
+            gameData.species[gameData.species[speciesName]["forms"][0]]["sprite"]
     ) {
-        return window.species[speciesName]["forms"][0];
+        return gameData.species[speciesName]["forms"][0];
     }
     return speciesName;
 }
@@ -162,7 +164,7 @@ export async function refreshURLParams() {
     } else if (document.getElementsByClassName("activeTable").length > 0) {
         const activeTable =
             document.getElementsByClassName("activeTable")[0].id;
-        if (activeTable != "speciesTable") {
+        if (activeTable !== "speciesTable") {
             params += `table=${document.getElementsByClassName("activeTable")[0].id}&`;
         }
         if (
@@ -193,7 +195,7 @@ export async function refreshURLParams() {
 
     await getHistoryState();
     window.history.replaceState(`${url}${params}`, null, `${url}${params}`);
-    return (`${url}${params}`, null, `${url}${params}`);
+    return `${url}${params}`;
 }
 
 export async function getHistoryState() {
@@ -238,15 +240,15 @@ export function speciesCanLearnMove(speciesObj, moveName) {
     for (let i = 0; i < index.length; i++) {
         if (index[i] in speciesObj) {
             for (let j = 0; j < speciesObj[index[i]].length; j++) {
-                if (typeof speciesObj[index[i]][j] == "object") {
-                    if (speciesObj[index[i]][j][0] == moveName) {
+                if (typeof speciesObj[index[i]][j] === "object") {
+                    if (speciesObj[index[i]][j][0] === moveName) {
                         if (index[i] === "levelUpLearnsets") {
                             return speciesObj[index[i]][j][1];
                         }
                         return index[i];
                     }
-                } else if (typeof (speciesObj[index[i]][j] == "string")) {
-                    if (speciesObj[index[i]][j] == moveName) {
+                } else if (typeof speciesObj[index[i]][j] === "string") {
+                    if (speciesObj[index[i]][j] === moveName) {
                         return index[i];
                     }
                 }
@@ -265,15 +267,15 @@ export function getPokemonResistanceValueAgainstType(speciesObj, type) {
                 speciesObj["type3"] !== speciesObj["type2"]
             ) {
                 return (
-                    window.typeChart[type][speciesObj["type1"]] *
-                    window.typeChart[type][speciesObj["type2"]] *
-                    window.typeChart[type][speciesObj["type3"]]
+                    gameData.typeChart[type][speciesObj["type1"]] *
+                    gameData.typeChart[type][speciesObj["type2"]] *
+                    gameData.typeChart[type][speciesObj["type3"]]
                 );
             }
         } else {
             return (
-                window.typeChart[type][speciesObj["type1"]] *
-                window.typeChart[type][speciesObj["type2"]]
+                gameData.typeChart[type][speciesObj["type1"]] *
+                gameData.typeChart[type][speciesObj["type2"]]
             );
         }
     } else {
@@ -283,32 +285,32 @@ export function getPokemonResistanceValueAgainstType(speciesObj, type) {
                 speciesObj["type3"] !== speciesObj["type2"]
             ) {
                 return (
-                    window.typeChart[type][speciesObj["type1"]] *
-                    window.typeChart[type][speciesObj["type3"]]
+                    gameData.typeChart[type][speciesObj["type1"]] *
+                    gameData.typeChart[type][speciesObj["type3"]]
                 );
             }
         } else {
-            return window.typeChart[type][speciesObj["type1"]];
+            return gameData.typeChart[type][speciesObj["type1"]];
         }
     }
 }
 
 export function getPokemonEffectivenessValueAgainstType(speciesObj, type) {
-    let offensiveValue = window.typeChart[speciesObj["type1"]][type];
+    let offensiveValue = gameData.typeChart[speciesObj["type1"]][type];
     if (
-        window.typeChart[speciesObj["type2"]][type] >
-        window.typeChart[speciesObj["type1"]][type]
+        gameData.typeChart[speciesObj["type2"]][type] >
+        gameData.typeChart[speciesObj["type1"]][type]
     ) {
-        offensiveValue = window.typeChart[speciesObj["type2"]][type];
+        offensiveValue = gameData.typeChart[speciesObj["type2"]][type];
     }
     if (typeof speciesObj["type3"] !== "undefined") {
         if (
-            window.typeChart[speciesObj["type3"]][type] >
-                window.typeChart[speciesObj["type1"]][type] &&
-            window.typeChart[speciesObj["type3"]][type] >
-                window.typeChart[speciesObj["type2"]][type]
+            gameData.typeChart[speciesObj["type3"]][type] >
+                gameData.typeChart[speciesObj["type1"]][type] &&
+            gameData.typeChart[speciesObj["type3"]][type] >
+                gameData.typeChart[speciesObj["type2"]][type]
         ) {
-            offensiveValue = window.typeChart[speciesObj["type3"]][type];
+            offensiveValue = gameData.typeChart[speciesObj["type3"]][type];
         }
     }
 

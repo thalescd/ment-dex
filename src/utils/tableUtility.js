@@ -1,4 +1,5 @@
-import { regexSpChar } from './config.js';
+import { regexSpChar, LAZY_LOAD_BATCH_SIZE, TRAINER_BATCH_SIZE } from './config.js';
+import { clearChildren } from './domUtils.js';
 import { settings } from './settings.js';
 import { footerP, sanitizeString, speciesCanLearnMove, refreshURLParams } from './utility.js';
 import { passAllFilters } from './tableFilters.js';
@@ -17,31 +18,35 @@ import {
     tracker,
     setTracker,
 } from './domRefs.js';
+import { gameData, trackers, uiState } from './state.js';
+import { displayFunctions } from './displayRegistry.js';
+import { setupItemsButtonFilters } from '../modules/scripts/displayItems.js';
+import { checkTrainerDifficulty, showRematch } from '../modules/scripts/displayTrainers.js';
 
 export async function displaySetup() {
     footerP("");
 
-    if (Object.keys(window.strategies).length === 0) {
+    if (Object.keys(gameData.strategies).length === 0) {
         onlyShowStrategyPokemon.classList.add("hide");
     }
-    if (Object.keys(window.locations).length === 0) {
+    if (Object.keys(gameData.locations).length === 0) {
         locationsButton.classList.add("hide");
     }
-    if (Object.keys(window.trainers).length === 0) {
+    if (Object.keys(gameData.trainers).length === 0) {
         trainersButton.classList.add("hide");
     }
-    const speciesKeyArray = Object.keys(window.species);
+    const speciesKeyArray = Object.keys(gameData.species);
     for (let i = 0; i < speciesKeyArray.length; i++) {
-        if (window.species[speciesKeyArray[i]]["changes"].length > 0) {
+        if (gameData.species[speciesKeyArray[i]]["changes"].length > 0) {
             changelogMode.classList.remove("hide");
             onlyShowChangedPokemon.classList.remove("hide");
             break;
         }
     }
-    if (Object.keys(window.items).length === 0) {
+    if (Object.keys(gameData.items).length === 0) {
         itemsButton.classList.add("hide");
     } else {
-        await window.setupItemsButtonFilters();
+        await setupItemsButtonFilters();
     }
     if (typeof window.innatesDefined !== "undefined") {
         document
@@ -54,15 +59,11 @@ export async function displaySetup() {
 
     lazyLoading(true);
 
-    await window.tableInput.classList.remove("hide");
-
-    await window.tableButton.classList.remove("hide");
-
-    await tableFilter.classList.remove("hide");
-
-    await table.classList.remove("hide");
-
-    await utilityButton.classList.remove("hide");
+    window.tableInput.classList.remove("hide");
+    window.tableButton.classList.remove("hide");
+    tableFilter.classList.remove("hide");
+    table.classList.remove("hide");
+    utilityButton.classList.remove("hide");
 }
 
 export function allAreEqual(array) {
@@ -121,9 +122,9 @@ export function sortTableByLearnsets(asc = true) {
         "false",
     ];
 
-    window.speciesTracker.sort((a, b) => {
-        let stringA = `${speciesCanLearnMove(window.species[a["key"]], window.speciesMoveFilter)}`;
-        let stringB = `${speciesCanLearnMove(window.species[b["key"]], window.speciesMoveFilter)}`;
+    trackers.species.sort((a, b) => {
+        let stringA = `${speciesCanLearnMove(gameData.species[a["key"]], uiState.speciesMoveFilter)}`;
+        let stringB = `${speciesCanLearnMove(gameData.species[b["key"]], uiState.speciesMoveFilter)}`;
 
         if (Number(stringA) && Number(stringB)) {
             return parseInt(stringA) > parseInt(stringB)
@@ -207,7 +208,7 @@ export function filterLocationsTableInput(input, obj, keyArray) {
         let compareString = `${zone},${method},`
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "");
-        if (name in window.species) {
+        if (name in gameData.species) {
             for (let k = 0; k < keyArray.length; k++) {
                 compareString += (obj[name][keyArray[k]] + ",")
                     .replaceAll(regexSpChar, "")
@@ -238,8 +239,8 @@ export function filterTrainersTableInput(input) {
         .replace(/[\u0300-\u036f]/g, "")
         .split(/ /g);
 
-    mainLoop: for (let i = 0, j = window.trainersTracker.length; i < j; i++) {
-        delete window.trainersTracker[i]["show"];
+    mainLoop: for (let i = 0, j = trackers.trainers.length; i < j; i++) {
+        delete trackers.trainers[i]["show"];
         tracker[i]["filter"] = tracker[i]["filter"].filter(
             (value) => value !== "input"
         );
@@ -248,17 +249,17 @@ export function filterTrainersTableInput(input) {
         const compareZone = zone.replaceAll(/ /g, "").toUpperCase();
         let compareArray = [
             compareZone,
-            window.trainers[zone][trainer]["ingameName"].toUpperCase(),
+            gameData.trainers[zone][trainer]["ingameName"].toUpperCase(),
         ];
 
-        const trainerDifficulty = window.checkTrainerDifficulty(zone, trainer);
+        const trainerDifficulty = checkTrainerDifficulty(zone, trainer);
         for (
             let k = 0;
-            k < window.trainers[zone][trainer]["party"][trainerDifficulty].length;
+            k < gameData.trainers[zone][trainer]["party"][trainerDifficulty].length;
             k++
         ) {
             compareArray.push(
-                window.trainers[zone][trainer]["party"][trainerDifficulty][k]["name"]
+                gameData.trainers[zone][trainer]["party"][trainerDifficulty][k]["name"]
             );
         }
         for (let k = 0; k < arraySanitizedInput.length; k++) {
@@ -270,22 +271,22 @@ export function filterTrainersTableInput(input) {
                         .includes(arraySanitizedInput[k].toUpperCase())
                 )
             ) {
-                delete window.trainers[zone][trainer]["match"];
+                delete gameData.trainers[zone][trainer]["match"];
                 tracker[i]["filter"].push("input");
                 continue mainLoop;
             }
-            if (window.trainersTracker[i]["filter"].length === 0) {
-                window.trainers[zone][trainer]["match"] = true;
+            if (trackers.trainers[i]["filter"].length === 0) {
+                gameData.trainers[zone][trainer]["match"] = true;
             }
         }
         if (
             input.trim().length === 0 &&
             window.trainersFilterContainer.children.length === 0
         ) {
-            delete window.trainers[zone][trainer]["match"];
+            delete gameData.trainers[zone][trainer]["match"];
         }
     }
-    window.showRematch();
+    showRematch();
 
     lazyLoading(true);
 }
@@ -305,7 +306,7 @@ export function filterItemsTableInput(input, keyArray) {
             if (
                 regexInput.test(
                     sanitizeString(
-                        "" + window.items[tracker[i]["key"]][keyArray[k]]
+                        "" + gameData.items[tracker[i]["key"]][keyArray[k]]
                     ).replaceAll(regexSpChar, "")
                 )
             ) {
@@ -315,11 +316,11 @@ export function filterItemsTableInput(input, keyArray) {
                 break;
             }
         }
-        Object.keys(window.items[tracker[i]["key"]]["locations"]).forEach((method) => {
+        Object.keys(gameData.items[tracker[i]["key"]]["locations"]).forEach((method) => {
             if (
                 regexInput.test(
                     sanitizeString(
-                        "" + window.items[tracker[i]["key"]]["locations"][method]
+                        "" + gameData.items[tracker[i]["key"]]["locations"][method]
                     ).replaceAll(regexSpChar, "")
                 )
             ) {
@@ -339,17 +340,15 @@ export async function lazyLoading(reset = false) {
     const activeTable = document.querySelectorAll(".activeTable > tbody")[0];
     if (activeTable && typeof tracker !== "undefined") {
         if (reset) {
-            while (activeTable.firstChild) {
-                activeTable.removeChild(activeTable.firstChild);
-            }
+            clearChildren(activeTable);
             refreshURLParams();
         }
-        let target = 75;
+        let target = LAZY_LOAD_BATCH_SIZE;
         let counter = 0;
 
         const displayFunction = `append${sanitizeString(activeTable.id).replace("tabletbody", "ToTable")}`;
         if (displayFunction === "appendTrainersToTable") {
-            target = 20;
+            target = TRAINER_BATCH_SIZE;
         }
 
         for (let i = 0, j = tracker.length; i < j; i++) {
@@ -360,14 +359,14 @@ export async function lazyLoading(reset = false) {
                         tracker[i]["show"]) &&
                     !document.getElementById(tracker[i]["key"])
                 ) {
-                    if (window[displayFunction](tracker[i]["key"])) {
+                    if (displayFunctions[displayFunction](tracker[i]["key"])) {
                         counter++;
                     }
                 } else if (
                     passAllFilters(tracker[i]["filter"]) &&
                     !document.getElementById(tracker[i]["key"])
                 ) {
-                    if (window[displayFunction](tracker[i]["key"])) {
+                    if (displayFunctions[displayFunction](tracker[i]["key"])) {
                         counter++;
                     }
                 }
@@ -376,13 +375,13 @@ export async function lazyLoading(reset = false) {
                     const map = tracker[i - 1]["key"].match(/.*?\\/)[0];
                     while (
                         i < j &&
-                        tracker[i]["key"].match(/.*?\\/)[0] == map
+                        tracker[i]["key"].match(/.*?\\/)[0] === map
                     ) {
                         if (
                             tracker[i]["filter"].length === 0 &&
                             !document.getElementById(tracker[i]["key"])
                         ) {
-                            window[displayFunction](tracker[i]["key"]);
+                            displayFunctions[displayFunction](tracker[i]["key"]);
                         }
                         i++;
                     }
@@ -404,9 +403,7 @@ export async function tableButtonClick(input, fromDisplayParams = false) {
 
     activeTable.forEach((table) => {
         const tbody = table.querySelector("tbody");
-        while (tbody.firstChild) {
-            tbody.removeChild(tbody.firstChild);
-        }
+        clearChildren(tbody);
 
         table.classList.remove("activeTable");
         table.classList.add("hide");
@@ -442,7 +439,7 @@ export async function tableButtonClick(input, fromDisplayParams = false) {
     targetFilter.classList.remove("hide");
     targetFilter.classList.add("activeFilter");
 
-    setTracker(window[`${input}Tracker`]);
+    setTracker(trackers[input]);
 
     await lazyLoading(true);
 }

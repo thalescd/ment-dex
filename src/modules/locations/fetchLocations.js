@@ -1,6 +1,7 @@
 import { repo1 } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
+import { gameData, trackers } from '../../utils/state.js';
 import { regexWildLocations, regexRaidLocations } from './regexLocations.js';
 
 async function getWildLocations(locations) {
@@ -24,36 +25,42 @@ async function getRaidLocations(locations) {
 }
 
 async function buildLocationsObj() {
-    let locations = {};
+    try {
+        let locations = {};
 
-    locations = await getWildLocations(locations);
-    locations = await getRaidLocations(locations);
+        locations = await getWildLocations(locations);
+        locations = await getRaidLocations(locations);
 
-    localStorage.setItem(
-        "locations",
-        LZString.compressToUTF16(JSON.stringify(locations))
-    );
-    return locations;
+        localStorage.setItem(
+            "locations",
+            LZString.compressToUTF16(JSON.stringify(locations))
+        );
+        return locations;
+    } catch (e) {
+        console.error("Failed to build locations data:", e.message, e.stack);
+        footerP("Error fetching locations data. Please refresh the page.");
+        throw e;
+    }
 }
 
 export async function fetchLocationsObj() {
     if (!localStorage.getItem("locations")) {
-        window.locations = await buildLocationsObj();
+        gameData.locations = await buildLocationsObj();
     } else {
-        window.locations = await JSON.parse(
+        gameData.locations = await JSON.parse(
             LZString.decompressFromUTF16(localStorage.getItem("locations"))
         );
     }
 
     let counter = 0;
-    window.locationsTracker = [];
-    Object.keys(window.locations).forEach((zone) => {
-        Object.keys(window.locations[zone]).forEach((method) => {
-            Object.keys(window.locations[zone][method]).forEach((speciesName) => {
-                window.locationsTracker[counter] = {};
-                window.locationsTracker[counter]["key"] =
+    trackers.locations = [];
+    Object.keys(gameData.locations).forEach((zone) => {
+        Object.keys(gameData.locations[zone]).forEach((method) => {
+            Object.keys(gameData.locations[zone][method]).forEach((speciesName) => {
+                trackers.locations[counter] = {};
+                trackers.locations[counter]["key"] =
                     `${zone}\\${method}\\${speciesName}`;
-                window.locationsTracker[counter]["filter"] = [];
+                trackers.locations[counter]["filter"] = [];
                 counter++;
             });
         });

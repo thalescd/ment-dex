@@ -1,10 +1,9 @@
 // Orquestrador principal - funcoes que coordenam multiplos modulos
 // Separado de utility.js para evitar dependencias circulares
 
-import { checkUpdate } from './config.js';
-import { panelSpecies, historyObj } from './domRefs.js';
+import { gameData } from './state.js';
 import { applySettings } from './settings.js';
-import { footerP, sanitizeString, forceUpdate, clearLocalStorage, setDataList, refreshURLParams, getHistoryState } from './utility.js';
+import { footerP, forceUpdate, setDataList, refreshURLParams } from './utility.js';
 import { setFilters, createFilter, deleteFiltersFromTable } from './tableFilters.js';
 import { displaySetup, tableButtonClick } from './tableUtility.js';
 import { createSpeciesPanel, speciesPanel } from './speciesPanelUtility.js';
@@ -16,61 +15,66 @@ import { fetchScripts } from '../modules/scripts/fetchScripts.js';
 import { fetchStrategiesObj } from '../modules/strategies/fetchStrategies.js';
 
 export async function fetchData(urlParams = "") {
-    if (urlParams == "") {
+    if (urlParams === "") {
         history.pushState(null, null, location.href);
         const queryString = window.location.search;
         urlParams = new URLSearchParams(queryString);
     }
-    await forceUpdate();
 
-    await fetchMovesObj();
-    await fetchAbilitiesObj();
-    await fetchSpeciesObj();
-    await fetchLocationsObj();
-    await fetchScripts();
-    await fetchStrategiesObj();
+    try {
+        await forceUpdate();
 
-    await fetchTypeChart();
-    await getLocationsByPokemon();
+        await fetchMovesObj();
+        await fetchAbilitiesObj();
+        await fetchSpeciesObj();
+        await fetchLocationsObj();
+        await fetchScripts();
+        await fetchStrategiesObj();
 
-    await setDataList();
-    await setFilters();
-    await applySettings();
-    await displaySetup();
-    await displayParams(urlParams);
+        await fetchTypeChart();
+        await getLocationsByPokemon();
 
-    await window.scrollTo(0, 0);
+        await setDataList();
+        await setFilters();
+        await applySettings();
+        await displaySetup();
+        await displayParams(urlParams);
+
+        window.scrollTo(0, 0);
+    } catch (e) {
+        console.error("Failed to load application data:", e.message, e.stack);
+        footerP("Error loading data. Please clear cache and refresh the page.");
+    }
 }
 
 export async function fetchTypeChart() {
     footerP("Fetching type chart");
-    window.typeChart = {};
+    gameData.typeChart = {};
     try {
-        let typeChartUrl = "src/typeChart.json";
+        let typeChartUrl = "src/data/typeChart.json";
         if (typeof window.repoTypeChartUrl !== "undefined") {
             typeChartUrl = window.repoTypeChartUrl;
         }
         let rawTypeChart = await fetch(typeChartUrl);
-        window.typeChart = await rawTypeChart.json();
+        gameData.typeChart = await rawTypeChart.json();
     } catch (e) {
-        console.log(e.message);
-        console.log(e.stack);
+        console.error("Failed to fetch type chart:", e.message, e.stack);
     }
 }
 
 export async function getLocationsByPokemon() {
-    window.locationsByPokemon = {};
+    gameData.locationsByPokemon = {};
 
-    Object.keys(window.locations).forEach((location) => {
-        Object.keys(window.locations[location]).forEach((method) => {
-            Object.keys(window.locations[location][method]).forEach((name) => {
-                if (!(name in window.locationsByPokemon)) {
-                    window.locationsByPokemon[name] = {};
+    Object.keys(gameData.locations).forEach((location) => {
+        Object.keys(gameData.locations[location]).forEach((method) => {
+            Object.keys(gameData.locations[location][method]).forEach((name) => {
+                if (!(name in gameData.locationsByPokemon)) {
+                    gameData.locationsByPokemon[name] = {};
                 }
-                if (!(location in window.locationsByPokemon[name])) {
-                    window.locationsByPokemon[name][location] = [];
+                if (!(location in gameData.locationsByPokemon[name])) {
+                    gameData.locationsByPokemon[name][location] = [];
                 }
-                window.locationsByPokemon[name][location].push(method);
+                gameData.locationsByPokemon[name][location].push(method);
             });
         });
     });
@@ -151,7 +155,7 @@ export async function displayHistoryObj(historyStateObj) {
 
 export function exportData() {
     console.log(
-        `let backupData = [${JSON.stringify(window.moves)}, ${JSON.stringify(window.abilities)}, ${JSON.stringify(window.species)}, ${JSON.stringify(window.locations)}, ${JSON.stringify(window.trainers)}, ${JSON.stringify(window.items)}, ${JSON.stringify(window.strategies)}, ${JSON.stringify(window.typeChart)}]`
+        `let backupData = [${JSON.stringify(gameData.moves)}, ${JSON.stringify(gameData.abilities)}, ${JSON.stringify(gameData.species)}, ${JSON.stringify(gameData.locations)}, ${JSON.stringify(gameData.trainers)}, ${JSON.stringify(gameData.items)}, ${JSON.stringify(gameData.strategies)}, ${JSON.stringify(gameData.typeChart)}]`
     );
 }
 

@@ -1,8 +1,12 @@
-import { regexSpChar } from './config.js';
+import { regexSpChar, MIN_FILTER_INPUT_LENGTH } from './config.js';
+import { clearChildren } from './domUtils.js';
 import { tracker, trainersFilter, trainersInput } from './domRefs.js';
 import { sanitizeString, speciesCanLearnMove } from './utility.js';
 import { lazyLoading } from './tableUtility.js';
 import { updateSpeciesMoveFilter } from '../modules/species/displaySpecies.js';
+import { checkTrainerDifficulty, showRematch } from '../modules/scripts/displayTrainers.js';
+import { updateLocationsMoveFilter } from '../modules/locations/displayLocations.js';
+import { gameData, trackers, uiState } from './state.js';
 
 function returnAllORfilterValuefromLabel(label) {
     let activeORfilterArray = [];
@@ -11,7 +15,7 @@ function returnAllORfilterValuefromLabel(label) {
         `${activeFilter.id}${label}Container`.replaceAll(" ", "")
     )[0];
     for (let i = 0; i < labelFilterContainer.children.length; i++) {
-        if (labelFilterContainer.children[i].children[0].value == "OR") {
+        if (labelFilterContainer.children[i].children[0].value === "OR") {
             activeORfilterArray.push(
                 labelFilterContainer.children[i].children[1].innerText
                     .split(":")[1]
@@ -26,7 +30,7 @@ function returnAllORfilterValuefromLabel(label) {
 export function reverseFilter(filterString, trackerFilter) {
     if (trackerFilter.includes(filterString)) {
         for (let k = 0; k < trackerFilter.length; k++) {
-            if (trackerFilter[k] == filterString) {
+            if (trackerFilter[k] === filterString) {
                 trackerFilter.splice(k, 1);
             }
         }
@@ -38,7 +42,7 @@ export function reverseFilter(filterString, trackerFilter) {
 }
 
 function filterLogicalConnector(trackerFilter, value, label, operator, passed) {
-    if (operator == "OR") {
+    if (operator === "OR") {
         let i = 0;
         for (i = 0; i < trackerFilter.length; i++) {
             if (new RegExp(`^OR_${label}`).test(trackerFilter[i])) {
@@ -51,7 +55,7 @@ function filterLogicalConnector(trackerFilter, value, label, operator, passed) {
             }
         }
 
-        if (i == trackerFilter.length) {
+        if (i === trackerFilter.length) {
             trackerFilter.push(`OR_${label}`);
             if (!passed) {
                 trackerFilter[i] += `/${value}@FAIL`;
@@ -60,13 +64,13 @@ function filterLogicalConnector(trackerFilter, value, label, operator, passed) {
             }
         }
     } else if (
-        (!passed && operator == "AND") ||
-        (passed && operator == "NOT")
+        (!passed && operator === "AND") ||
+        (passed && operator === "NOT")
     ) {
         trackerFilter.push(`filter${label}${value}`);
-    } else if (!passed && operator == "NOT") {
+    } else if (!passed && operator === "NOT") {
         for (let k = 0; k < trackerFilter.length; k++) {
-            if (trackerFilter[k] == `filter${label}${value}`) {
+            if (trackerFilter[k] === `filter${label}${value}`) {
                 trackerFilter.splice(k, 1);
             }
         }
@@ -80,7 +84,7 @@ function updateORinTracker(value, label) {
     for (let i = 0; i < tracker.length; i++) {
         for (let j = 0; j < tracker[i]["filter"].length; j++) {
             if (new RegExp(`^OR_${label}`).test(tracker[i]["filter"][j])) {
-                if (activeORfilterArray.length == 0) {
+                if (activeORfilterArray.length === 0) {
                     tracker[i]["filter"].splice(j, 1);
                 } else {
                     tracker[i]["filter"][j] = tracker[i]["filter"][
@@ -109,7 +113,7 @@ function filterSpeciesForm(value, label, operator) {
     for (let i = 0, j = tracker.length; i < j; i++) {
         let passed = true;
         let name = tracker[i]["key"];
-        if (tracker === window.locationsTracker) {
+        if (tracker === trackers.locations) {
             name = tracker[i]["key"].split("\\")[2];
         }
         if (value === "Mega") {
@@ -152,12 +156,12 @@ function filterSpeciesItem(value, label, operator) {
     for (let i = 0, j = tracker.length; i < j; i++) {
         let passed = true;
         let name = tracker[i]["key"];
-        if (tracker === window.locationsTracker) {
+        if (tracker === trackers.locations) {
             name = tracker[i]["key"].split("\\")[2];
         }
         if (
-            !(sanitizeString(window.species[name]["item1"]) === value) &&
-            !(sanitizeString(window.species[name]["item2"]) === value)
+            !(sanitizeString(gameData.species[name]["item1"]) === value) &&
+            !(sanitizeString(gameData.species[name]["item2"]) === value)
         ) {
             passed = false;
         }
@@ -178,8 +182,8 @@ function filterSpeciesAbility(
     operator
 ) {
     let abilityName = null;
-    Object.keys(window.abilities).forEach((ability) => {
-        if (window.abilities[ability]["ingameName"] === value) {
+    Object.keys(gameData.abilities).forEach((ability) => {
+        if (gameData.abilities[ability]["ingameName"] === value) {
             abilityName = ability;
         }
     });
@@ -187,12 +191,12 @@ function filterSpeciesAbility(
         for (let i = 0, j = tracker.length; i < j; i++) {
             let passed = true;
             let name = tracker[i]["key"];
-            if (tracker === window.locationsTracker) {
+            if (tracker === trackers.locations) {
                 name = tracker[i]["key"].split("\\")[2];
             }
-            if (!window.species[name]["abilities"].includes(abilityName)) {
+            if (!gameData.species[name]["abilities"].includes(abilityName)) {
                 if (typeof window.innatesDefined !== "undefined") {
-                    if (!window.species[name]["innates"].includes(abilityName)) {
+                    if (!gameData.species[name]["innates"].includes(abilityName)) {
                         passed = false;
                     }
                 } else {
@@ -213,8 +217,8 @@ function filterSpeciesAbility(
 
 function filterSpeciesMove(value, label, operator) {
     let moveName = null;
-    Object.keys(window.moves).forEach((move) => {
-        if (window.moves[move]["ingameName"] === value) {
+    Object.keys(gameData.moves).forEach((move) => {
+        if (gameData.moves[move]["ingameName"] === value) {
             moveName = move;
         }
     });
@@ -222,10 +226,10 @@ function filterSpeciesMove(value, label, operator) {
         for (let i = 0, j = tracker.length; i < j; i++) {
             let passed = true;
             let name = tracker[i]["key"];
-            if (tracker === window.locationsTracker) {
+            if (tracker === trackers.locations) {
                 name = tracker[i]["key"].split("\\")[2];
             }
-            if (speciesCanLearnMove(window.species[name], moveName) === false) {
+            if (speciesCanLearnMove(gameData.species[name], moveName) === false) {
                 passed = false;
             }
 
@@ -239,14 +243,14 @@ function filterSpeciesMove(value, label, operator) {
         }
     }
 
-    if (tracker == window.speciesTracker) {
+    if (tracker === trackers.species) {
         let sortTable = false;
-        if (window.speciesMoveFilter == null) {
+        if (uiState.speciesMoveFilter === null) {
             sortTable = true;
         }
         updateSpeciesMoveFilter(sortTable);
-    } else if (tracker == window.locationsTracker) {
-        window.updateLocationsMoveFilter();
+    } else if (tracker === trackers.locations) {
+        updateLocationsMoveFilter();
     }
 }
 
@@ -254,12 +258,12 @@ function filterSpeciesEggGroup(value, label, operator) {
     for (let i = 0, j = tracker.length; i < j; i++) {
         let passed = true;
         let name = tracker[i]["key"];
-        if (tracker === window.locationsTracker) {
+        if (tracker === trackers.locations) {
             name = tracker[i]["key"].split("\\")[2];
         }
         if (
-            !(sanitizeString(window.species[name]["eggGroup1"]) === value) &&
-            !(sanitizeString(window.species[name]["eggGroup2"]) === value)
+            !(sanitizeString(gameData.species[name]["eggGroup1"]) === value) &&
+            !(sanitizeString(gameData.species[name]["eggGroup2"]) === value)
         ) {
             passed = false;
         }
@@ -278,26 +282,26 @@ function filterType(value, label, operator) {
     for (let i = 0, j = tracker.length; i < j; i++) {
         let passed = true;
         let name = tracker[i]["key"];
-        if (tracker === window.locationsTracker) {
+        if (tracker === trackers.locations) {
             name = tracker[i]["key"].split("\\")[2];
         }
-        if (tracker == window.speciesTracker || tracker == window.locationsTracker) {
-            if (typeof window.species[name]["type3"] !== "undefined") {
+        if (tracker === trackers.species || tracker === trackers.locations) {
+            if (typeof gameData.species[name]["type3"] !== "undefined") {
                 if (
-                    !(sanitizeString(window.species[name]["type1"]) === value) &&
-                    !(sanitizeString(window.species[name]["type2"]) === value) &&
-                    !(sanitizeString(window.species[name]["type3"]) === value)
+                    !(sanitizeString(gameData.species[name]["type1"]) === value) &&
+                    !(sanitizeString(gameData.species[name]["type2"]) === value) &&
+                    !(sanitizeString(gameData.species[name]["type3"]) === value)
                 ) {
                     passed = false;
                 }
             } else if (
-                !(sanitizeString(window.species[name]["type1"]) === value) &&
-                !(sanitizeString(window.species[name]["type2"]) === value)
+                !(sanitizeString(gameData.species[name]["type1"]) === value) &&
+                !(sanitizeString(gameData.species[name]["type2"]) === value)
             ) {
                 passed = false;
             }
-        } else if (tracker == window.movesTracker) {
-            if (!(sanitizeString(window.moves[name]["type"]) === value)) {
+        } else if (tracker === trackers.moves) {
+            if (!(sanitizeString(gameData.moves[name]["type"]) === value)) {
                 passed = false;
             }
         }
@@ -316,7 +320,7 @@ function filterMovesSplit(value, label, operator) {
     for (let i = 0, j = tracker.length; i < j; i++) {
         let passed = true;
         let name = tracker[i]["key"];
-        if (!(sanitizeString(window.moves[name]["split"]) === value)) {
+        if (!(sanitizeString(gameData.moves[name]["split"]) === value)) {
             passed = false;
         }
 
@@ -334,8 +338,8 @@ function filterMovesFlags(value, label, operator) {
     for (let i = 0, j = tracker.length; i < j; i++) {
         let passed = false;
         let name = tracker[i]["key"];
-        for (let k = 0; k < window.moves[name]["flags"].length; k++) {
-            if (sanitizeString(window.moves[name]["flags"][k]) === value) {
+        for (let k = 0; k < gameData.moves[name]["flags"].length; k++) {
+            if (sanitizeString(gameData.moves[name]["flags"][k]) === value) {
                 passed = true;
                 break;
             }
@@ -355,7 +359,7 @@ function filterMovesTarget(value, label, operator) {
     for (let i = 0, j = tracker.length; i < j; i++) {
         let passed = false;
         let name = tracker[i]["key"];
-        if (sanitizeString(window.moves[name]["target"]) === value) {
+        if (sanitizeString(gameData.moves[name]["target"]) === value) {
             passed = true;
         }
 
@@ -393,18 +397,18 @@ function filterBaseStats(value, label) {
         label = "BST";
     }
 
-    filterOperators(value, label, window.species);
+    filterOperators(value, label, gameData.species);
 }
 
 function selectFilter(value, label, operator = "AND") {
     if (label === "Item") {
-        if (tracker === window.trainersTracker) {
+        if (tracker === trackers.trainers) {
             trainerSpeciesMatchFilter(true);
         } else {
             filterSpeciesItem(value, label, operator);
         }
     } else if (label === "Move") {
-        if (tracker === window.trainersTracker) {
+        if (tracker === trackers.trainers) {
             trainerSpeciesMatchFilter(true);
         } else {
             filterSpeciesMove(value, label, operator);
@@ -412,7 +416,7 @@ function selectFilter(value, label, operator = "AND") {
     } else if (label === "Type") {
         filterType(value, label, operator);
     } else if (label === "Ability") {
-        if (tracker === window.trainersTracker) {
+        if (tracker === trackers.trainers) {
             trainerSpeciesMatchFilter(true);
         } else {
             filterSpeciesAbility(value, label, operator);
@@ -441,21 +445,21 @@ export async function setFilters() {
         window.speciesFilterList,
         window.locationsFilterList,
     ]);
-    createFilterGroup(createFilterArray(["type"], window.moves), "Type", [
+    createFilterGroup(createFilterArray(["type"], gameData.moves), "Type", [
         window.speciesFilterList,
         window.movesFilterList,
         window.locationsFilterList,
     ]);
-    createFilterGroup(createFilterArray(["split"], window.moves), "Split", [
+    createFilterGroup(createFilterArray(["split"], gameData.moves), "Split", [
         window.movesFilterList,
     ]);
-    createFilterGroup(createFilterArray(["flags"], window.moves), "Flag", [
+    createFilterGroup(createFilterArray(["flags"], gameData.moves), "Flag", [
         window.movesFilterList,
     ]);
-    createFilterGroup(createFilterArray(["target"], window.moves), "Target", [
+    createFilterGroup(createFilterArray(["target"], gameData.moves), "Target", [
         window.movesFilterList,
     ]);
-    createFilterGroup(createFilterArray(["item1", "item2"], window.species), "Item", [
+    createFilterGroup(createFilterArray(["item1", "item2"], gameData.species), "Item", [
         window.speciesFilterList,
         window.locationsFilterList,
     ]);
@@ -463,7 +467,7 @@ export async function setFilters() {
         createFilterGroup(
             Array.from(
                 new Set(
-                    JSON.stringify(window.trainers)
+                    JSON.stringify(gameData.trainers)
                         .match(/ITEM_\w+/g)
                         .map((value) => sanitizeString(value))
                 )
@@ -471,19 +475,21 @@ export async function setFilters() {
             "Item",
             [window.trainersFilterList]
         );
-    } catch {}
+    } catch (e) {
+        console.warn("Failed to create trainer item filters:", e.message);
+    }
     createFilterGroup(
-        createFilterArray(["ingameName"], window.abilities, false),
+        createFilterArray(["ingameName"], gameData.abilities, false),
         "Ability",
         [window.speciesFilterList, window.locationsFilterList, window.trainersFilterList]
     );
-    createFilterGroup(createFilterArray(["ingameName"], window.moves, false), "Move", [
+    createFilterGroup(createFilterArray(["ingameName"], gameData.moves, false), "Move", [
         window.speciesFilterList,
         window.locationsFilterList,
         window.trainersFilterList,
     ]);
     createFilterGroup(
-        createFilterArray(["eggGroup1", "eggGroup2"], window.species),
+        createFilterArray(["eggGroup1", "eggGroup2"], gameData.species),
         "Egg Group",
         [window.speciesFilterList, window.locationsFilterList]
     );
@@ -542,7 +548,7 @@ function createFilterGroup(
             mainContainer.append(container);
             mainContainer.className = "filterListContainer";
 
-            if (operator == true) {
+            if (operator === true) {
                 container.classList.add("operator");
                 container.addEventListener("click", () => {
                     selectFilter(value, labelValue);
@@ -580,7 +586,7 @@ export function filterFilters(input) {
             ) {
                 filters[i].classList.remove("hide");
             } else if (
-                inputLength >= 3 &&
+                inputLength >= MIN_FILTER_INPUT_LENGTH &&
                 filterValue.includes(sanitizedInput) &&
                 !filters[i].classList.contains("operator")
             ) {
@@ -666,7 +672,7 @@ function createFilterElement(label, value, operator = "AND", activeFilter) {
     filterText.addEventListener("click", () => {
         newFilter.remove();
 
-        if (filterOperator.value == "OR") {
+        if (filterOperator.value === "OR") {
             updateORinTracker(
                 value.replaceAll(" ", ""),
                 label.replaceAll(" ", "")
@@ -684,10 +690,10 @@ function createFilterElement(label, value, operator = "AND", activeFilter) {
             }
         }
 
-        if (tracker == window.speciesTracker) {
+        if (tracker === trackers.species) {
             updateSpeciesMoveFilter();
-        } else if (tracker == window.locationsTracker) {
-            window.updateLocationsMoveFilter();
+        } else if (tracker === trackers.locations) {
+            updateLocationsMoveFilter();
         }
         if (trainersFilter === activeFilter) {
             trainerSpeciesMatchFilter(false);
@@ -698,7 +704,7 @@ function createFilterElement(label, value, operator = "AND", activeFilter) {
             `${activeFilter.id}${label}Container`.replaceAll(" ", "")
         );
         if (labelFilterContainer) {
-            if (labelFilterContainer[0].children.length == 0) {
+            if (labelFilterContainer[0].children.length === 0) {
                 labelFilterContainer[0].remove();
             }
         }
@@ -709,7 +715,7 @@ function createFilterElement(label, value, operator = "AND", activeFilter) {
     });
 
     filterOperator.addEventListener("change", () => {
-        if (previousOperator == "OR") {
+        if (previousOperator === "OR") {
             updateORinTracker(
                 value.replaceAll(" ", ""),
                 label.replaceAll(" ", "")
@@ -729,14 +735,14 @@ function createFilterElement(label, value, operator = "AND", activeFilter) {
 
         selectFilter(value, label, filterOperator.value);
 
-        if (filterOperator.value == "NOT" && label == "Move") {
-            if (tracker == window.speciesTracker) {
+        if (filterOperator.value === "NOT" && label === "Move") {
+            if (tracker === trackers.species) {
                 updateSpeciesMoveFilter();
-            } else if (tracker == window.locationsTracker) {
-                window.updateLocationsMoveFilter();
+            } else if (tracker === trackers.locations) {
+                updateLocationsMoveFilter();
             }
         }
-        if (trainersFilter == activeFilter) {
+        if (trainersFilter === activeFilter) {
             trainerSpeciesMatchFilter(false);
         }
 
@@ -785,13 +791,12 @@ export function deleteFiltersFromTable() {
         }
     }
 
-    while (tableFilterContainer.firstChild)
-        tableFilterContainer.removeChild(tableFilterContainer.firstChild);
+    clearChildren(tableFilterContainer);
 
-    if (tracker == window.speciesTracker) {
+    if (tracker === trackers.species) {
         updateSpeciesMoveFilter();
-    } else if (tracker == window.locationsTracker) {
-        window.updateLocationsMoveFilter();
+    } else if (tracker === trackers.locations) {
+        updateLocationsMoveFilter();
     }
 }
 
@@ -799,23 +804,23 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
     const trainersFilterElements =
         window.trainersFilterContainer.getElementsByClassName("filter");
     trainersTrackerLoop: for (
-        let i = 0, j = window.trainersTracker.length;
+        let i = 0, j = trackers.trainers.length;
         i < j;
         i++
     ) {
-        delete window.trainersTracker[i]["show"];
+        delete trackers.trainers[i]["show"];
         if (resetInput) {
-            window.trainersTracker[i]["filter"] = [];
+            trackers.trainers[i]["filter"] = [];
         } else {
-            window.trainersTracker[i]["filter"] = window.trainersTracker[i]["filter"].filter(
+            trackers.trainers[i]["filter"] = trackers.trainers[i]["filter"].filter(
                 (filter) => filter === "input"
             );
         }
-        const zone = window.trainersTracker[i]["key"].split("\\")[0];
-        const trainer = window.trainersTracker[i]["key"].split("\\")[1];
-        const difficulty = window.checkTrainerDifficulty(zone, trainer);
-        delete window.trainers[zone][trainer]["match"];
-        delete window.trainersTracker[i]["show"];
+        const zone = trackers.trainers[i]["key"].split("\\")[0];
+        const trainer = trackers.trainers[i]["key"].split("\\")[1];
+        const difficulty = checkTrainerDifficulty(zone, trainer);
+        delete gameData.trainers[zone][trainer]["match"];
+        delete trackers.trainers[i]["show"];
 
         filterContainer: for (let k = 0; k < trainersFilterElements.length; k++) {
             let ignoreTrainerTeamIndex = [];
@@ -824,7 +829,7 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 .replace(" ", "")
                 .split(":")[1];
             const operator = trainersFilterElements[k].parentNode.children[0].value;
-            let trainerTeam = window.trainers[zone][trainer]["party"][difficulty];
+            let trainerTeam = gameData.trainers[zone][trainer]["party"][difficulty];
             let passed = false;
 
             trainerTeamLoop: for (let l = 0; l < trainerTeam.length; l++) {
@@ -835,21 +840,21 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 const speciesObj = trainerTeam[l];
                 if (label === "Ability") {
                     let abilityName = null;
-                    Object.keys(window.abilities).forEach((ability) => {
-                        if (window.abilities[ability]["ingameName"] === value) {
+                    Object.keys(gameData.abilities).forEach((ability) => {
+                        if (gameData.abilities[ability]["ingameName"] === value) {
                             abilityName = ability;
                         }
                     });
                     if (abilityName) {
                         if (
-                            window.species[speciesObj["name"]]["abilities"][
+                            gameData.species[speciesObj["name"]]["abilities"][
                                 speciesObj["ability"]
                             ] === abilityName
                         ) {
                             continue trainerTeamLoop;
                         } else if (typeof window.innatesDefined !== "undefined") {
                             if (
-                                window.species[speciesObj["name"]]["innates"].includes(
+                                gameData.species[speciesObj["name"]]["innates"].includes(
                                     abilityName
                                 )
                             ) {
@@ -859,8 +864,8 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                     }
                 } else if (label === "Move") {
                     let moveName = null;
-                    Object.keys(window.moves).forEach((move) => {
-                        if (window.moves[move]["ingameName"] === value) {
+                    Object.keys(gameData.moves).forEach((move) => {
+                        if (gameData.moves[move]["ingameName"] === value) {
                             moveName = move;
                         }
                     });
@@ -876,30 +881,30 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 }
                 ignoreTrainerTeamIndex.push(l);
             }
-            passed = trainerTeam.length != ignoreTrainerTeamIndex.length;
-            window.trainersTracker[i]["filter"] = filterLogicalConnector(
-                window.trainersTracker[i]["filter"],
+            passed = trainerTeam.length !== ignoreTrainerTeamIndex.length;
+            trackers.trainers[i]["filter"] = filterLogicalConnector(
+                trackers.trainers[i]["filter"],
                 value.replaceAll(" ", ""),
                 label.replaceAll(" ", ""),
                 operator,
                 passed
             );
-            if (!passed && operator == "AND") {
+            if (!passed && operator === "AND") {
                 continue trainersTrackerLoop;
             }
         }
-        if (passAllFilters(window.trainersTracker[i]["filter"])) {
-            window.trainers[zone][trainer]["match"] = true;
+        if (passAllFilters(trackers.trainers[i]["filter"])) {
+            gameData.trainers[zone][trainer]["match"] = true;
         }
         if (
             trainersInput.value.trim().length === 0 &&
             trainersFilterElements.length === 0
         ) {
-            delete window.trainers[zone][trainer]["match"];
+            delete gameData.trainers[zone][trainer]["match"];
         }
     }
 
-    window.showRematch();
+    showRematch();
 }
 
 function filterOperators(value, label, obj) {
@@ -917,7 +922,7 @@ function filterOperators(value, label, obj) {
 
     for (let i = 0, j = tracker.length; i < j; i++) {
         let name = tracker[i]["key"];
-        if (tracker === window.locationsTracker) {
+        if (tracker === trackers.locations) {
             name = tracker[i]["key"].split("\\")[2];
         }
 
@@ -934,7 +939,7 @@ function filterOperators(value, label, obj) {
                 );
             }
         } else if (operator === "=") {
-            if (!(obj[name][value] == number)) {
+            if (!(obj[name][value] === number)) {
                 tracker[i]["filter"].push(
                     `filter${label}${operator}${number}`.replaceAll(" ", "")
                 );

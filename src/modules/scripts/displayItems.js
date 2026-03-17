@@ -4,6 +4,8 @@ import { itemsTableTbody } from '../../utils/domRefs.js';
 import { lazyLoading } from '../../utils/tableUtility.js';
 import { settings } from '../../utils/settings.js';
 import { getItemSpriteSrc } from './fetchScripts.js';
+import { gameData } from '../../utils/state.js';
+import { LONG_PRESS_DURATION_MS } from '../../utils/config.js';
 
 let itemsLocations = [];
 if (localStorage.getItem("itemsLocations")) {
@@ -12,13 +14,13 @@ if (localStorage.getItem("itemsLocations")) {
 
 export function appendItemsToTable(key) {
     if (
-        window.items[key]["description"] == "" ||
-        window.items[key]["sprite"] === "" ||
-        /_MAIL$|ITEM_NONE/i.test(window.items[key]["name"])
+        gameData.items[key]["description"] === "" ||
+        gameData.items[key]["sprite"] === "" ||
+        /_MAIL$|ITEM_NONE/i.test(gameData.items[key]["name"])
     ) {
         return false;
     }
-    if (settings.includes(window.items[key]["pocket"])) {
+    if (settings.includes(gameData.items[key]["pocket"])) {
         return false;
     }
 
@@ -50,15 +52,15 @@ function returnItemTableThead(key) {
     itemSprite.classList = `itemSprite sprite${key}`;
     const itemNameDescContainer = document.createElement("th");
     const itemName = document.createElement("span");
-    itemName.innerText = window.items[key]["ingameName"];
+    itemName.innerText = gameData.items[key]["ingameName"];
     itemName.classList = "itemName";
     if (/^TM\d+$|^HM\d+$/i.test(itemName.innerText)) {
-        itemName.innerText = sanitizeString(window.items[key]["name"])
+        itemName.innerText = sanitizeString(gameData.items[key]["name"])
             .replace("Tm", "TM")
             .replace("Hm", "HM");
     }
     const itemDescription = document.createElement("th");
-    itemDescription.innerText = window.items[key]["description"];
+    itemDescription.innerText = gameData.items[key]["description"];
     itemDescription.classList = "itemDescription";
 
     itemSpriteContainer.append(itemSprite);
@@ -75,28 +77,28 @@ function returnItemTableThead(key) {
 function returnItemTableTbody(key) {
     const itemsTableTbody = document.createElement("tbody");
 
-    Object.keys(window.items[key]["locations"]).forEach((method) => {
+    Object.keys(gameData.items[key]["locations"]).forEach((method) => {
         if (!settings.includes(method)) {
-            for (let i = 0; i < window.items[key]["locations"][method].length; i++) {
+            for (let i = 0; i < gameData.items[key]["locations"][method].length; i++) {
                 if (
                     (!settings.includes("hideCrossedItems") ||
                         !itemsLocations.includes(
-                            `${key}${method}${window.items[key]["locations"][method][i]}`
+                            `${key}${method}${gameData.items[key]["locations"][method][i]}`
                         )) &&
-                    window.items[key]["locations"][method][i] !== "Debug"
+                    gameData.items[key]["locations"][method][i] !== "Debug"
                 ) {
                     const row = document.createElement("tr");
                     const methodContainer = document.createElement("td");
                     methodContainer.innerText = method;
                     const location = document.createElement("td");
-                    location.innerText = window.items[key]["locations"][method][i];
+                    location.innerText = gameData.items[key]["locations"][method][i];
 
                     row.append(methodContainer);
                     row.append(location);
 
                     if (
                         itemsLocations.includes(
-                            `${key}${method}${window.items[key]["locations"][method][i]}`
+                            `${key}${method}${gameData.items[key]["locations"][method][i]}`
                         )
                     ) {
                         row.classList.add("itemCrossed");
@@ -106,7 +108,7 @@ function returnItemTableTbody(key) {
 
                     row.addEventListener("click", () => {
                         row.classList.toggle("itemCrossed");
-                        const itemLocationMethodString = `${key}${method}${window.items[key]["locations"][method][i]}`;
+                        const itemLocationMethodString = `${key}${method}${gameData.items[key]["locations"][method][i]}`;
 
                         if (row.classList.contains("itemCrossed")) {
                             itemsLocations.push(itemLocationMethodString);
@@ -200,18 +202,18 @@ let getItemsButtons = setInterval(function () {
         if (preventDefault) {
             event.preventDefault();
         }
-        if (event.type == "mousedown" || event.type == "mouseup") {
-            if (event.which == 2 || event.which == 3) {
+        if (event.type === "mousedown" || event.type === "mouseup") {
+            if (event.which === 2 || event.which === 3) {
                 // if right click or mousewheel
                 return false;
             }
         }
-        if (event.type == "mousedown" || event.type == "touchstart") {
+        if (event.type === "mousedown" || event.type === "touchstart") {
             document
                 .getElementById("resetCrossedItems")
                 .classList.add("clicked");
-            resetTimer = setTimeout(lockSpecies, 1500);
-        } else if (event.type == "mouseup" || event.type == "touchend") {
+            resetTimer = setTimeout(lockSpecies, LONG_PRESS_DURATION_MS);
+        } else if (event.type === "mouseup" || event.type === "touchend") {
             document
                 .getElementById("resetCrossedItems")
                 .classList.remove("clicked");
@@ -272,14 +274,14 @@ export async function setupItemsButtonFilters() {
 
     let pocketsName = [];
     let methods = [];
-    Object.keys(window.items).forEach((itemName) => {
+    Object.keys(gameData.items).forEach((itemName) => {
         if (
-            !pocketsName.includes(window.items[itemName]["pocket"]) &&
-            itemName != "ITEM_NONE"
+            !pocketsName.includes(gameData.items[itemName]["pocket"]) &&
+            itemName !== "ITEM_NONE"
         ) {
-            pocketsName.push(window.items[itemName]["pocket"]);
+            pocketsName.push(gameData.items[itemName]["pocket"]);
         }
-        Object.keys(window.items[itemName]["locations"]).forEach((method) => {
+        Object.keys(gameData.items[itemName]["locations"]).forEach((method) => {
             if (!methods.includes(method)) {
                 methods.push(method);
             }
@@ -314,7 +316,7 @@ export async function setupItemsButtonFilters() {
     });
 
     methods.forEach((method) => {
-        if (method != "Tutor") {
+        if (method !== "Tutor") {
             const methodButton = document.createElement("button");
             methodButton.innerText = method;
             methodButton.classList = "methodButton activeSetting";
@@ -349,7 +351,7 @@ export async function spriteRemoveItemBgReturnBase64(itemName) {
     canvas.width = 24;
     canvas.height = 24;
     sprite.crossOrigin = "anonymous";
-    sprite.src = window.items[itemName]["url"];
+    sprite.src = gameData.items[itemName]["url"];
 
     const context = canvas.getContext("2d");
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -378,11 +380,11 @@ export async function spriteRemoveItemBgReturnBase64(itemName) {
             context.putImageData(imageData, 0, 0);
 
             if (!localStorage.getItem(`${itemName}`)) {
-                await localStorage.setItem(
+                localStorage.setItem(
                     `${itemName}`,
                     LZString.compressToUTF16(canvas.toDataURL())
                 );
-                window.sprites[itemName] = canvas.toDataURL();
+                gameData.sprites[itemName] = canvas.toDataURL();
             }
             if (
                 document.getElementsByClassName(`sprite${itemName}`).length > 0
@@ -398,6 +400,3 @@ export async function spriteRemoveItemBgReturnBase64(itemName) {
     };
 }
 
-// Shims temporários
-window.appendItemsToTable = appendItemsToTable;
-window.setupItemsButtonFilters = setupItemsButtonFilters;

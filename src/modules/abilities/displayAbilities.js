@@ -1,11 +1,12 @@
+import { gameData, trackers } from '../../utils/state.js';
 import { abilitiesTableTbody, speciesButton, setTracker } from '../../utils/domRefs.js';
 import { tableButtonClick } from '../../utils/tableUtility.js';
 import { deleteFiltersFromTable, createFilter } from '../../utils/tableFilters.js';
 
 export function appendAbilitiesToTable(abilitiesName) {
     if (
-        !window.abilities[abilitiesName]["description"] ||
-        window.abilities[abilitiesName]["description"]?.length <= 0 ||
+        !gameData.abilities[abilitiesName]["description"] ||
+        gameData.abilities[abilitiesName]["description"]?.length <= 0 ||
         abilitiesName === "ABILITY_NONE"
     ) {
         return false;
@@ -17,41 +18,39 @@ export function appendAbilitiesToTable(abilitiesName) {
 
     row.setAttribute("id", `${abilitiesName}`);
 
-    if (window.abilities[abilitiesName]["ID"]) {
+    if (gameData.abilities[abilitiesName]["ID"]) {
         let abilityID = document.createElement("td");
         abilityID.className = "abilityID";
-        abilityID.innerText = window.abilities[abilitiesName]["ID"];
+        abilityID.innerText = gameData.abilities[abilitiesName]["ID"];
         row.append(abilityID);
     }
 
     let ability = document.createElement("td");
     const abilityName = document.createElement("span");
     ability.className = "ability";
-    ability.innerText = window.abilities[abilitiesName]["ingameName"];
+    ability.innerText = gameData.abilities[abilitiesName]["ingameName"];
     abilityName.className = "key hide";
-    abilityName.innerText = window.abilities[abilitiesName]["name"];
+    abilityName.innerText = gameData.abilities[abilitiesName]["name"];
     ability.append(abilityName);
 
     row.append(ability);
 
     let description = document.createElement("td");
     description.className = "description";
-    description.innerText = window.abilities[abilitiesName]["description"];
+    description.innerText = gameData.abilities[abilitiesName]["description"];
     row.append(description);
 
     row.addEventListener("click", async () => {
         if (!speciesButton.classList.contains("activeButton")) {
-            setTracker(window.speciesTracker);
+            setTracker(trackers.species);
             await tableButtonClick("species");
         }
         window.scrollTo({ top: 0 });
         deleteFiltersFromTable();
-        createFilter(window.abilities[abilitiesName]["ingameName"], "Ability");
+        createFilter(gameData.abilities[abilitiesName]["ingameName"], "Ability");
     });
 
     tBody.append(row);
     return true;
 }
 
-// Shim temporário: tableUtility.js chama via window[displayFunction]
-window.appendAbilitiesToTable = appendAbilitiesToTable;

@@ -9,7 +9,7 @@ export function regexAbilities(textAbilities, abilities) {
         const matchAbility = line.match(/ (ABILITY_\w+)/i);
         if (matchAbility) {
             ability = matchAbility[1];
-            if (ability == "ABILITY_DRILLBEAK") {
+            if (ability === "ABILITY_DRILLBEAK") {
                 ability = "ABILITY_DRILL_BEAK";
             }
             let isNew = abilities[ability] === undefined;
@@ -50,11 +50,11 @@ export function regexVanillaAbilitiesDescription(textAbilitiesIngameName, abilit
     const lines = textAbilitiesIngameName.split("\n");
     let conversionTable = {};
     let idx = Object.entries(abilities).filter(
-        ([ability, values]) => values.id != undefined
+        ([ability, values]) => values.id !== undefined
     ).length;
     const abilitiesAlso = Object.fromEntries(
         Object.entries(abilities)
-            .filter(([ability, values]) => values.also != undefined)
+            .filter(([ability, values]) => values.also !== undefined)
             .flatMap(([ability, values]) =>
                 values.also.map((also) => [also, ability])
             )
@@ -64,7 +64,7 @@ export function regexVanillaAbilitiesDescription(textAbilitiesIngameName, abilit
         let ability = lines[i].match(/\[ABILITY_(\w+)\]/i); //this is going to get confusing real quick :)
         if (ability) {
             ability = "ABILITY_" + ability[1].replace(/_/g, "");
-            if (ability == "ABILITY_DRILLBEAK") {
+            if (ability === "ABILITY_DRILLBEAK") {
                 ability = "ABILITY_DRILL_BEAK";
             }
 
@@ -192,7 +192,7 @@ export function regexAbilitiesDescription(textAbilitiesDescription, abilities) {
 export function regexNewAbilities(replaceAbilities, abilities) {
     Object.keys(replaceAbilities).forEach((oldAbility) => {
         Object.keys(replaceAbilities[oldAbility]).forEach((newAbility) => {
-            if (newAbility == "ABILITY_DRILLBEAK") {
+            if (newAbility === "ABILITY_DRILLBEAK") {
                 newAbility = "ABILITY_DRILL_BEAK";
             }
             if (oldAbility in abilities && !(newAbility in abilities)) {

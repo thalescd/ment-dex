@@ -6,12 +6,15 @@ import { deleteFiltersFromTable, createFilter } from '../../utils/tableFilters.j
 import { createSpeciesPanel } from '../../utils/speciesPanelUtility.js';
 import { createPopupForMove } from '../moves/displayMoves.js';
 import { getItemSpriteSrc, getTrainerSpriteSrc } from './fetchScripts.js';
+import { gameData, trackers, uiState } from '../../utils/state.js';
+import { clearChildren, createPopup } from '../../utils/domUtils.js';
+import { MOVE_NAME_MAX_WIDTH_PX } from '../../utils/config.js';
 
 export function appendTrainersToTable(key) {
     const zone = key.split("\\")[0];
     const trainer = key.split("\\")[1];
 
-    if (!window.trainers[zone][trainer]["rematch"]) {
+    if (!gameData.trainers[zone][trainer]["rematch"]) {
         let trainerMainContainer = document.createElement("table");
         trainerMainContainer.setAttribute("id", key);
         trainerMainContainer.className = "trainerTable";
@@ -22,7 +25,7 @@ export function appendTrainersToTable(key) {
         const trainerLocation = document.createElement("th");
 
         let format = "Single";
-        if (window.trainers[zone][trainer]["double"]) {
+        if (gameData.trainers[zone][trainer]["double"]) {
             format = "Double";
             formatContainer.classList.add("double");
         }
@@ -31,12 +34,12 @@ export function appendTrainersToTable(key) {
 
         const trainerSpriteContainer = document.createElement("span");
         const trainerSprite = document.createElement("img");
-        trainerSprite.className = `sprite${window.trainers[zone][trainer]["sprite"]}`;
+        trainerSprite.className = `sprite${gameData.trainers[zone][trainer]["sprite"]}`;
         trainerSprite.src = getTrainerSpriteSrc(
-            window.trainers[zone][trainer]["sprite"]
+            gameData.trainers[zone][trainer]["sprite"]
         );
         const trainerName = document.createElement("span");
-        trainerName.innerText = window.trainers[zone][trainer]["ingameName"];
+        trainerName.innerText = gameData.trainers[zone][trainer]["ingameName"];
         trainerName.className = "trainerName";
         const trainerRematchContainer = document.createElement("div");
         trainerRematchContainer.className = "trainerRematchContainer hide";
@@ -44,7 +47,7 @@ export function appendTrainersToTable(key) {
         trainerRematch.innerText = "1";
         trainerRematch.className = `trainerRematch activeRematch`;
         trainerRematch.name = trainer;
-        if (window.trainers[zone][trainer]["match"]) {
+        if (gameData.trainers[zone][trainer]["match"]) {
             trainerRematch.classList.add("trainerRematchMatch");
         }
 
@@ -60,7 +63,7 @@ export function appendTrainersToTable(key) {
 
         trainerMainContainer.append(trainerThead);
         trainerMainContainer.append(
-            createTrainerSpeciesTbody(window.trainers[zone][trainer])
+            createTrainerSpeciesTbody(gameData.trainers[zone][trainer])
         );
 
         trainersTableTbody.append(trainerMainContainer);
@@ -70,13 +73,13 @@ export function appendTrainersToTable(key) {
             setActiveRematch(zone, trainer);
         });
 
-        if (window.trainers[zone][trainer]["activeRematch"]) {
+        if (gameData.trainers[zone][trainer]["activeRematch"]) {
             setActiveRematch(zone, trainer);
         }
 
         return true;
     } else {
-        const rematch = window.trainers[zone][trainer]["rematch"];
+        const rematch = gameData.trainers[zone][trainer]["rematch"];
         const rematchKey = `${zone}\\${rematch}`;
 
         if (document.getElementById(rematchKey)) {
@@ -88,7 +91,7 @@ export function appendTrainersToTable(key) {
                 trainerRematchContainer.children.length + 1;
             trainerRematch.className = `trainerRematch ${key}`;
             trainerRematch.name = trainer;
-            if (window.trainers[zone][trainer]["match"]) {
+            if (gameData.trainers[zone][trainer]["match"]) {
                 trainerRematch.classList.add("trainerRematchMatch");
             }
 
@@ -102,7 +105,7 @@ export function appendTrainersToTable(key) {
                 trainerRematchContainer.classList.remove("hide");
             }
 
-            if (window.trainers[zone][trainer]["activeRematch"]) {
+            if (gameData.trainers[zone][trainer]["activeRematch"]) {
                 replaceTbody(rematchKey, zone, trainer);
                 setActiveRematch(zone, trainer);
             }
@@ -116,13 +119,13 @@ function createTrainerSpeciesTbody(trainerObj) {
     const trainerTbody = document.createElement("tbody");
     trainerTbody.className = "trainerTbody";
     let difficulty = "Normal";
-    if (trainerObj["party"][window.trainersDifficulty]) {
-        difficulty = window.trainersDifficulty;
+    if (trainerObj["party"][uiState.trainersDifficulty]) {
+        difficulty = uiState.trainersDifficulty;
     }
 
     for (let i = 0; i < trainerObj["party"][difficulty].length; i++) {
         const trainerSpeciesObj = trainerObj["party"][difficulty][i];
-        if (window.species[trainerSpeciesObj["name"]]["baseSpeed"] > 0) {
+        if (gameData.species[trainerSpeciesObj["name"]]["baseSpeed"] > 0) {
             const trainerSpeciesContainer = document.createElement("td");
 
             const speciesSpriteContainer = document.createElement("div");
@@ -142,8 +145,8 @@ function createTrainerSpeciesTbody(trainerObj) {
 
             const trainerSpeciesAbility = document.createElement("div");
             trainerSpeciesAbility.innerText =
-                window.abilities[
-                    window.species[trainerSpeciesObj["name"]]["abilities"][
+                gameData.abilities[
+                    gameData.species[trainerSpeciesObj["name"]]["abilities"][
                         trainerSpeciesObj["ability"]
                     ]
                 ]["ingameName"];
@@ -151,13 +154,13 @@ function createTrainerSpeciesTbody(trainerObj) {
                 "hyperlink bold trainerSpeciesAbility";
             trainerSpeciesAbility.addEventListener("click", () => {
                 let abilityArray = [
-                    window.species[trainerSpeciesObj["name"]]["abilities"][
+                    gameData.species[trainerSpeciesObj["name"]]["abilities"][
                         trainerSpeciesObj["ability"]
                     ],
                 ];
                 if (typeof window.innatesDefined !== "undefined") {
                     abilityArray = abilityArray.concat(
-                        window.species[trainerSpeciesObj["name"]]["innates"]
+                        gameData.species[trainerSpeciesObj["name"]]["innates"]
                     );
                 }
                 createPopupAbility(abilityArray);
@@ -205,22 +208,22 @@ function returnMovesObj(trainerSpeciesObj) {
 
     for (let i = 0; i < trainerSpeciesObj["moves"].length; i++) {
         if (
-            trainerSpeciesObj["moves"][i] != "MOVE_NONE" &&
-            trainerSpeciesObj["moves"][i] in window.moves
+            trainerSpeciesObj["moves"][i] !== "MOVE_NONE" &&
+            trainerSpeciesObj["moves"][i] in gameData.moves
         ) {
             const trainerSpeciesMoveContainer = document.createElement("div");
             const trainerSpeciesMoveType = document.createElement("span");
             trainerSpeciesMoveType.innerText = sanitizeString(
-                window.moves[trainerSpeciesObj["moves"][i]]["type"]
+                gameData.moves[trainerSpeciesObj["moves"][i]]["type"]
             ).slice(0, 3);
-            trainerSpeciesMoveType.className = `backgroundSmall ${window.moves[trainerSpeciesObj["moves"][i]]["type"]} trainersSpeciesMoveType`;
+            trainerSpeciesMoveType.className = `backgroundSmall ${gameData.moves[trainerSpeciesObj["moves"][i]]["type"]} trainersSpeciesMoveType`;
             const trainerSpeciesMoveName = document.createElement("span");
             trainerSpeciesMoveName.className =
                 "trainerSpeciesMoveName hyperlink";
 
-            let moveName = window.moves[trainerSpeciesObj["moves"][i]]["ingameName"];
+            let moveName = gameData.moves[trainerSpeciesObj["moves"][i]]["ingameName"];
             let resized = false;
-            while (getTextWidth(moveName + ".") >= 90) {
+            while (getTextWidth(moveName + ".") >= MOVE_NAME_MAX_WIDTH_PX) {
                 moveName = moveName.slice(0, -1);
                 resized = true;
             }
@@ -233,7 +236,7 @@ function returnMovesObj(trainerSpeciesObj) {
             trainerSpeciesMoveContainer.append(trainerSpeciesMoveType);
 
             trainerSpeciesMoveName.addEventListener("click", () => {
-                createPopupForMove(window.moves[trainerSpeciesObj["moves"][i]], false);
+                createPopupForMove(gameData.moves[trainerSpeciesObj["moves"][i]], false);
                 overlay.style.display = "flex";
                 body.classList.add("fixed");
             });
@@ -284,12 +287,12 @@ function returnEVsIVsObj(trainerSpeciesObj) {
 
         const trainerSpeciesEVs = document.createElement("div");
         trainerSpeciesEVs.innerText = EVs[i];
-        if (EVs[i] == 0) {
+        if (EVs[i] === 0) {
             trainerSpeciesEVs.innerText = "-";
         }
         const trainerSpeciesIVs = document.createElement("div");
         trainerSpeciesIVs.innerText = IVs[i];
-        if (IVs[i] == 0) {
+        if (IVs[i] === 0) {
             trainerSpeciesIVs.innerText = "-";
         }
 
@@ -335,60 +338,21 @@ function returnNature(nature) {
 }
 
 function createPopupAbility(abilityArray) {
-    overlayAbilities.style.display = "flex";
-    body.classList.add("fixedAbilities");
-
-    while (popupAbilities.firstChild) {
-        popupAbilities.removeChild(popupAbilities.firstChild);
-    }
-
-    const abilityMainContainer = document.createElement("ul");
-
-    for (let i = 0; i < abilityArray.length; i++) {
-        const abilityContainer = document.createElement("li");
-        const abilityName = document.createElement("span");
-        abilityName.innerText = `${window.abilities[abilityArray[i]]["ingameName"]}: `;
-        abilityName.className = "bold";
-        const abilityDescription = document.createElement("span");
-        abilityDescription.innerText =
-            window.abilities[abilityArray[i]]["description"];
-        abilityContainer.append(abilityName);
-        abilityContainer.append(abilityDescription);
-        abilityMainContainer.append(abilityContainer);
-        if (i < abilityArray.length - 1) {
-            abilityMainContainer.innerHTML += "<br />";
-        }
-    }
-
-    popupAbilities.append(abilityMainContainer);
+    createPopup(
+        abilityArray,
+        (key) => gameData.abilities[key]["ingameName"],
+        (key) => gameData.abilities[key]["description"],
+        overlayAbilities, popupAbilities, body
+    );
 }
 
 function createPopupItem(itemArray) {
-    overlayAbilities.style.display = "flex";
-    body.classList.add("fixedAbilities");
-
-    while (popupAbilities.firstChild) {
-        popupAbilities.removeChild(popupAbilities.firstChild);
-    }
-
-    const itemMainContainer = document.createElement("ul");
-
-    for (let i = 0; i < itemArray.length; i++) {
-        const itemContainer = document.createElement("li");
-        const itemName = document.createElement("span");
-        itemName.innerText = `${window.items[itemArray[i]]["ingameName"]}: `;
-        itemName.className = "bold";
-        const itemDescription = document.createElement("span");
-        itemDescription.innerText = window.items[itemArray[i]]["description"];
-        itemContainer.append(itemName);
-        itemContainer.append(itemDescription);
-        itemMainContainer.append(itemContainer);
-        if (i < itemArray.length - 1) {
-            itemMainContainer.innerHTML += "<br />";
-        }
-    }
-
-    popupAbilities.append(itemMainContainer);
+    createPopup(
+        itemArray,
+        (key) => gameData.items[key]["ingameName"],
+        (key) => gameData.items[key]["description"],
+        overlayAbilities, popupAbilities, body
+    );
 }
 
 async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
@@ -425,11 +389,11 @@ async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
         context.putImageData(imageData, 0, 0);
 
         if (!localStorage.getItem(`${trainerSprite}`)) {
-            await localStorage.setItem(
+            localStorage.setItem(
                 `${trainerSprite}`,
                 LZString.compressToUTF16(canvas.toDataURL())
             );
-            window.sprites[trainerSprite] = canvas.toDataURL();
+            gameData.sprites[trainerSprite] = canvas.toDataURL();
         }
         if (
             document.getElementsByClassName(`sprite${trainerSprite}`).length > 0
@@ -451,12 +415,12 @@ function replaceTbody(key, zone, trainer) {
 
         trainerEl
             .getElementsByClassName("trainerTbody")[0]
-            .replaceWith(createTrainerSpeciesTbody(window.trainers[zone][trainer]));
+            .replaceWith(createTrainerSpeciesTbody(gameData.trainers[zone][trainer]));
         const trainerFormat =
             trainerEl.getElementsByClassName("trainerFormat")[0];
         trainerFormat.classList.remove("double");
 
-        if (window.trainers[zone][trainer]["double"]) {
+        if (gameData.trainers[zone][trainer]["double"]) {
             format = "Double";
             trainerFormat.classList.add("double");
         }
@@ -466,8 +430,8 @@ function replaceTbody(key, zone, trainer) {
 }
 
 export function checkTrainerDifficulty(zone, trainer) {
-    if (window.trainers[zone][trainer]["party"][window.trainersDifficulty]) {
-        return window.trainersDifficulty;
+    if (gameData.trainers[zone][trainer]["party"][uiState.trainersDifficulty]) {
+        return uiState.trainersDifficulty;
     } else {
         return "Normal";
     }
@@ -475,23 +439,23 @@ export function checkTrainerDifficulty(zone, trainer) {
 
 function setActiveRematch(zone, trainer) {
     let trainerName = trainer;
-    if (window.trainers[zone][trainer]["rematch"]) {
-        trainerName = window.trainers[zone][trainer]["rematch"];
+    if (gameData.trainers[zone][trainer]["rematch"]) {
+        trainerName = gameData.trainers[zone][trainer]["rematch"];
     }
     const key = `${zone}\\${trainerName}`;
 
     let baseTrainer = trainer;
-    if (window.trainers[zone][trainer]["rematch"]) {
-        baseTrainer = window.trainers[zone][trainer]["rematch"];
+    if (gameData.trainers[zone][trainer]["rematch"]) {
+        baseTrainer = gameData.trainers[zone][trainer]["rematch"];
     }
-    if (window.trainers[zone][baseTrainer]["rematchArray"]) {
-        delete window.trainers[zone][baseTrainer]["activeRematch"];
-        window.trainers[zone][baseTrainer]["rematchArray"].forEach((rematch) => {
-            delete window.trainers[zone][rematch]["activeRematch"];
+    if (gameData.trainers[zone][baseTrainer]["rematchArray"]) {
+        delete gameData.trainers[zone][baseTrainer]["activeRematch"];
+        gameData.trainers[zone][baseTrainer]["rematchArray"].forEach((rematch) => {
+            delete gameData.trainers[zone][rematch]["activeRematch"];
         });
     }
 
-    window.trainers[zone][trainer]["activeRematch"] = true;
+    gameData.trainers[zone][trainer]["activeRematch"] = true;
 
     try {
         document
@@ -499,45 +463,47 @@ function setActiveRematch(zone, trainer) {
             .getElementsByClassName("activeRematch")[0]
             .classList.remove("activeRematch");
         document.getElementsByName(trainer)[0].classList.add("activeRematch");
-    } catch {}
+    } catch (e) {
+        console.warn("Failed to update rematch UI:", e.message);
+    }
 }
 
 export function showRematch() {
-    for (let i = 0, j = window.trainersTracker.length; i < j; i++) {
-        const zone = window.trainersTracker[i]["key"].split("\\")[0];
-        const trainer = window.trainersTracker[i]["key"].split("\\")[1];
+    for (let i = 0, j = trackers.trainers.length; i < j; i++) {
+        const zone = trackers.trainers[i]["key"].split("\\")[0];
+        const trainer = trackers.trainers[i]["key"].split("\\")[1];
         if (
-            (window.trainers[zone][trainer]["rematch"] ||
-                window.trainers[zone][trainer]["rematchArray"]) &&
-            window.trainersTracker[i]["filter"].length === 0
+            (gameData.trainers[zone][trainer]["rematch"] ||
+                gameData.trainers[zone][trainer]["rematchArray"]) &&
+            trackers.trainers[i]["filter"].length === 0
         ) {
             let rememberI = i;
             let baseTrainer = trainer;
-            if (window.trainers[zone][trainer]["rematch"]) {
-                baseTrainer = window.trainers[zone][trainer]["rematch"];
+            if (gameData.trainers[zone][trainer]["rematch"]) {
+                baseTrainer = gameData.trainers[zone][trainer]["rematch"];
             }
             //setActiveRematch(zone, trainer)
-            if (window.trainers[zone][baseTrainer]["rematchArray"]) {
+            if (gameData.trainers[zone][baseTrainer]["rematchArray"]) {
                 const rematchArray =
-                    window.trainers[zone][baseTrainer]["rematchArray"].concat(
+                    gameData.trainers[zone][baseTrainer]["rematchArray"].concat(
                         baseTrainer
                     );
                 for (let k = 0; k < rematchArray.length; k++) {
                     if (
                         i - k > 0 &&
                         rematchArray.includes(
-                            window.trainersTracker[i - k]["key"].split("\\")[1]
+                            trackers.trainers[i - k]["key"].split("\\")[1]
                         )
                     ) {
-                        window.trainersTracker[i - k]["show"] = true;
+                        trackers.trainers[i - k]["show"] = true;
                     }
                     if (
                         i + k < j &&
                         rematchArray.includes(
-                            window.trainersTracker[i + k]["key"].split("\\")[1]
+                            trackers.trainers[i + k]["key"].split("\\")[1]
                         )
                     ) {
-                        window.trainersTracker[i + k]["show"] = true;
+                        trackers.trainers[i + k]["show"] = true;
                         rememberI = i + k + 1;
                     }
                 }
@@ -547,7 +513,3 @@ export function showRematch() {
     }
 }
 
-// Shims temporários
-window.appendTrainersToTable = appendTrainersToTable;
-window.checkTrainerDifficulty = checkTrainerDifficulty;
-window.showRematch = showRematch;

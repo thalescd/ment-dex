@@ -98,7 +98,7 @@ export function changeSetting(setting, enable = false) {
             settings.push(setting);
         }
     } else {
-        settings = settings.filter((value) => value != setting);
+        settings = settings.filter((value) => value !== setting);
     }
     localStorage.setItem("DEXsettings", JSON.stringify(settings));
     applySettings();
