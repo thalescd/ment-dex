@@ -1,4 +1,4 @@
-import { sanitizeString } from '../../utils/utility.js';
+import { sanitizeString } from "../../utils/utility.js";
 
 export function regexMovesDescription(textMovesDescription, moves) {
     const lines = textMovesDescription.split("\n");
@@ -236,7 +236,10 @@ export function regexMovesIngameName(textMovesIngameName, moves) {
     return moves;
 }
 
-export function regexVanillaMovesDescription(textVanillaMovesDescription, moves) {
+export function regexVanillaMovesDescription(
+    textVanillaMovesDescription,
+    moves
+) {
     const lines = textVanillaMovesDescription.split("\n");
     let conversionTable = {};
 

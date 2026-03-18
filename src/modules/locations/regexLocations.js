@@ -1,4 +1,4 @@
-import { sanitizeString } from '../../utils/utility.js';
+import { sanitizeString } from "../../utils/utility.js";
 
 export function regexWildLocations(wildEncounters, locations) {
     const methodArrayWild = [

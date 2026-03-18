@@ -10,8 +10,8 @@ import {
     speciesPanelTutorTableTbody,
     hideEggMoves,
     speciesPanelEggMovesTableTbody,
-    popup
-} from './domRefs.js';
+    popup,
+} from "./domRefs.js";
 
 export let settings = [];
 
@@ -29,7 +29,9 @@ export async function applySettings() {
     if (settings.includes("speciesPanelHistorySticky")) {
         speciesPanelHistoryContainer.classList.add("speciesPanelHistorySticky");
     } else {
-        speciesPanelHistoryContainer.classList.remove("speciesPanelHistorySticky");
+        speciesPanelHistoryContainer.classList.remove(
+            "speciesPanelHistorySticky"
+        );
     }
 
     if (settings.includes("hideLevelUpFromPreviousEvolution")) {

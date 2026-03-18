@@ -1,14 +1,17 @@
-import { checkUpdate } from './config.js';
-import { LZString } from './lz-string.js';
-import { gameData, uiState } from './state.js';
-import { spriteRemoveBgReturnBase64, decodeSpriteDataString } from './spriteUtils.js';
+import { checkUpdate } from "./config.js";
+import { LZString } from "./lz-string.js";
+import { gameData, uiState } from "./state.js";
+import {
+    spriteRemoveBgReturnBase64,
+    decodeSpriteDataString,
+} from "./spriteUtils.js";
 import {
     speciesPanelMainContainer,
     speciesPanelInputSpeciesDataList,
     abilitiesInputDataList,
     panelSpecies,
     historyObj,
-} from './domRefs.js';
+} from "./domRefs.js";
 
 export function sanitizeString(string, removeSpecial = true) {
     const regex =
@@ -115,7 +118,9 @@ export async function setDataList() {
         }
         const option = document.createElement("option");
         option.innerText = gameData.abilities[abilityName]["ingameName"];
-        uiState.abilitiesIngameNameArray.push(gameData.abilities[abilityName]["ingameName"]);
+        uiState.abilitiesIngameNameArray.push(
+            gameData.abilities[abilityName]["ingameName"]
+        );
         abilitiesInputDataList.append(option);
     }
 }
@@ -148,7 +153,9 @@ export function returnTargetSpeciesSprite(speciesName) {
     if (
         gameData.species[speciesName]["forms"].length > 1 &&
         gameData.species[speciesName]["sprite"] ===
-            gameData.species[gameData.species[speciesName]["forms"][0]]["sprite"]
+            gameData.species[gameData.species[speciesName]["forms"][0]][
+                "sprite"
+            ]
     ) {
         return gameData.species[speciesName]["forms"][0];
     }
@@ -316,4 +323,3 @@ export function getPokemonEffectivenessValueAgainstType(speciesObj, type) {
 
     return offensiveValue;
 }
-

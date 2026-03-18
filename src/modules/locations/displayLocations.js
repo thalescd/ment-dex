@@ -1,8 +1,16 @@
-import { sanitizeString, speciesCanLearnMove, getSpeciesSpriteSrc, returnTargetSpeciesSprite } from '../../utils/utility.js';
-import { locationsTableTbody, locationsFilterContainer } from '../../utils/domRefs.js';
-import { createSpeciesPanel } from '../../utils/speciesPanelUtility.js';
-import { gameData, uiState } from '../../utils/state.js';
-import { getMoveMethodLabel } from '../../utils/domUtils.js';
+import {
+    sanitizeString,
+    speciesCanLearnMove,
+    getSpeciesSpriteSrc,
+    returnTargetSpeciesSprite,
+} from "../../utils/utility.js";
+import {
+    locationsTableTbody,
+    locationsFilterContainer,
+} from "../../utils/domRefs.js";
+import { createSpeciesPanel } from "../../utils/speciesPanelUtility.js";
+import { gameData, uiState } from "../../utils/state.js";
+import { getMoveMethodLabel } from "../../utils/domUtils.js";
 
 uiState.locationsMoveFilter = null;
 
@@ -20,7 +28,10 @@ export function updateLocationsMoveFilter() {
                     .replace(" ", "")
                     .split(":")[1];
                 Object.keys(gameData.moves).forEach((moveName) => {
-                    if (gameData.moves[moveName]["ingameName"] === uiState.locationsMoveFilter) {
+                    if (
+                        gameData.moves[moveName]["ingameName"] ===
+                        uiState.locationsMoveFilter
+                    ) {
                         uiState.locationsMoveFilter = moveName;
                     }
                 });
@@ -97,7 +108,9 @@ function appendSpeciesEl(location, method, speciesKey, methodTable) {
     } else {
         rarity.innerText = gameData.locations[location][method][speciesKey];
         if (
-            Number.isInteger(parseInt(gameData.locations[location][method][speciesKey]))
+            Number.isInteger(
+                parseInt(gameData.locations[location][method][speciesKey])
+            )
         ) {
             rarity.innerText += "%";
             rarity.style.color = `hsl(${gameData.locations[location][method][speciesKey] * 2},85%,45%)`;
@@ -246,4 +259,3 @@ function returnMethodSprite(method) {
         return method;
     }
 }
-

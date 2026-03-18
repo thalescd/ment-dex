@@ -1,5 +1,9 @@
-import { sanitizeString, getSpeciesSpriteSrc, copyToClipboard } from './utility.js';
-import { gameData } from './state.js';
+import {
+    sanitizeString,
+    getSpeciesSpriteSrc,
+    copyToClipboard,
+} from "./utility.js";
+import { gameData } from "./state.js";
 
 function createStrategyMove(num, move) {
     const moveContainer = document.createElement("tr");

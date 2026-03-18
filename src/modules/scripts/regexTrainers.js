@@ -1,6 +1,6 @@
-import { sanitizeString } from '../../utils/utility.js';
-import { repos } from '../../utils/config.js';
-import { gameData } from '../../utils/state.js';
+import { sanitizeString } from "../../utils/utility.js";
+import { repos } from "../../utils/config.js";
+import { gameData } from "../../utils/state.js";
 
 export function initTrainer(trainers, trainer, zone) {
     if (!trainers[zone]) {
@@ -30,9 +30,7 @@ export async function regexTrainers(textTrainers) {
         });
     });
 
-    const rawRematch = await fetch(
-        `${repos.cfru}/src/battle_setup.c`
-    );
+    const rawRematch = await fetch(`${repos.cfru}/src/battle_setup.c`);
     const textRematch = await rawRematch.text();
 
     let trainerToRematch = {};
@@ -68,17 +66,22 @@ export async function regexTrainers(textTrainers) {
                     }
                     if (trainer && zone && rematch) {
                         if (!gameData.trainers[zone][rematch]["rematchArray"]) {
-                            gameData.trainers[zone][rematch]["rematchArray"] = [];
+                            gameData.trainers[zone][rematch]["rematchArray"] =
+                                [];
                         }
                         try {
-                            gameData.trainers[zone][trainer]["rematch"] = rematch;
+                            gameData.trainers[zone][trainer]["rematch"] =
+                                rematch;
                         } catch {
                             gameData.trainers[zone][trainer] = {};
                             initTrainer(gameData.trainers, trainer, zone);
-                            gameData.trainers[zone][trainer]["rematch"] = rematch;
+                            gameData.trainers[zone][trainer]["rematch"] =
+                                rematch;
                             trainerToZone[trainer] = zone;
                         }
-                        gameData.trainers[zone][rematch]["rematchArray"].push(trainer);
+                        gameData.trainers[zone][rematch]["rematchArray"].push(
+                            trainer
+                        );
                     }
                 }
             }
@@ -86,7 +89,8 @@ export async function regexTrainers(textTrainers) {
                 if (/.trainerPic *=/i.test(line)) {
                     const matchTrainerPic = line.match(/TRAINER_PIC_\w+/i);
                     if (matchTrainerPic) {
-                        gameData.trainers[zone][trainer]["sprite"] = matchTrainerPic[0];
+                        gameData.trainers[zone][trainer]["sprite"] =
+                            matchTrainerPic[0];
                     }
                 } else if (/.trainerName *=/i.test(line)) {
                     const matchTrainerName = line.match(/_\(\"(.*)\"\)/i);
@@ -251,42 +255,51 @@ export async function regexTrainersParties(
                         if (!mon["nature"]) {
                             mon["nature"] = "NATURE_DOCILE";
                         }
-                        if (!gameData.trainers[zone][trainer]["party"][difficulty]) {
-                            gameData.trainers[zone][trainer]["party"][difficulty] = [];
+                        if (
+                            !gameData.trainers[zone][trainer]["party"][
+                                difficulty
+                            ]
+                        ) {
+                            gameData.trainers[zone][trainer]["party"][
+                                difficulty
+                            ] = [];
                         }
-                        gameData.trainers[zone][trainer]["party"][difficulty].push(mon);
+                        gameData.trainers[zone][trainer]["party"][
+                            difficulty
+                        ].push(mon);
                     }
                     mon = {};
                 } else if (/^} *;$/.test(line)) {
-                    Object.keys(gameData.trainers[zone][trainer]["party"]).forEach(
-                        (difficulty) => {
-                            gameData.trainers[zone][trainer]["party"][
-                                difficulty
-                            ].forEach((trainerSpeciesObj) => {
-                                let speciesName = trainerSpeciesObj["name"];
-                                for (
-                                    let i = 0;
-                                    i <
-                                    gameData.species[speciesName]["evolution"].length;
-                                    i++
+                    Object.keys(
+                        gameData.trainers[zone][trainer]["party"]
+                    ).forEach((difficulty) => {
+                        gameData.trainers[zone][trainer]["party"][
+                            difficulty
+                        ].forEach((trainerSpeciesObj) => {
+                            let speciesName = trainerSpeciesObj["name"];
+                            for (
+                                let i = 0;
+                                i <
+                                gameData.species[speciesName]["evolution"]
+                                    .length;
+                                i++
+                            ) {
+                                if (
+                                    gameData.species[speciesName]["evolution"][
+                                        i
+                                    ][0].includes("EVO_MEGA") &&
+                                    gameData.species[speciesName]["evolution"][
+                                        i
+                                    ][1] === trainerSpeciesObj["item"]
                                 ) {
-                                    if (
-                                        gameData.species[speciesName]["evolution"][
-                                            i
-                                        ][0].includes("EVO_MEGA") &&
-                                        gameData.species[speciesName]["evolution"][
-                                            i
-                                        ][1] === trainerSpeciesObj["item"]
-                                    ) {
-                                        trainerSpeciesObj["name"] =
-                                            gameData.species[speciesName]["evolution"][
-                                                i
-                                            ][2];
-                                    }
+                                    trainerSpeciesObj["name"] =
+                                        gameData.species[speciesName][
+                                            "evolution"
+                                        ][i][2];
                                 }
-                            });
-                        }
-                    );
+                            }
+                        });
+                    });
 
                     trainer = null;
                     zone = null;

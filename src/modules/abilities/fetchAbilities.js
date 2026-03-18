@@ -1,14 +1,14 @@
-import { repos } from '../../utils/config.js';
-import { LZString } from '../../utils/lz-string.js';
-import { footerP } from '../../utils/utility.js';
-import { gameData, trackers } from '../../utils/state.js';
+import { repos } from "../../utils/config.js";
+import { LZString } from "../../utils/lz-string.js";
+import { footerP } from "../../utils/utility.js";
+import { gameData, trackers } from "../../utils/state.js";
 import {
     regexAbilities,
     regexVanillaAbilitiesDescription,
     regexAbilitiesIngameName,
     regexAbilitiesDescription,
-    regexNewAbilities
-} from './regexAbilities.js';
+    regexNewAbilities,
+} from "./regexAbilities.js";
 
 async function getAbilities(abilities) {
     footerP("Fetching abilities");
@@ -82,7 +82,8 @@ async function buildAbilitiesObj() {
             "Nullifies all water to up Sp. Atk.";
         abilities["ABILITY_GRASS_DASH"]["description"] =
             "Grass-type moves hit first.";
-        abilities["ABILITY_SLIPPERY_TAIL"]["description"] = "Tail moves hit first.";
+        abilities["ABILITY_SLIPPERY_TAIL"]["description"] =
+            "Tail moves hit first.";
         abilities["ABILITY_DRILL_BEAK"]["description"] =
             "Drill moves land critical hits.";
 

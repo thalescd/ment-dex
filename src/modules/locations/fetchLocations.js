@@ -1,8 +1,8 @@
-import { repos } from '../../utils/config.js';
-import { LZString } from '../../utils/lz-string.js';
-import { footerP } from '../../utils/utility.js';
-import { gameData, trackers } from '../../utils/state.js';
-import { regexWildLocations, regexRaidLocations } from './regexLocations.js';
+import { repos } from "../../utils/config.js";
+import { LZString } from "../../utils/lz-string.js";
+import { footerP } from "../../utils/utility.js";
+import { gameData, trackers } from "../../utils/state.js";
+import { regexWildLocations, regexRaidLocations } from "./regexLocations.js";
 
 async function getWildLocations(locations) {
     footerP("Fetching wild locations");
@@ -56,13 +56,15 @@ export async function fetchLocationsObj() {
     trackers.locations = [];
     Object.keys(gameData.locations).forEach((zone) => {
         Object.keys(gameData.locations[zone]).forEach((method) => {
-            Object.keys(gameData.locations[zone][method]).forEach((speciesName) => {
-                trackers.locations[counter] = {};
-                trackers.locations[counter]["key"] =
-                    `${zone}\\${method}\\${speciesName}`;
-                trackers.locations[counter]["filter"] = [];
-                counter++;
-            });
+            Object.keys(gameData.locations[zone][method]).forEach(
+                (speciesName) => {
+                    trackers.locations[counter] = {};
+                    trackers.locations[counter]["key"] =
+                        `${zone}\\${method}\\${speciesName}`;
+                    trackers.locations[counter]["filter"] = [];
+                    counter++;
+                }
+            );
         });
     });
 }

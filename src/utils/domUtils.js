@@ -20,7 +20,14 @@ export function getMoveMethodLabel(moveMethod) {
     return labels[moveMethod] || null;
 }
 
-export function createPopup(dataArray, getNameFn, getDescriptionFn, overlayEl, popupEl, bodyEl) {
+export function createPopup(
+    dataArray,
+    getNameFn,
+    getDescriptionFn,
+    overlayEl,
+    popupEl,
+    bodyEl
+) {
     overlayEl.style.display = "flex";
     bodyEl.classList.add("fixedAbilities");
 

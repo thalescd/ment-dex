@@ -1,9 +1,9 @@
-import { getSpeciesSpriteSrc, returnTargetSpeciesSprite } from './utility.js';
-import { panelSpecies, speciesPanelHistoryContainer } from './domRefs.js';
-import { gameData, uiState } from './state.js';
-import { clearChildren } from './domUtils.js';
-import { MAX_PANEL_HISTORY, LOCK_SPECIES_TIMEOUT_MS } from './config.js';
-import { createSpeciesPanel } from './speciesPanelUtility.js';
+import { getSpeciesSpriteSrc, returnTargetSpeciesSprite } from "./utility.js";
+import { panelSpecies, speciesPanelHistoryContainer } from "./domRefs.js";
+import { gameData, uiState } from "./state.js";
+import { clearChildren } from "./domUtils.js";
+import { MAX_PANEL_HISTORY, LOCK_SPECIES_TIMEOUT_MS } from "./config.js";
+import { createSpeciesPanel } from "./speciesPanelUtility.js";
 
 // Initialize history from localStorage
 if (localStorage.getItem("speciesPanelHistory")) {
@@ -22,7 +22,8 @@ function updateSpeciesPanelHistoryOrder() {
                     break;
                 } else {
                     const temp = uiState.speciesPanelHistory[j - 1];
-                    uiState.speciesPanelHistory[j - 1] = uiState.speciesPanelHistory[j];
+                    uiState.speciesPanelHistory[j - 1] =
+                        uiState.speciesPanelHistory[j];
                     uiState.speciesPanelHistory[j] = temp;
                 }
             }
@@ -121,7 +122,8 @@ export async function manageSpeciesPanelHistory(speciesName) {
     for (let i = 0; i < uiState.speciesPanelHistory.length; i++) {
         if (
             !(uiState.speciesPanelHistory[i][0] in gameData.species) ||
-            gameData.species[uiState.speciesPanelHistory[i][0]]["baseSpeed"] === 0
+            gameData.species[uiState.speciesPanelHistory[i][0]]["baseSpeed"] ===
+                0
         ) {
             uiState.speciesPanelHistory.splice(i, 1);
             i--;
@@ -170,15 +172,18 @@ export async function manageSpeciesPanelHistory(speciesName) {
 
     for (let i = 0; i < uiState.speciesPanelHistory.length; i++) {
         if (
-            gameData.species[uiState.speciesPanelHistory[i][0]]["evolutionLine"].includes(
-                speciesName
-            ) ||
-            gameData.species[uiState.speciesPanelHistory[i][0]]["forms"].includes(speciesName)
+            gameData.species[uiState.speciesPanelHistory[i][0]][
+                "evolutionLine"
+            ].includes(speciesName) ||
+            gameData.species[uiState.speciesPanelHistory[i][0]][
+                "forms"
+            ].includes(speciesName)
         ) {
             uiState.speciesPanelHistory[i][0] = speciesName;
             for (let j = i; j > locked; j--) {
                 const temp = uiState.speciesPanelHistory[j - 1];
-                uiState.speciesPanelHistory[j - 1] = uiState.speciesPanelHistory[j];
+                uiState.speciesPanelHistory[j - 1] =
+                    uiState.speciesPanelHistory[j];
                 uiState.speciesPanelHistory[j] = temp;
             }
             displaySpeciesPanelHistory();

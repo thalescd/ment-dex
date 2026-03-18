@@ -1,6 +1,6 @@
-import { gameData, trackers } from '../../utils/state.js';
-import { clearChildren } from '../../utils/domUtils.js';
-import { sanitizeString } from '../../utils/utility.js';
+import { gameData, trackers } from "../../utils/state.js";
+import { clearChildren } from "../../utils/domUtils.js";
+import { sanitizeString } from "../../utils/utility.js";
 import {
     movesTableTbody,
     movesButton,
@@ -8,11 +8,14 @@ import {
     overlay,
     body,
     popup,
-    setTracker
-} from '../../utils/domRefs.js';
-import { tableButtonClick } from '../../utils/tableUtility.js';
-import { deleteFiltersFromTable, createFilter } from '../../utils/tableFilters.js';
-import { speciesPanel } from '../../utils/speciesPanelUtility.js';
+    setTracker,
+} from "../../utils/domRefs.js";
+import { tableButtonClick } from "../../utils/tableUtility.js";
+import {
+    deleteFiltersFromTable,
+    createFilter,
+} from "../../utils/tableFilters.js";
+import { speciesPanel } from "../../utils/speciesPanelUtility.js";
 
 export function appendMovesToTable(moveName) {
     if (
@@ -279,4 +282,3 @@ export function createPopupForMove(move, interactAble = true) {
         popup.append(filterButton);
     }
 }
-

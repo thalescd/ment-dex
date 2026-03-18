@@ -1,8 +1,8 @@
-import { sanitizeString } from '../../utils/utility.js';
-import { repos } from '../../utils/config.js';
-import { gameData, trackers } from '../../utils/state.js';
-import { initTrainer } from './regexTrainers.js';
-import { initItem } from './regexItems.js';
+import { sanitizeString } from "../../utils/utility.js";
+import { repos } from "../../utils/config.js";
+import { gameData, trackers } from "../../utils/state.js";
+import { initTrainer } from "./regexTrainers.js";
+import { initItem } from "./regexItems.js";
 
 function initScriptsLocations(speciesName, zone, method) {
     if (!gameData.locations[zone]) {
@@ -16,7 +16,8 @@ function initScriptsLocations(speciesName, zone, method) {
 
         const counter = trackers.locations.length;
         trackers.locations[counter] = {};
-        trackers.locations[counter]["key"] = `${zone}\\${method}\\${speciesName}`;
+        trackers.locations[counter]["key"] =
+            `${zone}\\${method}\\${speciesName}`;
         trackers.locations[counter]["filter"] = [];
     }
 }
@@ -105,7 +106,8 @@ function regexScript(
             gameData.items[tutorName]["description"] =
                 gameData.moves[move]["description"].join("");
             gameData.items[tutorName]["pocket"] = "POCKET_TUTOR";
-            gameData.items[tutorName]["url"] = `assets/TM_${gameData.moves[move]["type"]}.png`;
+            gameData.items[tutorName]["url"] =
+                `assets/TM_${gameData.moves[move]["type"]}.png`;
         }
         gameData.items[tutorName]["locations"]["Tutor"].push(zone);
     }
@@ -164,19 +166,17 @@ export async function regexScripts(textScripts, tradeText, specialFunctions) {
 
     const scripts = textScripts.match(/data\/.*.inc/gi);
     for (let i = 0, j = scripts.length; i < j; i++) {
-        fetch(`${repos.cfru}/${scripts[i]}`).then(
-            (promises) => {
-                promises.text().then((text) => {
-                    regexScript(
-                        text,
-                        scripts[i],
-                        tradeArray,
-                        specialFunctions,
-                        regexSpecialFunctions
-                    );
-                });
-            }
-        );
+        fetch(`${repos.cfru}/${scripts[i]}`).then((promises) => {
+            promises.text().then((text) => {
+                regexScript(
+                    text,
+                    scripts[i],
+                    tradeArray,
+                    specialFunctions,
+                    regexSpecialFunctions
+                );
+            });
+        });
     }
 }
 

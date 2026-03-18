@@ -1,5 +1,5 @@
-import { repos } from '../../utils/config.js';
-import { gameData } from '../../utils/state.js';
+import { repos } from "../../utils/config.js";
+import { gameData } from "../../utils/state.js";
 
 export function regexSpecies(textSpecies, species) {
     const lines = textSpecies.split("\n");
@@ -171,7 +171,9 @@ export async function regexAbilitiesArrayForChanges(textAbilitiesForChanges) {
     return abilitiesArrayForChanges;
 }
 
-export function getLevelUpLearnsetsConversionTable(textLevelUpLearnsetsPointers) {
+export function getLevelUpLearnsetsConversionTable(
+    textLevelUpLearnsetsPointers
+) {
     const lines = textLevelUpLearnsetsPointers.split("\n");
     let conversionTable = {};
 
@@ -194,7 +196,11 @@ export function getLevelUpLearnsetsConversionTable(textLevelUpLearnsetsPointers)
     return conversionTable;
 }
 
-export function regexLevelUpLearnsets(textLevelUpLearnsets, conversionTable, species) {
+export function regexLevelUpLearnsets(
+    textLevelUpLearnsets,
+    conversionTable,
+    species
+) {
     const lines = textLevelUpLearnsets.split("\n");
     let speciesArray = [];
 
@@ -229,7 +235,12 @@ export function regexLevelUpLearnsets(textLevelUpLearnsets, conversionTable, spe
     return species;
 }
 
-export async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end) {
+export async function regexTMHMLearnsets(
+    textTMHMLearnsets,
+    species,
+    start,
+    end
+) {
     const lines = textTMHMLearnsets.split("\n");
     let name = null,
         startFound = false,
@@ -280,7 +291,12 @@ export async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end)
     //return altFormsLearnsets(species, "forms", "TMHMLearnsets")
 }
 
-export async function regexTutorLearnsets(textTutorLearnsets, species, start, end) {
+export async function regexTutorLearnsets(
+    textTutorLearnsets,
+    species,
+    start,
+    end
+) {
     const lines = textTutorLearnsets.split("\n");
     let startFound = false,
         count = 0;
@@ -329,7 +345,9 @@ export async function regexTutorLearnsets(textTutorLearnsets, species, start, en
                                 gameData.moves[matchMove[0]]["flags"].toString()
                             )
                         ) {
-                            gameData.moves[matchMove[0]]["flags"].push("BF Tutor");
+                            gameData.moves[matchMove[0]]["flags"].push(
+                                "BF Tutor"
+                            );
                         }
 
                         text.split("\n").forEach((line) => {

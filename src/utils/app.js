@@ -1,18 +1,27 @@
 // Orquestrador principal - funcoes que coordenam multiplos modulos
 // Separado de utility.js para evitar dependencias circulares
 
-import { gameData } from './state.js';
-import { applySettings } from './settings.js';
-import { footerP, forceUpdate, setDataList, refreshURLParams } from './utility.js';
-import { setFilters, createFilter, deleteFiltersFromTable } from './tableFilters.js';
-import { displaySetup, tableButtonClick } from './tableUtility.js';
-import { createSpeciesPanel, speciesPanel } from './speciesPanelUtility.js';
-import { fetchSpeciesObj } from '../modules/species/fetchSpecies.js';
-import { fetchMovesObj } from '../modules/moves/fetchMoves.js';
-import { fetchAbilitiesObj } from '../modules/abilities/fetchAbilities.js';
-import { fetchLocationsObj } from '../modules/locations/fetchLocations.js';
-import { fetchScripts } from '../modules/scripts/fetchScripts.js';
-import { fetchStrategiesObj } from '../modules/strategies/fetchStrategies.js';
+import { gameData } from "./state.js";
+import { applySettings } from "./settings.js";
+import {
+    footerP,
+    forceUpdate,
+    setDataList,
+    refreshURLParams,
+} from "./utility.js";
+import {
+    setFilters,
+    createFilter,
+    deleteFiltersFromTable,
+} from "./tableFilters.js";
+import { displaySetup, tableButtonClick } from "./tableUtility.js";
+import { createSpeciesPanel, speciesPanel } from "./speciesPanelUtility.js";
+import { fetchSpeciesObj } from "../modules/species/fetchSpecies.js";
+import { fetchMovesObj } from "../modules/moves/fetchMoves.js";
+import { fetchAbilitiesObj } from "../modules/abilities/fetchAbilities.js";
+import { fetchLocationsObj } from "../modules/locations/fetchLocations.js";
+import { fetchScripts } from "../modules/scripts/fetchScripts.js";
+import { fetchStrategiesObj } from "../modules/strategies/fetchStrategies.js";
 
 export async function fetchData(urlParams = "") {
     if (urlParams === "") {
@@ -67,15 +76,17 @@ export async function getLocationsByPokemon() {
 
     Object.keys(gameData.locations).forEach((location) => {
         Object.keys(gameData.locations[location]).forEach((method) => {
-            Object.keys(gameData.locations[location][method]).forEach((name) => {
-                if (!(name in gameData.locationsByPokemon)) {
-                    gameData.locationsByPokemon[name] = {};
+            Object.keys(gameData.locations[location][method]).forEach(
+                (name) => {
+                    if (!(name in gameData.locationsByPokemon)) {
+                        gameData.locationsByPokemon[name] = {};
+                    }
+                    if (!(location in gameData.locationsByPokemon[name])) {
+                        gameData.locationsByPokemon[name][location] = [];
+                    }
+                    gameData.locationsByPokemon[name][location].push(method);
                 }
-                if (!(location in gameData.locationsByPokemon[name])) {
-                    gameData.locationsByPokemon[name][location] = [];
-                }
-                gameData.locationsByPokemon[name][location].push(method);
-            });
+            );
         });
     });
 }
@@ -158,4 +169,3 @@ export function exportData() {
         `let backupData = [${JSON.stringify(gameData.moves)}, ${JSON.stringify(gameData.abilities)}, ${JSON.stringify(gameData.species)}, ${JSON.stringify(gameData.locations)}, ${JSON.stringify(gameData.trainers)}, ${JSON.stringify(gameData.items)}, ${JSON.stringify(gameData.strategies)}, ${JSON.stringify(gameData.typeChart)}]`
     );
 }
-

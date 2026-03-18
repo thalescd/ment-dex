@@ -1,5 +1,5 @@
-import { LZString } from './lz-string.js';
-import { gameData } from './state.js';
+import { LZString } from "./lz-string.js";
+import { gameData } from "./state.js";
 
 export function isSameColor(r1, g1, b1, r2, g2, b2, tolerance = 1) {
     return (

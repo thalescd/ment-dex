@@ -1,11 +1,11 @@
-import { sanitizeString } from '../../utils/utility.js';
-import { LZString } from '../../utils/lz-string.js';
-import { itemsTableTbody } from '../../utils/domRefs.js';
-import { lazyLoading } from '../../utils/tableUtility.js';
-import { settings } from '../../utils/settings.js';
-import { getItemSpriteSrc } from './fetchScripts.js';
-import { gameData } from '../../utils/state.js';
-import { LONG_PRESS_DURATION_MS } from '../../utils/config.js';
+import { sanitizeString } from "../../utils/utility.js";
+import { LZString } from "../../utils/lz-string.js";
+import { itemsTableTbody } from "../../utils/domRefs.js";
+import { lazyLoading } from "../../utils/tableUtility.js";
+import { settings } from "../../utils/settings.js";
+import { getItemSpriteSrc } from "./fetchScripts.js";
+import { gameData } from "../../utils/state.js";
+import { LONG_PRESS_DURATION_MS } from "../../utils/config.js";
 
 let itemsLocations = [];
 if (localStorage.getItem("itemsLocations")) {
@@ -79,7 +79,11 @@ function returnItemTableTbody(key) {
 
     Object.keys(gameData.items[key]["locations"]).forEach((method) => {
         if (!settings.includes(method)) {
-            for (let i = 0; i < gameData.items[key]["locations"][method].length; i++) {
+            for (
+                let i = 0;
+                i < gameData.items[key]["locations"][method].length;
+                i++
+            ) {
                 if (
                     (!settings.includes("hideCrossedItems") ||
                         !itemsLocations.includes(
@@ -91,7 +95,8 @@ function returnItemTableTbody(key) {
                     const methodContainer = document.createElement("td");
                     methodContainer.innerText = method;
                     const location = document.createElement("td");
-                    location.innerText = gameData.items[key]["locations"][method][i];
+                    location.innerText =
+                        gameData.items[key]["locations"][method][i];
 
                     row.append(methodContainer);
                     row.append(location);
@@ -399,4 +404,3 @@ export async function spriteRemoveItemBgReturnBase64(itemName) {
         }
     };
 }
-

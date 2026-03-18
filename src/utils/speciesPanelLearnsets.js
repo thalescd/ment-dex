@@ -1,5 +1,5 @@
-import { sanitizeString, speciesCanLearnMove } from './utility.js';
-import { createPopupForMove } from '../modules/moves/displayMoves.js';
+import { sanitizeString, speciesCanLearnMove } from "./utility.js";
+import { createPopupForMove } from "../modules/moves/displayMoves.js";
 import {
     panelSpecies,
     overlay,
@@ -8,9 +8,9 @@ import {
     speciesPanelTMHMTable,
     speciesPanelTutorTable,
     speciesPanelEggMovesTable,
-} from './domRefs.js';
-import { gameData } from './state.js';
-import { clearChildren } from './domUtils.js';
+} from "./domRefs.js";
+import { gameData } from "./state.js";
+import { clearChildren } from "./domUtils.js";
 
 function sortLearnsetsArray(thead, learnsetsArray, label, asc) {
     let index = "";
@@ -106,7 +106,11 @@ export function buildSpeciesPanelLevelUpFromPreviousEvoTable(
         i--
     ) {
         const targetSpecies = gameData.species[name]["evolutionLine"][i];
-        for (let j = 0; j < gameData.species[targetSpecies]["evolution"].length; j++) {
+        for (
+            let j = 0;
+            j < gameData.species[targetSpecies]["evolution"].length;
+            j++
+        ) {
             if (
                 evolutionLineArray.includes(
                     gameData.species[targetSpecies]["evolution"][j][2]
@@ -137,7 +141,8 @@ export function buildSpeciesPanelLevelUpFromPreviousEvoTable(
             asc
         ).forEach((move) => {
             if (
-                speciesCanLearnMove(gameData.species[name], move[0]) === false &&
+                speciesCanLearnMove(gameData.species[name], move[0]) ===
+                    false &&
                 !movesArray.includes(move[0])
             ) {
                 movesArray.push(move[0]);
@@ -151,10 +156,9 @@ export function buildSpeciesPanelLevelUpFromPreviousEvoTable(
 
                 const typeContainer = document.createElement("td");
                 const type = document.createElement("div");
-                type.innerText = sanitizeString(gameData.moves[move[0]]["type"]).slice(
-                    0,
-                    3
-                );
+                type.innerText = sanitizeString(
+                    gameData.moves[move[0]]["type"]
+                ).slice(0, 3);
                 type.className = `${gameData.moves[move[0]]["type"]} backgroundSmall`;
                 typeContainer.append(type);
                 row.append(typeContainer);
@@ -229,70 +233,77 @@ export function buildSpeciesPanelDoubleLearnsetsTable(
 
     clearChildren(Tbody);
 
-    sortLearnsetsArray(THead, gameData.species[name][input], label, asc).forEach(
-        (move) => {
-            const row = document.createElement("tr");
+    sortLearnsetsArray(
+        THead,
+        gameData.species[name][input],
+        label,
+        asc
+    ).forEach((move) => {
+        const row = document.createElement("tr");
 
-            const level = document.createElement("td");
-            level.innerText = move[1];
-            row.append(level);
+        const level = document.createElement("td");
+        level.innerText = move[1];
+        row.append(level);
 
-            const moveName = document.createElement("td");
-            moveName.innerText = gameData.moves[move[0]]["ingameName"];
-            moveName.className = "bold";
-            row.append(moveName);
+        const moveName = document.createElement("td");
+        moveName.innerText = gameData.moves[move[0]]["ingameName"];
+        moveName.className = "bold";
+        row.append(moveName);
 
-            const typeContainer = document.createElement("td");
-            const type = document.createElement("div");
-            type.innerText = sanitizeString(gameData.moves[move[0]]["type"]).slice(0, 3);
-            type.className = `${gameData.moves[move[0]]["type"]} backgroundSmall`;
-            typeContainer.append(type);
-            row.append(typeContainer);
+        const typeContainer = document.createElement("td");
+        const type = document.createElement("div");
+        type.innerText = sanitizeString(gameData.moves[move[0]]["type"]).slice(
+            0,
+            3
+        );
+        type.className = `${gameData.moves[move[0]]["type"]} backgroundSmall`;
+        typeContainer.append(type);
+        row.append(typeContainer);
 
-            const splitContainer = document.createElement("td");
-            const splitIcon = document.createElement("img");
-            splitIcon.src = `assets/${gameData.moves[move[0]]["split"]}.png`;
-            splitIcon.className = `${sanitizeString(gameData.moves[move[0]]["split"])} splitIcon`;
-            splitContainer.append(splitIcon);
-            row.append(splitContainer);
+        const splitContainer = document.createElement("td");
+        const splitIcon = document.createElement("img");
+        splitIcon.src = `assets/${gameData.moves[move[0]]["split"]}.png`;
+        splitIcon.className = `${sanitizeString(gameData.moves[move[0]]["split"])} splitIcon`;
+        splitContainer.append(splitIcon);
+        row.append(splitContainer);
 
-            const power = document.createElement("td");
-            power.className = "speciesPanelLearnsetsPower";
-            if (gameData.moves[move[0]]["power"] > 0) {
-                power.innerText = gameData.moves[move[0]]["power"];
-            } else {
-                power.innerText = "-";
-            }
-            row.append(power);
-
-            const accuracy = document.createElement("td");
-            accuracy.className = "speciesPanelLearnsetsAccuracy";
-            if (gameData.moves[move[0]]["accuracy"] > 0) {
-                accuracy.innerText = gameData.moves[move[0]]["accuracy"];
-            } else {
-                accuracy.innerText = "-";
-            }
-            row.append(accuracy);
-
-            const PP = document.createElement("td");
-            PP.className = "speciesPanelLearnsetsPP";
-            PP.innerText = gameData.moves[move[0]]["PP"];
-            row.append(PP);
-
-            const movedescription = document.createElement("td");
-            movedescription.className = "speciesPanelLearnsetsEffect";
-            movedescription.innerText = gameData.moves[move[0]]["description"].join("");
-
-            row.addEventListener("click", function () {
-                createPopupForMove(gameData.moves[move[0]]);
-                overlay.style.display = "flex";
-            });
-
-            row.append(movedescription);
-
-            Tbody.append(row);
+        const power = document.createElement("td");
+        power.className = "speciesPanelLearnsetsPower";
+        if (gameData.moves[move[0]]["power"] > 0) {
+            power.innerText = gameData.moves[move[0]]["power"];
+        } else {
+            power.innerText = "-";
         }
-    );
+        row.append(power);
+
+        const accuracy = document.createElement("td");
+        accuracy.className = "speciesPanelLearnsetsAccuracy";
+        if (gameData.moves[move[0]]["accuracy"] > 0) {
+            accuracy.innerText = gameData.moves[move[0]]["accuracy"];
+        } else {
+            accuracy.innerText = "-";
+        }
+        row.append(accuracy);
+
+        const PP = document.createElement("td");
+        PP.className = "speciesPanelLearnsetsPP";
+        PP.innerText = gameData.moves[move[0]]["PP"];
+        row.append(PP);
+
+        const movedescription = document.createElement("td");
+        movedescription.className = "speciesPanelLearnsetsEffect";
+        movedescription.innerText =
+            gameData.moves[move[0]]["description"].join("");
+
+        row.addEventListener("click", function () {
+            createPopupForMove(gameData.moves[move[0]]);
+            overlay.style.display = "flex";
+        });
+
+        row.append(movedescription);
+
+        Tbody.append(row);
+    });
 }
 
 export function buildSpeciesPanelSingleLearnsetsTable(
@@ -311,66 +322,73 @@ export function buildSpeciesPanelSingleLearnsetsTable(
 
     clearChildren(Tbody);
 
-    sortLearnsetsArray(THead, gameData.species[name][input], label, asc).forEach(
-        (move) => {
-            const row = document.createElement("tr");
+    sortLearnsetsArray(
+        THead,
+        gameData.species[name][input],
+        label,
+        asc
+    ).forEach((move) => {
+        const row = document.createElement("tr");
 
-            const moveName = document.createElement("td");
-            moveName.innerText = gameData.moves[move]["ingameName"];
-            moveName.className = "bold";
-            row.append(moveName);
+        const moveName = document.createElement("td");
+        moveName.innerText = gameData.moves[move]["ingameName"];
+        moveName.className = "bold";
+        row.append(moveName);
 
-            const typeContainer = document.createElement("td");
-            const type = document.createElement("div");
-            type.innerText = sanitizeString(gameData.moves[move]["type"]).slice(0, 3);
-            type.className = `${gameData.moves[move]["type"]} backgroundSmall`;
-            typeContainer.append(type);
-            row.append(typeContainer);
+        const typeContainer = document.createElement("td");
+        const type = document.createElement("div");
+        type.innerText = sanitizeString(gameData.moves[move]["type"]).slice(
+            0,
+            3
+        );
+        type.className = `${gameData.moves[move]["type"]} backgroundSmall`;
+        typeContainer.append(type);
+        row.append(typeContainer);
 
-            const splitContainer = document.createElement("td");
-            const splitIcon = document.createElement("img");
-            splitIcon.src = `assets/${gameData.moves[move]["split"]}.png`;
-            splitIcon.className = `${sanitizeString(gameData.moves[move]["split"])} splitIcon`;
-            splitContainer.append(splitIcon);
-            row.append(splitContainer);
+        const splitContainer = document.createElement("td");
+        const splitIcon = document.createElement("img");
+        splitIcon.src = `assets/${gameData.moves[move]["split"]}.png`;
+        splitIcon.className = `${sanitizeString(gameData.moves[move]["split"])} splitIcon`;
+        splitContainer.append(splitIcon);
+        row.append(splitContainer);
 
-            const power = document.createElement("td");
-            power.className = "speciesPanelLearnsetsPower";
-            if (gameData.moves[move]["power"] > 0) {
-                power.innerText = gameData.moves[move]["power"];
-            } else {
-                power.innerText = "-";
-            }
-            row.append(power);
-
-            const accuracy = document.createElement("td");
-            accuracy.className = "speciesPanelLearnsetsAccuracy";
-            if (gameData.moves[move]["accuracy"] > 0) {
-                accuracy.innerText = gameData.moves[move]["accuracy"];
-            } else {
-                accuracy.innerText = "-";
-            }
-            row.append(accuracy);
-
-            const PP = document.createElement("td");
-            PP.className = "speciesPanelLearnsetsPP";
-            PP.innerText = gameData.moves[move]["PP"];
-            row.append(PP);
-
-            const movedescription = document.createElement("td");
-            movedescription.className = "speciesPanelLearnsetsEffect";
-            movedescription.innerText += gameData.moves[move]["description"].join("");
-
-            row.addEventListener("click", function () {
-                createPopupForMove(gameData.moves[move]);
-                overlay.style.display = "flex";
-            });
-
-            row.append(movedescription);
-
-            Tbody.append(row);
+        const power = document.createElement("td");
+        power.className = "speciesPanelLearnsetsPower";
+        if (gameData.moves[move]["power"] > 0) {
+            power.innerText = gameData.moves[move]["power"];
+        } else {
+            power.innerText = "-";
         }
-    );
+        row.append(power);
+
+        const accuracy = document.createElement("td");
+        accuracy.className = "speciesPanelLearnsetsAccuracy";
+        if (gameData.moves[move]["accuracy"] > 0) {
+            accuracy.innerText = gameData.moves[move]["accuracy"];
+        } else {
+            accuracy.innerText = "-";
+        }
+        row.append(accuracy);
+
+        const PP = document.createElement("td");
+        PP.className = "speciesPanelLearnsetsPP";
+        PP.innerText = gameData.moves[move]["PP"];
+        row.append(PP);
+
+        const movedescription = document.createElement("td");
+        movedescription.className = "speciesPanelLearnsetsEffect";
+        movedescription.innerText +=
+            gameData.moves[move]["description"].join("");
+
+        row.addEventListener("click", function () {
+            createPopupForMove(gameData.moves[move]);
+            overlay.style.display = "flex";
+        });
+
+        row.append(movedescription);
+
+        Tbody.append(row);
+    });
 }
 
 // Setup thead click handlers for sorting

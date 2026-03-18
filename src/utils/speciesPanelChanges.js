@@ -1,5 +1,5 @@
-import { sanitizeString } from './utility.js';
-import { gameData } from './state.js';
+import { sanitizeString } from "./utility.js";
+import { gameData } from "./state.js";
 
 function replaceStatString(stat) {
     const replaceStringObject = {

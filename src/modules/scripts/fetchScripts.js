@@ -1,39 +1,45 @@
-import { repos } from '../../utils/config.js';
-import { LZString } from '../../utils/lz-string.js';
-import { footerP } from '../../utils/utility.js';
-import { gameData, trackers, uiState } from '../../utils/state.js';
-import { difficultyButtonContainer, trainersTableTbody, trainersInput, overlay, body } from '../../utils/domRefs.js';
-import { lazyLoading, filterTrainersTableInput } from '../../utils/tableUtility.js';
-import { trainerSpeciesMatchFilter } from '../../utils/tableFilters.js';
-import { spriteRemoveBgReturnBase64 } from '../../utils/spriteUtils.js';
-import { spriteRemoveItemBgReturnBase64 } from './displayItems.js';
-import { spriteRemoveTrainerBgReturnBase64 } from './displayTrainers.js';
-import { regexTrainers, regexTrainersParties } from './regexTrainers.js';
+import { repos } from "../../utils/config.js";
+import { LZString } from "../../utils/lz-string.js";
+import { footerP } from "../../utils/utility.js";
+import { gameData, trackers, uiState } from "../../utils/state.js";
+import {
+    difficultyButtonContainer,
+    trainersTableTbody,
+    trainersInput,
+    overlay,
+    body,
+} from "../../utils/domRefs.js";
+import {
+    lazyLoading,
+    filterTrainersTableInput,
+} from "../../utils/tableUtility.js";
+import { trainerSpeciesMatchFilter } from "../../utils/tableFilters.js";
+import { spriteRemoveBgReturnBase64 } from "../../utils/spriteUtils.js";
+import { spriteRemoveItemBgReturnBase64 } from "./displayItems.js";
+import { spriteRemoveTrainerBgReturnBase64 } from "./displayTrainers.js";
+import { regexTrainers, regexTrainersParties } from "./regexTrainers.js";
 import {
     regexItems,
     regexItemDescriptions,
     regexItemIcon,
     regexItemBallSripts,
     getHeldItems,
-    regexHiddenItems
-} from './regexItems.js';
-import { regexScripts, regexSpecialsFunctions } from './regexScriptLocations.js';
+    regexHiddenItems,
+} from "./regexItems.js";
+import {
+    regexScripts,
+    regexSpecialsFunctions,
+} from "./regexScriptLocations.js";
 
 async function getScripts() {
     footerP("Fetching scripts");
-    const rawScripts = await fetch(
-        `${repos.cfru}/data/event_scripts.s`
-    );
+    const rawScripts = await fetch(`${repos.cfru}/data/event_scripts.s`);
     const textScripts = await rawScripts.text();
 
-    const rawTrade = await fetch(
-        `${repos.cfru}/src/data/trade.h`
-    );
+    const rawTrade = await fetch(`${repos.cfru}/src/data/trade.h`);
     const tradeText = await rawTrade.text();
 
-    const rawSpecials = await fetch(
-        `${repos.cfru}/src/field_specials.c`
-    );
+    const rawSpecials = await fetch(`${repos.cfru}/src/field_specials.c`);
     const textSpecials = await rawSpecials.text();
 
     await getItemBallSripts(textScripts);
@@ -47,9 +53,7 @@ async function getScripts() {
 
 async function getItems() {
     footerP("Fetching items");
-    const rawItems = await fetch(
-        `${repos.cfru}/src/data/items.h`
-    );
+    const rawItems = await fetch(`${repos.cfru}/src/data/items.h`);
     const textItems = await rawItems.text();
 
     const descriptionConversionTable = await regexItems(textItems);
@@ -75,9 +79,7 @@ async function getItemBallSripts(textScripts) {
 }
 
 async function getHiddenItems() {
-    const rawFlags = await fetch(
-        `${repos.cfru}/include/constants/flags.h`
-    );
+    const rawFlags = await fetch(`${repos.cfru}/include/constants/flags.h`);
     const textFlags = await rawFlags.text();
 
     await regexHiddenItems(textFlags);
@@ -89,9 +91,7 @@ async function getItemsIcon() {
     );
     const textItemIconTable = await rawItemIconTable.text();
 
-    const rawItemsIcon = await fetch(
-        `${repos.cfru}/src/data/graphics/items.h`
-    );
+    const rawItemsIcon = await fetch(`${repos.cfru}/src/data/graphics/items.h`);
     const textItemsIcon = await rawItemsIcon.text();
 
     await regexItemIcon(textItemIconTable, textItemsIcon);
@@ -99,9 +99,7 @@ async function getItemsIcon() {
 
 async function getTrainers() {
     footerP("Fetching trainers");
-    const rawTrainers = await fetch(
-        `${repos.cfru}/src/data/trainers.h`
-    );
+    const rawTrainers = await fetch(`${repos.cfru}/src/data/trainers.h`);
     const textTrainers = await rawTrainers.text();
 
     const rawTrainersParties = await fetch(
@@ -216,7 +214,8 @@ export async function fetchScripts() {
                                 );
                             }
                             newDifficulty.classList.add("activeSetting");
-                            uiState.trainersDifficulty = newDifficulty.innerText;
+                            uiState.trainersDifficulty =
+                                newDifficulty.innerText;
                         }
                         trainerSpeciesMatchFilter(true);
                         filterTrainersTableInput(trainersInput.value);
@@ -301,18 +300,18 @@ async function bugFixTrainers() {
                     }
                 });
                 if (!stop) {
-                    Object.keys(gameData.trainers[trainerToZone[trainer]]).forEach(
-                        (trainerName) => {
-                            if (
-                                trainerName.split("_").splice(0, 2).join("_") ==
-                                    baseTrainerName &&
-                                trainerName.split("_").slice(0, -1).join("_") !=
-                                    fullTrainerName
-                            ) {
-                                correctZone = zone;
-                            }
+                    Object.keys(
+                        gameData.trainers[trainerToZone[trainer]]
+                    ).forEach((trainerName) => {
+                        if (
+                            trainerName.split("_").splice(0, 2).join("_") ==
+                                baseTrainerName &&
+                            trainerName.split("_").slice(0, -1).join("_") !=
+                                fullTrainerName
+                        ) {
+                            correctZone = zone;
                         }
-                    );
+                    });
                 }
                 stop = false;
             }
@@ -320,25 +319,32 @@ async function bugFixTrainers() {
             if (correctZone) {
                 if (correctZone === zone) {
                     if (
-                        Object.keys(gameData.trainers[zone][trainer]["party"]).length ===
-                        0
+                        Object.keys(gameData.trainers[zone][trainer]["party"])
+                            .length === 0
                     ) {
                         gameData.trainers[zone][trainer] = JSON.parse(
                             JSON.stringify(
-                                gameData.trainers[trainerToZone[trainer]][trainer]
+                                gameData.trainers[trainerToZone[trainer]][
+                                    trainer
+                                ]
                             )
                         );
-                        delete gameData.trainers[trainerToZone[trainer]][trainer];
+                        delete gameData.trainers[trainerToZone[trainer]][
+                            trainer
+                        ];
                     }
                 } else {
                     if (
                         Object.keys(
-                            gameData.trainers[trainerToZone[trainer]][trainer]["party"]
+                            gameData.trainers[trainerToZone[trainer]][trainer][
+                                "party"
+                            ]
                         ).length === 0
                     ) {
-                        gameData.trainers[trainerToZone[trainer]][trainer] = JSON.parse(
-                            JSON.stringify(gameData.trainers[zone][trainer])
-                        );
+                        gameData.trainers[trainerToZone[trainer]][trainer] =
+                            JSON.parse(
+                                JSON.stringify(gameData.trainers[zone][trainer])
+                            );
                         delete gameData.trainers[zone][trainer];
                     }
                 }
@@ -373,7 +379,10 @@ async function bugFixTrainers() {
                     rematchObj[trainer.split("_").slice(0, -1).join("_")]
                 ]["rematchArray"].push(trainer);
             }
-            if (Object.keys(gameData.trainers[zone][trainer]["party"]).length === 0) {
+            if (
+                Object.keys(gameData.trainers[zone][trainer]["party"])
+                    .length === 0
+            ) {
                 delete gameData.trainers[zone][trainer];
                 if (Object.keys(gameData.trainers[zone]).length === 0) {
                     delete gameData.trainers[zone];
@@ -382,4 +391,3 @@ async function bugFixTrainers() {
         });
     });
 }
-

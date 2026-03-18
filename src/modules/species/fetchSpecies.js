@@ -1,14 +1,24 @@
-import { gameData, trackers } from '../../utils/state.js';
-import { repos } from '../../utils/config.js';
-import { LZString } from '../../utils/lz-string.js';
-import { setTracker } from '../../utils/domRefs.js';
-import { footerP } from '../../utils/utility.js';
+import { gameData, trackers } from "../../utils/state.js";
+import { repos } from "../../utils/config.js";
+import { LZString } from "../../utils/lz-string.js";
+import { setTracker } from "../../utils/domRefs.js";
+import { footerP } from "../../utils/utility.js";
 import {
-    regexSpecies, regexBaseStats, regexLevelUpLearnsets, getLevelUpLearnsetsConversionTable,
-    regexTMHMLearnsets, regexTutorLearnsets, regexEvolution, regexForms,
-    regexEggMovesLearnsets, regexSprite, regexReplaceAbilities,
-    regexAbilitiesArrayForChanges, regexChanges, altFormsLearnsets
-} from './regexSpecies.js';
+    regexSpecies,
+    regexBaseStats,
+    regexLevelUpLearnsets,
+    getLevelUpLearnsetsConversionTable,
+    regexTMHMLearnsets,
+    regexTutorLearnsets,
+    regexEvolution,
+    regexForms,
+    regexEggMovesLearnsets,
+    regexSprite,
+    regexReplaceAbilities,
+    regexAbilitiesArrayForChanges,
+    regexChanges,
+    altFormsLearnsets,
+} from "./regexSpecies.js";
 
 // --- FUNÇÕES DE FETCH ---
 
@@ -26,9 +36,7 @@ async function getBaseStats(speciesObj) {
 }
 
 async function getLevelUpLearnsets(species) {
-    const rawLevelUpLearnsets = await fetch(
-        `${repos.dpe}/src/Learnsets.c`
-    );
+    const rawLevelUpLearnsets = await fetch(`${repos.dpe}/src/Learnsets.c`);
     const textLevelUpLearnsets = await rawLevelUpLearnsets.text();
 
     const rawLevelUpLearnsetsPointers = await fetch(
@@ -49,9 +57,7 @@ async function getLevelUpLearnsets(species) {
 }
 
 async function getTMHMLearnsets(species) {
-    const rawTMHMLearnsets = await fetch(
-        `${repos.dpe}/src/TM_Tutor_Tables.c`
-    );
+    const rawTMHMLearnsets = await fetch(`${repos.dpe}/src/TM_Tutor_Tables.c`);
     const textTMHMLearnsets = await rawTMHMLearnsets.text();
 
     return regexTMHMLearnsets(
@@ -63,9 +69,7 @@ async function getTMHMLearnsets(species) {
 }
 
 async function getTutorLearnsets(species) {
-    const rawTutorLearnsets = await fetch(
-        `${repos.dpe}/src/TM_Tutor_Tables.c`
-    );
+    const rawTutorLearnsets = await fetch(`${repos.dpe}/src/TM_Tutor_Tables.c`);
     const textTutorLearnsets = await rawTutorLearnsets.text();
 
     return regexTutorLearnsets(
@@ -77,9 +81,7 @@ async function getTutorLearnsets(species) {
 }
 
 async function getEvolution(species) {
-    const rawEvolution = await fetch(
-        `${repos.dpe}/src/Evolution%20Table.c`
-    );
+    const rawEvolution = await fetch(`${repos.dpe}/src/Evolution%20Table.c`);
     const textEvolution = await rawEvolution.text();
 
     return regexEvolution(textEvolution, species);
@@ -95,18 +97,14 @@ async function getForms(species) {
 }
 
 async function getEggMovesLearnsets(species) {
-    const rawEggMoves = await fetch(
-        `${repos.dpe}/src/Egg_Moves.c`
-    );
+    const rawEggMoves = await fetch(`${repos.dpe}/src/Egg_Moves.c`);
     const textEggMoves = await rawEggMoves.text();
 
     return regexEggMovesLearnsets(textEggMoves, species);
 }
 
 async function getSprite(species) {
-    const rawSprite = await fetch(
-        `${repos.dpe}/src/Front_Pic_Table.c`
-    );
+    const rawSprite = await fetch(`${repos.dpe}/src/Front_Pic_Table.c`);
     const textSprite = await rawSprite.text();
 
     return regexSprite(textSprite, species);
@@ -348,4 +346,3 @@ export async function fetchSpeciesObj() {
 
     setTracker(trackers.species);
 }
-

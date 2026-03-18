@@ -1,8 +1,17 @@
-import { regexSpChar, LAZY_LOAD_BATCH_SIZE, TRAINER_BATCH_SIZE } from './config.js';
-import { clearChildren } from './domUtils.js';
-import { settings } from './settings.js';
-import { footerP, sanitizeString, speciesCanLearnMove, refreshURLParams } from './utility.js';
-import { passAllFilters } from './tableFilters.js';
+import {
+    regexSpChar,
+    LAZY_LOAD_BATCH_SIZE,
+    TRAINER_BATCH_SIZE,
+} from "./config.js";
+import { clearChildren } from "./domUtils.js";
+import { settings } from "./settings.js";
+import {
+    footerP,
+    sanitizeString,
+    speciesCanLearnMove,
+    refreshURLParams,
+} from "./utility.js";
+import { passAllFilters } from "./tableFilters.js";
 import {
     onlyShowStrategyPokemon,
     locationsButton,
@@ -17,11 +26,14 @@ import {
     speciesTable,
     tracker,
     setTracker,
-} from './domRefs.js';
-import { gameData, trackers, uiState } from './state.js';
-import { displayFunctions } from './displayRegistry.js';
-import { setupItemsButtonFilters } from '../modules/scripts/displayItems.js';
-import { checkTrainerDifficulty, showRematch } from '../modules/scripts/displayTrainers.js';
+} from "./domRefs.js";
+import { gameData, trackers, uiState } from "./state.js";
+import { displayFunctions } from "./displayRegistry.js";
+import { setupItemsButtonFilters } from "../modules/scripts/displayItems.js";
+import {
+    checkTrainerDifficulty,
+    showRematch,
+} from "../modules/scripts/displayTrainers.js";
 
 export async function displaySetup() {
     footerP("");
@@ -78,7 +90,13 @@ export function allAreEqual(array) {
     return false;
 }
 
-export function sortTableByClassName(tableEl, obj, key, classHeader, asc = true) {
+export function sortTableByClassName(
+    tableEl,
+    obj,
+    key,
+    classHeader,
+    asc = true
+) {
     const dirModifier = asc ? 1 : -1;
 
     tracker.sort((a, b) => {
@@ -255,11 +273,14 @@ export function filterTrainersTableInput(input) {
         const trainerDifficulty = checkTrainerDifficulty(zone, trainer);
         for (
             let k = 0;
-            k < gameData.trainers[zone][trainer]["party"][trainerDifficulty].length;
+            k <
+            gameData.trainers[zone][trainer]["party"][trainerDifficulty].length;
             k++
         ) {
             compareArray.push(
-                gameData.trainers[zone][trainer]["party"][trainerDifficulty][k]["name"]
+                gameData.trainers[zone][trainer]["party"][trainerDifficulty][k][
+                    "name"
+                ]
             );
         }
         for (let k = 0; k < arraySanitizedInput.length; k++) {
@@ -316,21 +337,26 @@ export function filterItemsTableInput(input, keyArray) {
                 break;
             }
         }
-        Object.keys(gameData.items[tracker[i]["key"]]["locations"]).forEach((method) => {
-            if (
-                regexInput.test(
-                    sanitizeString(
-                        "" + gameData.items[tracker[i]["key"]]["locations"][method]
-                    ).replaceAll(regexSpChar, "")
-                )
-            ) {
-                if (!settings.includes(method)) {
-                    tracker[i]["filter"] = tracker[i]["filter"].filter(
-                        (value) => value !== "input"
-                    );
+        Object.keys(gameData.items[tracker[i]["key"]]["locations"]).forEach(
+            (method) => {
+                if (
+                    regexInput.test(
+                        sanitizeString(
+                            "" +
+                                gameData.items[tracker[i]["key"]]["locations"][
+                                    method
+                                ]
+                        ).replaceAll(regexSpChar, "")
+                    )
+                ) {
+                    if (!settings.includes(method)) {
+                        tracker[i]["filter"] = tracker[i]["filter"].filter(
+                            (value) => value !== "input"
+                        );
+                    }
                 }
             }
-        });
+        );
     }
 
     lazyLoading(true);
@@ -381,7 +407,9 @@ export async function lazyLoading(reset = false) {
                             tracker[i]["filter"].length === 0 &&
                             !document.getElementById(tracker[i]["key"])
                         ) {
-                            displayFunctions[displayFunction](tracker[i]["key"]);
+                            displayFunctions[displayFunction](
+                                tracker[i]["key"]
+                            );
                         }
                         i++;
                     }
@@ -443,4 +471,3 @@ export async function tableButtonClick(input, fromDisplayParams = false) {
 
     await lazyLoading(true);
 }
-

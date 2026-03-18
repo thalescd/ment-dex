@@ -1,12 +1,15 @@
-import { regexSpChar, MIN_FILTER_INPUT_LENGTH } from './config.js';
-import { clearChildren } from './domUtils.js';
-import { tracker, trainersFilter, trainersInput } from './domRefs.js';
-import { sanitizeString, speciesCanLearnMove } from './utility.js';
-import { lazyLoading } from './tableUtility.js';
-import { updateSpeciesMoveFilter } from '../modules/species/displaySpecies.js';
-import { checkTrainerDifficulty, showRematch } from '../modules/scripts/displayTrainers.js';
-import { updateLocationsMoveFilter } from '../modules/locations/displayLocations.js';
-import { gameData, trackers, uiState } from './state.js';
+import { regexSpChar, MIN_FILTER_INPUT_LENGTH } from "./config.js";
+import { clearChildren } from "./domUtils.js";
+import { tracker, trainersFilter, trainersInput } from "./domRefs.js";
+import { sanitizeString, speciesCanLearnMove } from "./utility.js";
+import { lazyLoading } from "./tableUtility.js";
+import { updateSpeciesMoveFilter } from "../modules/species/displaySpecies.js";
+import {
+    checkTrainerDifficulty,
+    showRematch,
+} from "../modules/scripts/displayTrainers.js";
+import { updateLocationsMoveFilter } from "../modules/locations/displayLocations.js";
+import { gameData, trackers, uiState } from "./state.js";
 
 function returnAllORfilterValuefromLabel(label) {
     let activeORfilterArray = [];
@@ -196,7 +199,9 @@ function filterSpeciesAbility(
             }
             if (!gameData.species[name]["abilities"].includes(abilityName)) {
                 if (typeof window.innatesDefined !== "undefined") {
-                    if (!gameData.species[name]["innates"].includes(abilityName)) {
+                    if (
+                        !gameData.species[name]["innates"].includes(abilityName)
+                    ) {
                         passed = false;
                     }
                 } else {
@@ -229,7 +234,9 @@ function filterSpeciesMove(value, label, operator) {
             if (tracker === trackers.locations) {
                 name = tracker[i]["key"].split("\\")[2];
             }
-            if (speciesCanLearnMove(gameData.species[name], moveName) === false) {
+            if (
+                speciesCanLearnMove(gameData.species[name], moveName) === false
+            ) {
                 passed = false;
             }
 
@@ -288,8 +295,14 @@ function filterType(value, label, operator) {
         if (tracker === trackers.species || tracker === trackers.locations) {
             if (typeof gameData.species[name]["type3"] !== "undefined") {
                 if (
-                    !(sanitizeString(gameData.species[name]["type1"]) === value) &&
-                    !(sanitizeString(gameData.species[name]["type2"]) === value) &&
+                    !(
+                        sanitizeString(gameData.species[name]["type1"]) ===
+                        value
+                    ) &&
+                    !(
+                        sanitizeString(gameData.species[name]["type2"]) ===
+                        value
+                    ) &&
                     !(sanitizeString(gameData.species[name]["type3"]) === value)
                 ) {
                     passed = false;
@@ -459,10 +472,11 @@ export async function setFilters() {
     createFilterGroup(createFilterArray(["target"], gameData.moves), "Target", [
         window.movesFilterList,
     ]);
-    createFilterGroup(createFilterArray(["item1", "item2"], gameData.species), "Item", [
-        window.speciesFilterList,
-        window.locationsFilterList,
-    ]);
+    createFilterGroup(
+        createFilterArray(["item1", "item2"], gameData.species),
+        "Item",
+        [window.speciesFilterList, window.locationsFilterList]
+    );
     try {
         createFilterGroup(
             Array.from(
@@ -481,13 +495,21 @@ export async function setFilters() {
     createFilterGroup(
         createFilterArray(["ingameName"], gameData.abilities, false),
         "Ability",
-        [window.speciesFilterList, window.locationsFilterList, window.trainersFilterList]
+        [
+            window.speciesFilterList,
+            window.locationsFilterList,
+            window.trainersFilterList,
+        ]
     );
-    createFilterGroup(createFilterArray(["ingameName"], gameData.moves, false), "Move", [
-        window.speciesFilterList,
-        window.locationsFilterList,
-        window.trainersFilterList,
-    ]);
+    createFilterGroup(
+        createFilterArray(["ingameName"], gameData.moves, false),
+        "Move",
+        [
+            window.speciesFilterList,
+            window.locationsFilterList,
+            window.trainersFilterList,
+        ]
+    );
     createFilterGroup(
         createFilterArray(["eggGroup1", "eggGroup2"], gameData.species),
         "Egg Group",
@@ -812,9 +834,9 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
         if (resetInput) {
             trackers.trainers[i]["filter"] = [];
         } else {
-            trackers.trainers[i]["filter"] = trackers.trainers[i]["filter"].filter(
-                (filter) => filter === "input"
-            );
+            trackers.trainers[i]["filter"] = trackers.trainers[i][
+                "filter"
+            ].filter((filter) => filter === "input");
         }
         const zone = trackers.trainers[i]["key"].split("\\")[0];
         const trainer = trackers.trainers[i]["key"].split("\\")[1];
@@ -822,14 +844,20 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
         delete gameData.trainers[zone][trainer]["match"];
         delete trackers.trainers[i]["show"];
 
-        filterContainer: for (let k = 0; k < trainersFilterElements.length; k++) {
+        filterContainer: for (
+            let k = 0;
+            k < trainersFilterElements.length;
+            k++
+        ) {
             let ignoreTrainerTeamIndex = [];
             const label = trainersFilterElements[k].innerText.split(":")[0];
             const value = trainersFilterElements[k].innerText
                 .replace(" ", "")
                 .split(":")[1];
-            const operator = trainersFilterElements[k].parentNode.children[0].value;
-            let trainerTeam = gameData.trainers[zone][trainer]["party"][difficulty];
+            const operator =
+                trainersFilterElements[k].parentNode.children[0].value;
+            let trainerTeam =
+                gameData.trainers[zone][trainer]["party"][difficulty];
             let passed = false;
 
             trainerTeamLoop: for (let l = 0; l < trainerTeam.length; l++) {
@@ -841,7 +869,9 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 if (label === "Ability") {
                     let abilityName = null;
                     Object.keys(gameData.abilities).forEach((ability) => {
-                        if (gameData.abilities[ability]["ingameName"] === value) {
+                        if (
+                            gameData.abilities[ability]["ingameName"] === value
+                        ) {
                             abilityName = ability;
                         }
                     });
@@ -852,11 +882,13 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                             ] === abilityName
                         ) {
                             continue trainerTeamLoop;
-                        } else if (typeof window.innatesDefined !== "undefined") {
+                        } else if (
+                            typeof window.innatesDefined !== "undefined"
+                        ) {
                             if (
-                                gameData.species[speciesObj["name"]]["innates"].includes(
-                                    abilityName
-                                )
+                                gameData.species[speciesObj["name"]][
+                                    "innates"
+                                ].includes(abilityName)
                             ) {
                                 continue trainerTeamLoop;
                             }
@@ -961,4 +993,3 @@ function filterOperators(value, label, obj) {
 
     createOperatorFilter(label, operator, number);
 }
-

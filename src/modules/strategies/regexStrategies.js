@@ -1,4 +1,4 @@
-import { gameData } from '../../utils/state.js';
+import { gameData } from "../../utils/state.js";
 
 export async function regexStrategies(textStrategies, strategies) {
     const lines = textStrategies.split("\n");

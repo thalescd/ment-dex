@@ -1,18 +1,31 @@
-import { sanitizeString, getSpeciesSpriteSrc, returnTargetSpeciesSprite, speciesCanLearnMove } from '../../utils/utility.js';
+import {
+    sanitizeString,
+    getSpeciesSpriteSrc,
+    returnTargetSpeciesSprite,
+    speciesCanLearnMove,
+} from "../../utils/utility.js";
 
-import { speciesTableTbody, changelogMode, panelSpecies } from '../../utils/domRefs.js';
-import { createSpeciesPanel, speciesPanel } from '../../utils/speciesPanelUtility.js';
-import { sortTableByLearnsets } from '../../utils/tableUtility.js';
-import { gameData, uiState } from '../../utils/state.js';
-import { getMoveMethodLabel } from '../../utils/domUtils.js';
+import {
+    speciesTableTbody,
+    changelogMode,
+    panelSpecies,
+} from "../../utils/domRefs.js";
+import {
+    createSpeciesPanel,
+    speciesPanel,
+} from "../../utils/speciesPanelUtility.js";
+import { sortTableByLearnsets } from "../../utils/tableUtility.js";
+import { gameData, uiState } from "../../utils/state.js";
+import { getMoveMethodLabel } from "../../utils/domUtils.js";
 
 uiState.speciesMoveFilter = null;
 
 export function updateSpeciesMoveFilter(sortTable = false) {
     uiState.speciesMoveFilter = null;
-    const moveFiltersContainer = window.speciesFilterContainer.getElementsByClassName(
-        "speciesFilterMoveContainer"
-    )[0];
+    const moveFiltersContainer =
+        window.speciesFilterContainer.getElementsByClassName(
+            "speciesFilterMoveContainer"
+        )[0];
     if (moveFiltersContainer) {
         const filters = moveFiltersContainer.getElementsByClassName("filter");
         if (filters.length === 1) {
@@ -21,7 +34,10 @@ export function updateSpeciesMoveFilter(sortTable = false) {
                     .replace(" ", "")
                     .split(":")[1];
                 Object.keys(gameData.moves).forEach((moveName) => {
-                    if (gameData.moves[moveName]["ingameName"] === uiState.speciesMoveFilter) {
+                    if (
+                        gameData.moves[moveName]["ingameName"] ===
+                        uiState.speciesMoveFilter
+                    ) {
                         uiState.speciesMoveFilter = moveName;
                         if (sortTable) {
                             sortTableByLearnsets(true);
@@ -84,7 +100,9 @@ export function appendSpeciesToTable(speciesName) {
     name.className = "key hide";
     name.innerText = gameData.species[speciesName]["name"];
     ingameName.className = "species";
-    ingameName.innerText = sanitizeString(gameData.species[speciesName]["name"]);
+    ingameName.innerText = sanitizeString(
+        gameData.species[speciesName]["name"]
+    );
     nameContainer.append(ingameName);
     nameContainer.append(name);
     row.append(nameContainer);
@@ -121,13 +139,18 @@ export function appendSpeciesToTable(speciesName) {
     }
 
     types.append(type1);
-    if (gameData.species[speciesName]["type1"] !== gameData.species[speciesName]["type2"]) {
+    if (
+        gameData.species[speciesName]["type1"] !==
+        gameData.species[speciesName]["type2"]
+    ) {
         types.append(type2);
     }
     if (typeof gameData.species[speciesName]["type3"] !== "undefined") {
         if (
-            gameData.species[speciesName]["type3"] !== gameData.species[speciesName]["type1"] &&
-            gameData.species[speciesName]["type3"] !== gameData.species[speciesName]["type2"]
+            gameData.species[speciesName]["type3"] !==
+                gameData.species[speciesName]["type1"] &&
+            gameData.species[speciesName]["type3"] !==
+                gameData.species[speciesName]["type2"]
         ) {
             type3.innerText = `${sanitizeString(gameData.species[speciesName]["type3"])} `;
             type3.className = `${gameData.species[speciesName]["type3"]} background`;
@@ -139,10 +162,17 @@ export function appendSpeciesToTable(speciesName) {
 
     let abilitiesContainer = document.createElement("td");
     abilitiesContainer.className = "abilities";
-    for (let j = 0; j < gameData.species[speciesName]["abilities"].length; j++) {
+    for (
+        let j = 0;
+        j < gameData.species[speciesName]["abilities"].length;
+        j++
+    ) {
         let ability = document.createElement("div");
         let abilityName = gameData.species[speciesName]["abilities"][j];
-        if (j === 1 && abilityName === gameData.species[speciesName]["abilities"][0]) {
+        if (
+            j === 1 &&
+            abilityName === gameData.species[speciesName]["abilities"][0]
+        ) {
             continue;
         } else if (
             j === 2 &&
@@ -159,8 +189,15 @@ export function appendSpeciesToTable(speciesName) {
                 ability.style.fontWeight = "bold";
             }
 
-            for (let k = 0; k < gameData.species[speciesName]["changes"].length; k++) {
-                if (gameData.species[speciesName]["changes"][k][0] === "abilities") {
+            for (
+                let k = 0;
+                k < gameData.species[speciesName]["changes"].length;
+                k++
+            ) {
+                if (
+                    gameData.species[speciesName]["changes"][k][0] ===
+                    "abilities"
+                ) {
                     if (
                         gameData.species[speciesName]["abilities"][j] !==
                             gameData.species[speciesName]["changes"][k][1][j] &&
@@ -183,7 +220,11 @@ export function appendSpeciesToTable(speciesName) {
     if (typeof window.innatesDefined !== "undefined") {
         let innatesContainer = document.createElement("td");
         innatesContainer.className = "innates";
-        for (let j = 0; j < gameData.species[speciesName]["innates"].length; j++) {
+        for (
+            let j = 0;
+            j < gameData.species[speciesName]["innates"].length;
+            j++
+        ) {
             let innates = document.createElement("div");
             let innatesName = gameData.species[speciesName]["innates"][j];
 
@@ -265,4 +306,3 @@ function createBaseStatsContainer(headerText, stats, speciesObj) {
 }
 
 // spriteRemoveBgReturnBase64, isSameColor, decodeSpriteDataString moved to ../../utils/spriteUtils.js
-

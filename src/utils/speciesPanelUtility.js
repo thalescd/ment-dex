@@ -6,9 +6,9 @@ import {
     refreshURLParams,
     getPokemonResistanceValueAgainstType,
     getPokemonEffectivenessValueAgainstType,
-} from './utility.js';
+} from "./utility.js";
 
-import { isSameColor } from './spriteUtils.js';
+import { isSameColor } from "./spriteUtils.js";
 
 import {
     panelSpecies,
@@ -48,28 +48,34 @@ import {
     table,
     utilityButton,
     popup,
-} from './domRefs.js';
+} from "./domRefs.js";
 
-import { tableButtonClick } from './tableUtility.js';
-import { deleteFiltersFromTable, createFilter } from './tableFilters.js';
-import { gameData, trackers } from './state.js';
-import { clearChildren } from './domUtils.js';
+import { tableButtonClick } from "./tableUtility.js";
+import { deleteFiltersFromTable, createFilter } from "./tableFilters.js";
+import { gameData, trackers } from "./state.js";
+import { clearChildren } from "./domUtils.js";
 
 // --- Extracted modules ---
-import { manageSpeciesPanelHistory } from './speciesPanelHistory.js';
-import { createChange } from './speciesPanelChanges.js';
-import { createSpeciesStrategy } from './speciesPanelStrategies.js';
+import { manageSpeciesPanelHistory } from "./speciesPanelHistory.js";
+import { createChange } from "./speciesPanelChanges.js";
+import { createSpeciesStrategy } from "./speciesPanelStrategies.js";
 import {
     buildSpeciesPanelLevelUpFromPreviousEvoTable,
     buildSpeciesPanelDoubleLearnsetsTable,
     buildSpeciesPanelSingleLearnsetsTable,
-} from './speciesPanelLearnsets.js';
+} from "./speciesPanelLearnsets.js";
 
 // --- DOM elements not in domRefs (grabbed locally) ---
 const speciesType3 = document.getElementById("speciesType3");
-const speciesAbilitiesMainContainer = document.getElementById("speciesAbilitiesMainContainer");
-const speciesEvolutionsMainContainer = document.getElementById("speciesEvolutionsMainContainer");
-const speciesFormesContainer = document.getElementById("speciesFormesContainer");
+const speciesAbilitiesMainContainer = document.getElementById(
+    "speciesAbilitiesMainContainer"
+);
+const speciesEvolutionsMainContainer = document.getElementById(
+    "speciesEvolutionsMainContainer"
+);
+const speciesFormesContainer = document.getElementById(
+    "speciesFormesContainer"
+);
 
 export async function createSpeciesPanel(name) {
     if (
@@ -103,10 +109,13 @@ export async function createSpeciesPanel(name) {
 
     if (typeof gameData.species[name]["type3"] !== "undefined") {
         if (
-            gameData.species[name]["type3"] !== gameData.species[name]["type1"] &&
+            gameData.species[name]["type3"] !==
+                gameData.species[name]["type1"] &&
             gameData.species[name]["type3"] !== gameData.species[name]["type2"]
         ) {
-            speciesType3.innerText = sanitizeString(gameData.species[name]["type3"]);
+            speciesType3.innerText = sanitizeString(
+                gameData.species[name]["type3"]
+            );
             speciesType3.className = `${gameData.species[name]["type3"]} background`;
             speciesType3.classList.remove("hide");
         }
@@ -141,7 +150,8 @@ export async function createSpeciesPanel(name) {
             const abilityDescription = document.createElement("span");
 
             abilityName.innerText = gameData.abilities[ability]["ingameName"];
-            abilityDescription.innerText = gameData.abilities[ability]["description"];
+            abilityDescription.innerText =
+                gameData.abilities[ability]["description"];
 
             if (i === 2) {
                 abilityName.className = "bold";
@@ -160,7 +170,10 @@ export async function createSpeciesPanel(name) {
                 }
                 deleteFiltersFromTable();
 
-                createFilter(gameData.abilities[ability]["ingameName"], "Ability");
+                createFilter(
+                    gameData.abilities[ability]["ingameName"],
+                    "Ability"
+                );
                 speciesPanel("hide");
                 window.scrollTo({ top: 0 });
             });
@@ -186,7 +199,8 @@ export async function createSpeciesPanel(name) {
                 const abilityName = document.createElement("span");
                 const abilityDescription = document.createElement("span");
 
-                abilityName.innerText = gameData.abilities[ability]["ingameName"];
+                abilityName.innerText =
+                    gameData.abilities[ability]["ingameName"];
                 abilityDescription.innerText =
                     gameData.abilities[ability]["description"];
 
@@ -203,7 +217,10 @@ export async function createSpeciesPanel(name) {
                     }
                     deleteFiltersFromTable();
 
-                    createFilter(gameData.abilities[ability]["ingameName"], "Ability");
+                    createFilter(
+                        gameData.abilities[ability]["ingameName"],
+                        "Ability"
+                    );
                     speciesPanel("hide");
                     window.scrollTo({ top: 0 });
                 });
@@ -269,10 +286,12 @@ export async function createSpeciesPanel(name) {
                     j++
                 ) {
                     if (
-                        gameData.species[targetSpecies]["evolutionLine"].indexOf(
-                            targetSpecies
-                        ) >=
-                        gameData.species[targetSpecies]["evolutionLine"].indexOf(
+                        gameData.species[targetSpecies][
+                            "evolutionLine"
+                        ].indexOf(targetSpecies) >=
+                        gameData.species[targetSpecies][
+                            "evolutionLine"
+                        ].indexOf(
                             gameData.species[targetSpecies]["evolution"][j][2]
                         )
                     ) {
@@ -280,13 +299,15 @@ export async function createSpeciesPanel(name) {
                         break mainLoop;
                     }
                     if (
-                        gameData.species[gameData.species[targetSpecies]["evolution"][j][2]][
-                            "baseSpeed"
-                        ] > 0
+                        gameData.species[
+                            gameData.species[targetSpecies]["evolution"][j][2]
+                        ]["baseSpeed"] > 0
                     ) {
                         speciesEvoTableContainer.append(
                             createClickableImgAndName(
-                                gameData.species[targetSpecies]["evolution"][j][2],
+                                gameData.species[targetSpecies]["evolution"][
+                                    j
+                                ][2],
                                 gameData.species[targetSpecies]["evolution"][j],
                                 false,
                                 false
@@ -327,10 +348,14 @@ export async function createSpeciesPanel(name) {
                     gameData.species[name]["forms"][i]
                 ) ||
                     gameData.species[name]["forms"][i] === name) &&
-                gameData.species[gameData.species[name]["forms"][i]]["baseSpeed"] > 0
+                gameData.species[gameData.species[name]["forms"][i]][
+                    "baseSpeed"
+                ] > 0
             ) {
                 speciesFormes.append(
-                    createClickableImgAndName(gameData.species[name]["forms"][i])
+                    createClickableImgAndName(
+                        gameData.species[name]["forms"][i]
+                    )
                 );
             }
         }
@@ -399,7 +424,10 @@ export async function createSpeciesPanel(name) {
             checkType.className = `backgroundSmall ${type}`;
 
             offensiveTypeEffectivenessValue.innerText =
-                getPokemonEffectivenessValueAgainstType(gameData.species[name], type);
+                getPokemonEffectivenessValueAgainstType(
+                    gameData.species[name],
+                    type
+                );
 
             offensiveTypeEffectivenessValue.className = `typeChartOffensive${offensiveTypeEffectivenessValue.innerText} backgroundSmall`;
             offensiveTypeEffectivenessContainer.append(checkType);
@@ -612,26 +640,30 @@ export function createPopupForLocations() {
     pokemonName.style.fontSize = "35px";
     popup.append(pokemonName);
 
-    Object.keys(gameData.locationsByPokemon[panelSpecies]).forEach((location) => {
-        const locationName = document.createElement("div");
-        locationName.classList.add("bold");
-        locationName.innerText = location;
-        locationName.style.padding = "25px 0px 10px 0px";
-        locationName.style.fontSize = "25px";
-        popup.append(locationName);
-        gameData.locationsByPokemon[panelSpecies][location].forEach((method) => {
-            const locationContainer = document.createElement("div");
-            locationContainer.style.fontSize = "20px";
-            const locationMethod = document.createElement("span");
-            locationMethod.innerText = `${method} `;
-            const locationRarity = document.createElement("span");
-            locationRarity.innerText = `${gameData.locations[location][method][panelSpecies]}%`;
-            locationRarity.style.color = `hsl(${gameData.locations[location][method][panelSpecies] * 2},85%,45%)`;
-            locationContainer.append(locationMethod);
-            locationContainer.append(locationRarity);
-            popup.append(locationContainer);
-        });
-    });
+    Object.keys(gameData.locationsByPokemon[panelSpecies]).forEach(
+        (location) => {
+            const locationName = document.createElement("div");
+            locationName.classList.add("bold");
+            locationName.innerText = location;
+            locationName.style.padding = "25px 0px 10px 0px";
+            locationName.style.fontSize = "25px";
+            popup.append(locationName);
+            gameData.locationsByPokemon[panelSpecies][location].forEach(
+                (method) => {
+                    const locationContainer = document.createElement("div");
+                    locationContainer.style.fontSize = "20px";
+                    const locationMethod = document.createElement("span");
+                    locationMethod.innerText = `${method} `;
+                    const locationRarity = document.createElement("span");
+                    locationRarity.innerText = `${gameData.locations[location][method][panelSpecies]}%`;
+                    locationRarity.style.color = `hsl(${gameData.locations[location][method][panelSpecies] * 2},85%,45%)`;
+                    locationContainer.append(locationMethod);
+                    locationContainer.append(locationRarity);
+                    popup.append(locationContainer);
+                }
+            );
+        }
+    );
 }
 
 export function createPopupForInfo() {
@@ -652,10 +684,13 @@ export function createPopupForInfo() {
     eggGroupHeader.style.color = "var(--theme-color)";
     popup.append(eggGroupHeader);
     const eggGroup1 = document.createElement("div");
-    eggGroup1.innerText = sanitizeString(gameData.species[panelSpecies]["eggGroup1"]);
+    eggGroup1.innerText = sanitizeString(
+        gameData.species[panelSpecies]["eggGroup1"]
+    );
     popup.append(eggGroup1);
     if (
-        gameData.species[panelSpecies]["eggGroup1"] !== gameData.species[panelSpecies]["eggGroup2"]
+        gameData.species[panelSpecies]["eggGroup1"] !==
+        gameData.species[panelSpecies]["eggGroup2"]
     ) {
         const eggGroup2 = document.createElement("div");
         eggGroup2.innerText = sanitizeString(
@@ -697,10 +732,12 @@ export function createPopupForInfo() {
     }
 }
 
-
 export async function speciesPanel(param) {
     if (typeof speciesPanelMainContainer !== "undefined") {
-        if (param === "hide" || gameData.species[panelSpecies]["baseSpeed"] <= 0) {
+        if (
+            param === "hide" ||
+            gameData.species[panelSpecies]["baseSpeed"] <= 0
+        ) {
             body.classList.remove("fixedPanel");
             overlaySpeciesPanel.style.display = "none";
             speciesPanelMainContainer.classList.add("hide");
@@ -734,4 +771,3 @@ export async function speciesPanel(param) {
         }
     }
 }
-

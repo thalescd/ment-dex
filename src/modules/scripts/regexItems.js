@@ -1,6 +1,6 @@
-import { sanitizeString } from '../../utils/utility.js';
-import { repos } from '../../utils/config.js';
-import { gameData } from '../../utils/state.js';
+import { sanitizeString } from "../../utils/utility.js";
+import { repos } from "../../utils/config.js";
+import { gameData } from "../../utils/state.js";
 
 export function initItem(name) {
     gameData.items[name] = {};
@@ -28,7 +28,8 @@ export async function regexItems(textItems) {
         } else if (regexMatch) {
             const match = regexMatch[0];
             if (match === ".name") {
-                gameData.items[item]["ingameName"] = line.match(/_\("(.*)"\)/)[1];
+                gameData.items[item]["ingameName"] =
+                    line.match(/_\("(.*)"\)/)[1];
             } else if (match === ".description") {
                 const descMatch = line.match(/s\w+Desc/i);
                 if (descMatch) {
@@ -52,7 +53,10 @@ export async function regexItems(textItems) {
     return conversionTable;
 }
 
-export async function regexItemDescriptions(textItemDescriptions, conversionTable) {
+export async function regexItemDescriptions(
+    textItemDescriptions,
+    conversionTable
+) {
     const lines = textItemDescriptions.split("\n");
     let desc = null,
         description = "";
@@ -157,20 +161,30 @@ export async function getHeldItems() {
     Object.keys(gameData.species).forEach((speciesName) => {
         if (gameData.species[speciesName]["item1"] !== "") {
             if (
-                !("Held" in gameData.items[gameData.species[speciesName]["item1"]]["locations"])
+                !(
+                    "Held" in
+                    gameData.items[gameData.species[speciesName]["item1"]][
+                        "locations"
+                    ]
+                )
             ) {
-                gameData.items[gameData.species[speciesName]["item1"]]["locations"]["Held"] = [
-                    "Held by wild Pokemon",
-                ];
+                gameData.items[gameData.species[speciesName]["item1"]][
+                    "locations"
+                ]["Held"] = ["Held by wild Pokemon"];
             }
         }
         if (gameData.species[speciesName]["item2"] !== "") {
             if (
-                !("Held" in gameData.items[gameData.species[speciesName]["item2"]]["locations"])
+                !(
+                    "Held" in
+                    gameData.items[gameData.species[speciesName]["item2"]][
+                        "locations"
+                    ]
+                )
             ) {
-                gameData.items[gameData.species[speciesName]["item2"]]["locations"]["Held"] = [
-                    "Held by wild Pokemon",
-                ];
+                gameData.items[gameData.species[speciesName]["item2"]][
+                    "locations"
+                ]["Held"] = ["Held by wild Pokemon"];
             }
         }
     });

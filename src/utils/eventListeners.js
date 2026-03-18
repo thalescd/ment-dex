@@ -1,14 +1,29 @@
 // Event listeners e observers - modulo de side-effect (nao exporta nada)
 
-import { appTitle, footerText, TYPING_DEBOUNCE_MS } from './config.js';
-import { changeSetting, manageSettings } from './settings.js';
-import { sortTableByClassName, sortTableByLearnsets, filterTableInput, filterLocationsTableInput, filterTrainersTableInput, filterItemsTableInput, lazyLoading, tableButtonClick } from './tableUtility.js';
-import { filterFilters } from './tableFilters.js';
-import { fetchShinySprite, createSpeciesPanel, speciesPanel, createPopupForLocations, createPopupForInfo } from './speciesPanelUtility.js';
-import { refreshURLParams, clearLocalStorage } from './utility.js';
-import { clearChildren } from './domUtils.js';
-import { displayHistoryObj, fetchData } from './app.js';
-import { gameData, trackers, uiState } from './state.js';
+import { appTitle, footerText, TYPING_DEBOUNCE_MS } from "./config.js";
+import { changeSetting, manageSettings } from "./settings.js";
+import {
+    sortTableByClassName,
+    sortTableByLearnsets,
+    filterTableInput,
+    filterLocationsTableInput,
+    filterTrainersTableInput,
+    filterItemsTableInput,
+    lazyLoading,
+    tableButtonClick,
+} from "./tableUtility.js";
+import { filterFilters } from "./tableFilters.js";
+import {
+    fetchShinySprite,
+    createSpeciesPanel,
+    speciesPanel,
+    createPopupForLocations,
+    createPopupForInfo,
+} from "./speciesPanelUtility.js";
+import { refreshURLParams, clearLocalStorage } from "./utility.js";
+import { clearChildren } from "./domUtils.js";
+import { displayHistoryObj, fetchData } from "./app.js";
+import { gameData, trackers, uiState } from "./state.js";
 import {
     panelSpecies,
     historyObj,
@@ -72,7 +87,7 @@ import {
     trainersButton,
     itemsInput,
     itemsButton,
-} from './domRefs.js';
+} from "./domRefs.js";
 
 // --- Configuracao inicial ---
 document.title = appTitle;
@@ -338,7 +353,11 @@ speciesInput.addEventListener("input", (e) => {
     typingTimer = setTimeout(function () {
         const value = e.target.value;
         filterFilters(value);
-        filterTableInput(value, gameData.species, ["name", "abilities", "innates"]);
+        filterTableInput(value, gameData.species, [
+            "name",
+            "abilities",
+            "innates",
+        ]);
     }, doneTypingInterval);
 });
 abilitiesInput.addEventListener("input", (e) => {
@@ -446,13 +465,16 @@ onlyShowChangedPokemon.addEventListener("click", () => {
 
     for (let i = 0, j = trackers.species.length; i < j; i++) {
         if (onlyShowChangedPokemon.classList.contains("activeSetting")) {
-            if (gameData.species[trackers.species[i]["key"]]["changes"].length === 0) {
+            if (
+                gameData.species[trackers.species[i]["key"]]["changes"]
+                    .length === 0
+            ) {
                 trackers.species[i]["filter"].push("changed");
             }
         } else {
-            trackers.species[i]["filter"] = trackers.species[i]["filter"].filter(
-                (value) => value !== "changed"
-            );
+            trackers.species[i]["filter"] = trackers.species[i][
+                "filter"
+            ].filter((value) => value !== "changed");
         }
     }
     lazyLoading(true);
@@ -465,9 +487,9 @@ onlyShowStrategyPokemon.addEventListener("click", () => {
                 trackers.species[i]["filter"].push("strategy");
             }
         } else {
-            trackers.species[i]["filter"] = trackers.species[i]["filter"].filter(
-                (value) => value !== "strategy"
-            );
+            trackers.species[i]["filter"] = trackers.species[i][
+                "filter"
+            ].filter((value) => value !== "strategy");
         }
     }
     lazyLoading(true);

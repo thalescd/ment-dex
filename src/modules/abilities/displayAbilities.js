@@ -1,7 +1,14 @@
-import { gameData, trackers } from '../../utils/state.js';
-import { abilitiesTableTbody, speciesButton, setTracker } from '../../utils/domRefs.js';
-import { tableButtonClick } from '../../utils/tableUtility.js';
-import { deleteFiltersFromTable, createFilter } from '../../utils/tableFilters.js';
+import { gameData, trackers } from "../../utils/state.js";
+import {
+    abilitiesTableTbody,
+    speciesButton,
+    setTracker,
+} from "../../utils/domRefs.js";
+import { tableButtonClick } from "../../utils/tableUtility.js";
+import {
+    deleteFiltersFromTable,
+    createFilter,
+} from "../../utils/tableFilters.js";
 
 export function appendAbilitiesToTable(abilitiesName) {
     if (
@@ -47,10 +54,12 @@ export function appendAbilitiesToTable(abilitiesName) {
         }
         window.scrollTo({ top: 0 });
         deleteFiltersFromTable();
-        createFilter(gameData.abilities[abilitiesName]["ingameName"], "Ability");
+        createFilter(
+            gameData.abilities[abilitiesName]["ingameName"],
+            "Ability"
+        );
     });
 
     tBody.append(row);
     return true;
 }
-

@@ -1,4 +1,4 @@
-import { sanitizeString } from '../../utils/utility.js';
+import { sanitizeString } from "../../utils/utility.js";
 
 export function regexAbilities(textAbilities, abilities) {
     const lines = textAbilities.split("\n");
@@ -46,7 +46,10 @@ export function regexAbilities(textAbilities, abilities) {
     return abilities;
 }
 
-export function regexVanillaAbilitiesDescription(textAbilitiesIngameName, abilities) {
+export function regexVanillaAbilitiesDescription(
+    textAbilitiesIngameName,
+    abilities
+) {
     const lines = textAbilitiesIngameName.split("\n");
     let conversionTable = {};
     let idx = Object.entries(abilities).filter(

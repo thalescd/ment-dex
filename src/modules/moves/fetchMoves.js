@@ -1,20 +1,18 @@
-import { gameData, trackers } from '../../utils/state.js';
-import { repos } from '../../utils/config.js';
-import { LZString } from '../../utils/lz-string.js';
-import { footerP } from '../../utils/utility.js';
+import { gameData, trackers } from "../../utils/state.js";
+import { repos } from "../../utils/config.js";
+import { LZString } from "../../utils/lz-string.js";
+import { footerP } from "../../utils/utility.js";
 import {
     regexMoves,
     regexMovesDescription,
     regexMovesIngameName,
     regexVanillaMovesDescription,
-    regexMovesFlags
-} from './regexMoves.js';
+    regexMovesFlags,
+} from "./regexMoves.js";
 
 async function getMoves(moves) {
     footerP("Fetching moves");
-    const rawMoves = await fetch(
-        `${repos.cfru}/src/Tables/battle_moves.c`
-    );
+    const rawMoves = await fetch(`${repos.cfru}/src/Tables/battle_moves.c`);
     const textMoves = await rawMoves.text();
 
     return regexMoves(textMoves, moves);

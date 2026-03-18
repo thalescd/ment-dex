@@ -1,14 +1,28 @@
-import { sanitizeString, getSpeciesSpriteSrc, returnTargetSpeciesSprite, getTextWidth } from '../../utils/utility.js';
-import { LZString } from '../../utils/lz-string.js';
-import { trainersTableTbody, overlayAbilities, popupAbilities, overlay, body } from '../../utils/domRefs.js';
-import { tableButtonClick } from '../../utils/tableUtility.js';
-import { deleteFiltersFromTable, createFilter } from '../../utils/tableFilters.js';
-import { createSpeciesPanel } from '../../utils/speciesPanelUtility.js';
-import { createPopupForMove } from '../moves/displayMoves.js';
-import { getItemSpriteSrc, getTrainerSpriteSrc } from './fetchScripts.js';
-import { gameData, trackers, uiState } from '../../utils/state.js';
-import { clearChildren, createPopup } from '../../utils/domUtils.js';
-import { MOVE_NAME_MAX_WIDTH_PX } from '../../utils/config.js';
+import {
+    sanitizeString,
+    getSpeciesSpriteSrc,
+    returnTargetSpeciesSprite,
+    getTextWidth,
+} from "../../utils/utility.js";
+import { LZString } from "../../utils/lz-string.js";
+import {
+    trainersTableTbody,
+    overlayAbilities,
+    popupAbilities,
+    overlay,
+    body,
+} from "../../utils/domRefs.js";
+import { tableButtonClick } from "../../utils/tableUtility.js";
+import {
+    deleteFiltersFromTable,
+    createFilter,
+} from "../../utils/tableFilters.js";
+import { createSpeciesPanel } from "../../utils/speciesPanelUtility.js";
+import { createPopupForMove } from "../moves/displayMoves.js";
+import { getItemSpriteSrc, getTrainerSpriteSrc } from "./fetchScripts.js";
+import { gameData, trackers, uiState } from "../../utils/state.js";
+import { clearChildren, createPopup } from "../../utils/domUtils.js";
+import { MOVE_NAME_MAX_WIDTH_PX } from "../../utils/config.js";
 
 export function appendTrainersToTable(key) {
     const zone = key.split("\\")[0];
@@ -221,7 +235,8 @@ function returnMovesObj(trainerSpeciesObj) {
             trainerSpeciesMoveName.className =
                 "trainerSpeciesMoveName hyperlink";
 
-            let moveName = gameData.moves[trainerSpeciesObj["moves"][i]]["ingameName"];
+            let moveName =
+                gameData.moves[trainerSpeciesObj["moves"][i]]["ingameName"];
             let resized = false;
             while (getTextWidth(moveName + ".") >= MOVE_NAME_MAX_WIDTH_PX) {
                 moveName = moveName.slice(0, -1);
@@ -236,7 +251,10 @@ function returnMovesObj(trainerSpeciesObj) {
             trainerSpeciesMoveContainer.append(trainerSpeciesMoveType);
 
             trainerSpeciesMoveName.addEventListener("click", () => {
-                createPopupForMove(gameData.moves[trainerSpeciesObj["moves"][i]], false);
+                createPopupForMove(
+                    gameData.moves[trainerSpeciesObj["moves"][i]],
+                    false
+                );
                 overlay.style.display = "flex";
                 body.classList.add("fixed");
             });
@@ -342,7 +360,9 @@ function createPopupAbility(abilityArray) {
         abilityArray,
         (key) => gameData.abilities[key]["ingameName"],
         (key) => gameData.abilities[key]["description"],
-        overlayAbilities, popupAbilities, body
+        overlayAbilities,
+        popupAbilities,
+        body
     );
 }
 
@@ -351,7 +371,9 @@ function createPopupItem(itemArray) {
         itemArray,
         (key) => gameData.items[key]["ingameName"],
         (key) => gameData.items[key]["description"],
-        overlayAbilities, popupAbilities, body
+        overlayAbilities,
+        popupAbilities,
+        body
     );
 }
 
@@ -415,7 +437,9 @@ function replaceTbody(key, zone, trainer) {
 
         trainerEl
             .getElementsByClassName("trainerTbody")[0]
-            .replaceWith(createTrainerSpeciesTbody(gameData.trainers[zone][trainer]));
+            .replaceWith(
+                createTrainerSpeciesTbody(gameData.trainers[zone][trainer])
+            );
         const trainerFormat =
             trainerEl.getElementsByClassName("trainerFormat")[0];
         trainerFormat.classList.remove("double");
@@ -450,9 +474,11 @@ function setActiveRematch(zone, trainer) {
     }
     if (gameData.trainers[zone][baseTrainer]["rematchArray"]) {
         delete gameData.trainers[zone][baseTrainer]["activeRematch"];
-        gameData.trainers[zone][baseTrainer]["rematchArray"].forEach((rematch) => {
-            delete gameData.trainers[zone][rematch]["activeRematch"];
-        });
+        gameData.trainers[zone][baseTrainer]["rematchArray"].forEach(
+            (rematch) => {
+                delete gameData.trainers[zone][rematch]["activeRematch"];
+            }
+        );
     }
 
     gameData.trainers[zone][trainer]["activeRematch"] = true;
@@ -512,4 +538,3 @@ export function showRematch() {
         }
     }
 }
-
