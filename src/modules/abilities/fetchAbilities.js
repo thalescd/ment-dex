@@ -1,92 +1,17 @@
-import { repos } from "../../utils/config.js";
+import { dataSources } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
 import { footerP } from "../../utils/utility.js";
 import { gameData, trackers } from "../../utils/state.js";
-import {
-    regexAbilities,
-    regexVanillaAbilitiesDescription,
-    regexAbilitiesIngameName,
-    regexAbilitiesDescription,
-    regexNewAbilities,
-} from "./regexAbilities.js";
-
-async function getAbilities(abilities) {
-    footerP("Fetching abilities");
-    const rawAbilities = await fetch(
-        `${repos.cfru}/include/constants/abilities.h`
-    );
-    const textAbilities = await rawAbilities.text();
-
-    return regexAbilities(textAbilities, abilities);
-}
-
-async function getVanillaAbilitiesDescription(abilities) {
-    const rawVanillaAbilitiesDescription = await fetch(
-        `${repos.decap}/src/data/text/abilities.h`
-    );
-    const textVanillaAbilitiesDescription =
-        await rawVanillaAbilitiesDescription.text();
-
-    return regexVanillaAbilitiesDescription(
-        textVanillaAbilitiesDescription,
-        abilities
-    );
-}
-
-async function getAbilitiesIngameName(abilities) {
-    footerP("Fetching abilities ingame name");
-    const rawAbilitiesIngameName = await fetch(
-        `${repos.cfru}/strings/ability_name_table.string`
-    );
-    const textAbilitiesIngameName = await rawAbilitiesIngameName.text();
-
-    return regexAbilitiesIngameName(textAbilitiesIngameName, abilities);
-}
-
-async function getAbilitiesDescription(abilities) {
-    footerP("Fetching abilities description");
-    const rawAbilitiesDescription = await fetch(
-        `${repos.cfru}/strings/ability_descriptions.string`
-    );
-    const textAbilitiesDescription = await rawAbilitiesDescription.text();
-
-    return regexAbilitiesDescription(textAbilitiesDescription, abilities);
-}
-
-async function getNewAbilities(abilities) {
-    const rawNewAbilities = await fetch(
-        `${repos.dex}/src/abilities/duplicate_abilities.json`
-    );
-    const jsonNewAbilities = await rawNewAbilities.json();
-
-    return regexNewAbilities(jsonNewAbilities, abilities);
-}
+import { parseAbilitiesInfo } from "./regexAbilities.js";
 
 async function buildAbilitiesObj() {
     try {
-        let abilities = {};
-        abilities = await getAbilities(abilities);
+        footerP("Fetching abilities");
+        const raw = await fetch(dataSources.abilitiesInfo);
+        const text = await raw.text();
+        let abilities = parseAbilitiesInfo(text);
 
-        abilities = await getVanillaAbilitiesDescription(abilities);
-        await Promise.all([
-            getAbilitiesIngameName(abilities),
-            getAbilitiesDescription(abilities),
-            getNewAbilities(abilities),
-        ]);
-
-        abilities["ABILITY_NEUTRALIZINGGAS"]["description"] =
-            "All Abilities are nullified.";
-        abilities["ABILITY_FULLMETALBODY"]["description"] =
-            "Prevents ability reduction.";
-        abilities["ABILITY_EVAPORATE"]["description"] =
-            "Nullifies all water to up Sp. Atk.";
-        abilities["ABILITY_GRASS_DASH"]["description"] =
-            "Grass-type moves hit first.";
-        abilities["ABILITY_SLIPPERY_TAIL"]["description"] =
-            "Tail moves hit first.";
-        abilities["ABILITY_DRILL_BEAK"]["description"] =
-            "Drill moves land critical hits.";
-
+        // Remover abilities sem descricao (mesmo comportamento do original)
         Object.keys(abilities).forEach((ability) => {
             if (abilities[ability]["description"] === "") {
                 delete abilities[ability];

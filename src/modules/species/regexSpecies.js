@@ -1,423 +1,346 @@
+// Parsers para o formato pokeemerald-expansion
 import { repos } from "../../utils/config.js";
-import { gameData } from "../../utils/state.js";
 
-export function regexSpecies(textSpecies, species) {
-    const lines = textSpecies.split("\n");
-    let ID = 0;
-
-    lines.forEach((line) => {
-        const matchSpecies = line.match(/#define *(SPECIES_\w+)/i);
-        if (matchSpecies) {
-            const name = matchSpecies[1];
-
-            const matchID = line.match(/0[xX][0-9a-fA-F]+/i);
-            if (matchID) {
-                ID = parseInt(matchID[0]);
-
-                species[name] = {};
-                species[name]["name"] = name;
-
-                species[name]["ID"] = ID;
-            }
-        }
-    });
-    return species;
+// Helpers para extrair strings entre aspas de macros C
+function extractQuotedStrings(raw) {
+    const parts = [];
+    const re = /"([^"]*)"/g;
+    let m;
+    while ((m = re.exec(raw)) !== null) parts.push(m[1]);
+    return parts.join("").replace(/\\n/g, " ");
 }
 
-export function regexBaseStats(textBaseStats, species) {
-    const lines = textBaseStats.split("\n");
-
-    const regex =
-        /baseHP|baseAttack|baseDefense|baseSpeed|baseSpAttack|baseSpDefense|type1|type2|item1|item2|eggGroup1|eggGroup2|ability1|ability2|hiddenAbility/;
-    let change = false,
-        value,
-        name;
-
-    lines.forEach((line) => {
-        if (/#else/i.test(line)) change = true;
-        if (/#endif/i.test(line)) change = false;
-
-        const matchSpecies = line.match(/SPECIES_\w+/i);
-        if (matchSpecies) {
-            name = matchSpecies[0];
-            change = false;
-        }
-
-        const matchRegex = line.match(regex);
-        if (matchRegex && name in species) {
-            // name in species necessary, don't touch
-            const match = matchRegex[0];
-
-            if (
-                match === "baseHP" ||
-                match === "baseAttack" ||
-                match === "baseDefense" ||
-                match === "baseSpeed" ||
-                match === "baseSpAttack" ||
-                match === "baseSpDefense"
-            ) {
-                const matchInt = line.match(/\d+/);
-                if (matchInt) value = parseInt(matchInt[0]);
-            } else if (
-                match === "type1" ||
-                match === "type2" ||
-                match === "item1" ||
-                match === "item2" ||
-                match === "eggGroup1" ||
-                match === "eggGroup2" ||
-                match === "ability1" ||
-                match === "ability2" ||
-                match === "hiddenAbility"
-            ) {
-                value = line.match(/\w+_\w+/i);
-                if (value) value = value[0];
-            }
-
-            if (change === true) species[name]["changes"].push([match, value]);
-            else if (change === false) {
-                if (
-                    match === "ability1" ||
-                    match === "ability2" ||
-                    match === "hiddenAbility"
-                ) {
-                    species[name]["abilities"].push(value);
-                } else {
-                    species[name][match] = value;
-                }
-            }
-        }
-    });
-    return getBST(species);
-}
-
-export function regexChanges(textChanges, species, abilitiesArrayForChanges) {
-    const lines = textChanges.split("\n");
-
-    const regex =
-        /baseHP|baseAttack|baseDefense|baseSpeed|baseSpAttack|baseSpDefense|type1|type2|ability1|ability2|hiddenAbility/i;
-    let value,
-        name,
-        abilitiesArray = [];
-
-    lines.forEach((line) => {
-        const matchSpecies = line.match(/SPECIES_\w+/i);
-        if (matchSpecies) {
-            for (let i = 0; i < abilitiesArray.length; i++) {
-                const ability = species[name]["abilities"][i];
-                if (!abilitiesArrayForChanges.includes(ability)) {
-                    abilitiesArray[i] = ability;
-                }
-            }
-
-            if (
-                name in species &&
-                JSON.stringify(abilitiesArray) !==
-                    JSON.stringify(species[name]["abilities"])
-            ) {
-                species[name]["changes"].push(["abilities", abilitiesArray]);
-            }
-            name = matchSpecies[0];
-            abilitiesArray = [];
-        }
-
-        if (name in species) {
-            const matchRegex = line.match(regex);
-            if (matchRegex) {
-                const match = matchRegex[0];
-
-                if (
-                    match === "baseHP" ||
-                    match === "baseAttack" ||
-                    match === "baseDefense" ||
-                    match === "baseSpeed" ||
-                    match === "baseSpAttack" ||
-                    match === "baseSpDefense"
-                ) {
-                    const matchInt = line.match(/\d+/);
-                    if (matchInt) value = parseInt(matchInt[0]);
-                } else if (match === "type1" || match === "type2") {
-                    value = line.match(/\w+_\w+/i);
-                    if (value) value = value[0];
-                } else if (
-                    match === "ability1" ||
-                    match === "ability2" ||
-                    match === "hiddenAbility"
-                ) {
-                    value = line.match(/\w+_\w+/i);
-                    if (value) value = value[0];
-                    abilitiesArray.push(value);
-                }
-
-                if (match in species[name] && species[name][match] !== value) {
-                    species[name]["changes"].push([match, value]);
-                }
-            }
-        }
-    });
-    return species;
-}
-
-export async function regexAbilitiesArrayForChanges(textAbilitiesForChanges) {
-    const lines = textAbilitiesForChanges.split("\n");
-    let abilitiesArrayForChanges = [];
-
-    lines.forEach((line) => {
-        const matchAbility = line.match(/ABILITY_\w+/i);
-        if (matchAbility) {
-            abilitiesArrayForChanges.push(matchAbility[0]);
-        }
-    });
-
-    return abilitiesArrayForChanges;
-}
-
-export function getLevelUpLearnsetsConversionTable(
-    textLevelUpLearnsetsPointers
-) {
-    const lines = textLevelUpLearnsetsPointers.split("\n");
-    let conversionTable = {};
-
-    lines.forEach((line) => {
-        const matchSpecies = line.match(/SPECIES_\w+/i);
-        if (matchSpecies) {
-            const value = matchSpecies[0];
-
-            const matchConversion = line.match(/s\w+LevelUpLearnset/i);
-            if (matchConversion) {
-                const index = matchConversion[0];
-
-                if (conversionTable[index] === undefined)
-                    // DO NOT TOUCH THAT FUTURE ME, THIS IS THE WAY, DON'T QUESTION ME
-                    conversionTable[index] = [value]; // DO NOT TOUCH THAT FUTURE ME, THIS IS THE WAY, DON'T QUESTION ME
-                else conversionTable[index].push(value);
-            }
-        }
-    });
-    return conversionTable;
-}
-
-export function regexLevelUpLearnsets(
-    textLevelUpLearnsets,
-    conversionTable,
-    species
-) {
-    const lines = textLevelUpLearnsets.split("\n");
-    let speciesArray = [];
-
-    lines.forEach((line) => {
-        const matchConversion = line.match(/s\w+LevelUpLearnset/i);
-        if (matchConversion) {
-            const index = matchConversion[0];
-            if (index in conversionTable) {
-                speciesArray = conversionTable[index];
-            }
-        }
-
-        const matchLevelMove = line.match(/(\d+) *, *(MOVE_\w+)/i);
-        if (matchLevelMove) {
-            const level = parseInt(matchLevelMove[1]);
-            const move = matchLevelMove[2];
-            for (let i = 0; i < speciesArray.length; i++)
-                species[speciesArray[i]]["levelUpLearnsets"].push([
-                    move,
-                    level,
-                ]);
-        }
-    });
-    for (const name of Object.keys(conversionTable)) {
-        if (conversionTable[name].length >= 2) {
-            for (let j = 0; j < conversionTable[name].length; j++) {
-                species[conversionTable[name][j]]["forms"] =
-                    conversionTable[name];
-            }
-        }
+// ========================================================================
+// 1. parseSpeciesConstants — include/constants/species.h
+//    #define SPECIES_BULBASAUR 1
+// ========================================================================
+export function parseSpeciesConstants(text) {
+    const species = {};
+    const re = /#define\s+(SPECIES_\w+)\s+(\d+)/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+        const name = m[1];
+        const id = parseInt(m[2]);
+        species[name] = { name, ID: id };
     }
     return species;
 }
 
-export async function regexTMHMLearnsets(
-    textTMHMLearnsets,
-    species,
-    start,
-    end
-) {
-    const lines = textTMHMLearnsets.split("\n");
-    let name = null,
-        startFound = false,
-        TMHM = 0,
-        count = 0;
-    const fetchPromises = [];
+// ========================================================================
+// 2. parseSpeciesInfo — species_info/gen_X_families.h
+//    Retorna { data: { SPECIES_XXX: {...} }, families: { P_FAMILY_XXX: [...] } }
+// ========================================================================
+export function parseSpeciesInfo(text) {
+    const data = {};
+    const families = {};
 
-    lines.forEach((line) => {
-        if (line.includes(start)) startFound = true;
-        else if (line.includes(end)) startFound = false;
+    // Tracking de familias via #if P_FAMILY_XXX ... #endif
+    let currentFamily = null;
+    const lines = text.split("\n");
+    const familyStartRe = /^#if\s+P_FAMILY_(\w+)/;
+    const familyEndRe = /^#endif\s*\/\/\s*P_FAMILY_/;
 
-        if (startFound) {
-            const matchMove = line.trim().match(/^MOVE_\w+/i);
-            if (matchMove) {
-                let move = gameData.moves[matchMove[0]]["ingameName"];
-                count++;
+    // Primeiro: identificar ranges de linhas por familia
+    const familyRanges = [];
+    let rangeStart = -1;
+    let familyName = null;
 
-                if (move === "Solar Beam") move = "Solarbeam";
-                else if (move === "Will-O-Wisp") move = "Will-o-Wisp";
-                else if (move === "U-turn") move = "U-Turn";
-                else if (move === "Poweruppunch") move = "Power-Up Punch";
-                else if (move === "Dazzlinggleam") move = "Dazzling Gleam";
-                else if (move === "Drainingkiss") move = "Draining Kiss";
-
-                const rawTMHM = fetch(
-                    `${repos.dpe}/src/tm_compatibility/${count} - ${move}.txt`
-                )
-                    .then((raw) => raw.text())
-                    .then((text) => {
-                        text.split("\n").forEach((line) => {
-                            const matchTMHM = line.match(/TM\d+|HM\d+/i);
-                            if (matchTMHM) TMHM = matchTMHM[0];
-
-                            const matchSpecies = `SPECIES_${line.trim()}`;
-                            if (species[matchSpecies] !== undefined)
-                                species[matchSpecies]["TMHMLearnsets"].push(
-                                    matchMove[0]
-                                );
-                        });
-                    });
-                fetchPromises.push(rawTMHM);
-            }
+    for (let i = 0; i < lines.length; i++) {
+        const startMatch = lines[i].match(familyStartRe);
+        if (startMatch && rangeStart === -1) {
+            rangeStart = i;
+            familyName = `P_FAMILY_${startMatch[1]}`;
         }
-    });
+        if (familyEndRe.test(lines[i]) && rangeStart !== -1) {
+            familyRanges.push({ family: familyName, start: rangeStart, end: i });
+            rangeStart = -1;
+            familyName = null;
+        }
+    }
 
-    await Promise.all(fetchPromises);
-    return species;
-    //return altFormsLearnsets(species, "forms", "TMHMLearnsets")
+    // Regex para blocos de species — suporta 2 niveis de chaves aninhadas
+    const blockRegex =
+        /\[(SPECIES_\w+)\]\s*=\s*\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g;
+
+    // Pre-parse de TODOS os #define do arquivo (macros de stats, etc)
+    const defines = {};
+    const defineRe = /#define\s+(\w+)\s+(.+)/g;
+    let defMatch;
+    while ((defMatch = defineRe.exec(text)) !== null) {
+        defines[defMatch[1]] = defMatch[2].trim();
+    }
+
+    // Processar cada familia
+    for (const range of familyRanges) {
+        const chunk = lines.slice(range.start, range.end + 1).join("\n");
+        const familySpecies = [];
+        let match;
+        blockRegex.lastIndex = 0;
+
+        while ((match = blockRegex.exec(chunk)) !== null) {
+            const speciesKey = match[1];
+            const body = match[2];
+            familySpecies.push(speciesKey);
+
+            data[speciesKey] = parseSpeciesBody(body, defines);
+        }
+
+        families[range.family] = familySpecies;
+    }
+
+    return { data, families };
 }
 
-export async function regexTutorLearnsets(
-    textTutorLearnsets,
-    species,
-    start,
-    end
-) {
-    const lines = textTutorLearnsets.split("\n");
-    let startFound = false,
-        count = 0;
-    const fetchPromises = [];
-
-    lines.forEach((line) => {
-        if (line.includes(start)) startFound = true;
-        else if (line.includes(end)) startFound = false;
-
-        if (startFound) {
-            const matchMove = line.trim().match(/^MOVE_\w+/i);
-            if (matchMove) {
-                let move = gameData.moves[matchMove[0]]["ingameName"];
-                count++;
-
-                if (move === "Jealous Burn") move = "Burning Jealousy";
-                else if (move === "Soft-Boiled") move = "Softboiled";
-                else if (move === "Stompingtantrum") move = "Stomping Tantrum";
-                else if (move === "Mistyterrain") move = "Misty Terrain";
-                else if (move === "Grassyterrain") move = "Grassy Terrain";
-                else if (move === "Psychicterrain") move = "Psychic Terrain";
-                else if (move === "Electricterrain") move = "Electric Terrain";
-                else if (move === "Break Swipe") move = "Breaking Swipe";
-                else if (move === "HiHorsepower") move = "High Horsepower";
-                else if (move === "ThunderPunch") move = "Thunder Punch";
-                else if (move === "Darkestlariat") move = "Darkest Lariat";
-                else if (move === "PhantomForce") move = "Phantom Force";
-                else if (move === "Mysticalfire") move = "Mystical Fire";
-                else if (move === "Psychicfangs") move = "Psychic Fangs";
-                else if (move === "Expand Force") move = "Expanding Force";
-                else if (move === "TerrainPulse") move = "Terrain Pulse";
-                else if (move === "Rising Volt") move = "Rising Voltage";
-                else if (move === "MistyExplode") move = "Misty Explosion";
-                else if (move === "Corrode Gas") move = "Corrosive Gas";
-                else if (move === "SkitterSmack") move = "Skitter Smack";
-                else if (move === "Scorch Sands") move = "Scorching Sands";
-                else if (move === "DualWingbeat") move = "Dual Wingbeat";
-
-                const rawTutor = fetch(
-                    `${repos.dpe}/src/tutor_compatibility/${count} - ${move}.txt`
-                )
-                    .then((raw) => raw.text())
-                    .then((text) => {
-                        if (
-                            !/Tutor/.test(
-                                gameData.moves[matchMove[0]]["flags"].toString()
-                            )
-                        ) {
-                            gameData.moves[matchMove[0]]["flags"].push(
-                                "BF Tutor"
-                            );
-                        }
-
-                        text.split("\n").forEach((line) => {
-                            const matchSpecies = `SPECIES_${line.trim()}`;
-                            if (species[matchSpecies] !== undefined)
-                                species[matchSpecies]["tutorLearnsets"].push(
-                                    matchMove[0]
-                                );
-                        });
-                    });
-
-                fetchPromises.push(rawTutor);
-            }
+function resolveIntValue(raw, defines) {
+    const trimmed = raw.trim();
+    // Caso 1: numero simples
+    if (/^\d+$/.test(trimmed)) return parseInt(trimmed);
+    // Caso 2: ternario inline — pegar o primeiro valor (branch "updated"/true)
+    const ternaryMatch = trimmed.match(/\?\s*(\d+)/);
+    if (ternaryMatch) return parseInt(ternaryMatch[1]);
+    // Caso 3: referencia a macro — resolver no mapa de defines
+    if (defines) {
+        const macroVal = defines[trimmed];
+        if (macroVal) {
+            const macroTernary = macroVal.match(/\?\s*(\d+)/);
+            if (macroTernary) return parseInt(macroTernary[1]);
+            const macroNum = macroVal.match(/(\d+)/);
+            if (macroNum) return parseInt(macroNum[1]);
         }
-    });
-
-    await Promise.all(fetchPromises);
-    return species;
-    //return altFormsLearnsets(species, "forms", "tutorLearnsets")
+    }
+    return 0;
 }
 
-export function regexEvolution(textEvolution, species) {
-    const lines = textEvolution.split("\n");
-    let name;
+function parseSpeciesBody(body, defines) {
+    const intField = (name) => {
+        const m = body.match(new RegExp(`\\.${name}\\s*=\\s*([^,\\n]+)`));
+        return m ? resolveIntValue(m[1], defines) : 0;
+    };
 
-    lines.forEach((line) => {
-        const matchSpecies = line.match(/\[ *(SPECIES_\w+) *\]/i);
-        if (matchSpecies) name = matchSpecies[1];
+    // Types: MON_TYPES(TYPE_X) ou MON_TYPES(TYPE_X, TYPE_Y)
+    let type1 = "", type2 = "";
+    const typesMatch = body.match(/\.types\s*=\s*MON_TYPES\(([^)]+)\)/);
+    if (typesMatch) {
+        const types = typesMatch[1].match(/TYPE_\w+/g) || [];
+        type1 = types[0] || "";
+        type2 = types[1] || type1; // se 1 tipo, duplicar
+    }
 
-        const matchEvoInfo = line.match(/(\w+), *(\w+), *(\w+)/);
-        if (matchEvoInfo) {
-            let method = matchEvoInfo[1];
-            if (/ITEM_HISUI_ROCK/i.test(line)) {
-                method = method.replace(/HOLD_ITEM$/, "HOLD_HISUI_ROCK");
+    // Abilities: { ABILITY_X, ABILITY_Y, ABILITY_Z }
+    const abilities = [];
+    const abilitiesMatch = body.match(/\.abilities\s*=\s*\{([^}]+)\}/);
+    if (abilitiesMatch) {
+        const abs = abilitiesMatch[1].match(/ABILITY_\w+/g) || [];
+        abilities.push(...abs);
+    }
+
+    // Egg groups: MON_EGG_GROUPS(EGG_GROUP_X, EGG_GROUP_Y)
+    let eggGroup1 = "", eggGroup2 = "";
+    const eggMatch = body.match(/\.eggGroups\s*=\s*MON_EGG_GROUPS\(([^)]+)\)/);
+    if (eggMatch) {
+        const groups = eggMatch[1].match(/EGG_GROUP_\w+/g) || [];
+        eggGroup1 = groups[0] || "";
+        eggGroup2 = groups[1] || eggGroup1;
+    }
+
+    // Items
+    const itemCommonMatch = body.match(/\.itemCommon\s*=\s*(ITEM_\w+)/);
+    const itemRareMatch = body.match(/\.itemRare\s*=\s*(ITEM_\w+)/);
+    const item1 = itemCommonMatch ? itemCommonMatch[1] : "";
+    const item2 = itemRareMatch ? itemRareMatch[1] : "";
+
+    // Evolutions: EVOLUTION({METHOD, COND, TARGET}, {METHOD, COND, TARGET}, ...)
+    // Algumas podem ter 4+ campos com CONDITIONS — pegar apenas os 3 primeiros
+    const evolution = [];
+    const evoMatch = body.match(/\.evolutions\s*=\s*EVOLUTION\(([\s\S]*?)\)(?:\s*,|\s*$)/);
+    if (evoMatch) {
+        const evoContent = evoMatch[1];
+        // Cada evolucao esta dentro de { ... }
+        const evoBlockRe = /\{(\w+)\s*,\s*(\w+)\s*,\s*(\w+)/g;
+        let evoM;
+        while ((evoM = evoBlockRe.exec(evoContent)) !== null) {
+            // Ignorar blocos internos de CONDITIONS (que também têm {})
+            // Verificar que o primeiro match é um EVO_ method
+            if (evoM[1].startsWith("EVO_")) {
+                evolution.push([evoM[1], evoM[2], evoM[3]]);
             }
-            const condition = matchEvoInfo[2];
-            const targetSpecies = matchEvoInfo[3];
-            species[name]["evolution"].push([method, condition, targetSpecies]);
         }
-    });
+    }
 
-    return getEvolutionLine(species);
+    // Learnset references
+    const levelUpRef = body.match(/\.levelUpLearnset\s*=\s*(s\w+LevelUpLearnset)/);
+    const teachableRef = body.match(/\.teachableLearnset\s*=\s*(s\w+TeachableLearnset)/);
+    const eggMoveRef = body.match(/\.eggMoveLearnset\s*=\s*(s\w+EggMoveLearnset)/);
+
+    // Sprite reference
+    const frontPicMatch = body.match(/\.frontPic\s*=\s*(gMonFrontPic_\w+)/);
+
+    // Species display name
+    const speciesNameMatch = body.match(/\.speciesName\s*=\s*_\(\s*"([^"]*)"\s*\)/);
+
+    return {
+        baseHP: intField("baseHP"),
+        baseAttack: intField("baseAttack"),
+        baseDefense: intField("baseDefense"),
+        baseSpeed: intField("baseSpeed"),
+        baseSpAttack: intField("baseSpAttack"),
+        baseSpDefense: intField("baseSpDefense"),
+        type1, type2,
+        abilities,
+        eggGroup1, eggGroup2,
+        item1, item2,
+        evolution,
+        levelUpRef: levelUpRef ? levelUpRef[1] : null,
+        teachableRef: teachableRef ? teachableRef[1] : null,
+        eggMoveRef: eggMoveRef ? eggMoveRef[1] : null,
+        frontPicRef: frontPicMatch ? frontPicMatch[1] : null,
+        speciesName: speciesNameMatch ? speciesNameMatch[1] : "",
+    };
 }
 
-async function getEvolutionLine(species) {
+// ========================================================================
+// 3. parseLevelUpLearnsets — level_up_learnsets/gen_x.h
+//    LEVEL_UP_MOVE(level, MOVE_XXX)
+// ========================================================================
+export function parseLevelUpLearnsets(text) {
+    const learnsets = {};
+    const blockRe = /\b(s\w+LevelUpLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)LEVEL_UP_END/g;
+    let match;
+
+    while ((match = blockRe.exec(text)) !== null) {
+        const name = match[1];
+        const body = match[2];
+        const moves = [];
+        const moveRe = /LEVEL_UP_MOVE\(\s*(\d+)\s*,\s*(MOVE_\w+)\s*\)/g;
+        let m;
+        while ((m = moveRe.exec(body)) !== null) {
+            moves.push([m[2], parseInt(m[1])]);
+        }
+        learnsets[name] = moves;
+    }
+
+    return learnsets;
+}
+
+// ========================================================================
+// 4. parseTeachableLearnsets — teachable_learnsets.h
+//    Listas de MOVE_XXX terminadas por MOVE_UNAVAILABLE
+// ========================================================================
+export function parseTeachableLearnsets(text) {
+    const learnsets = {};
+    const blockRe = /\b(s\w+TeachableLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)MOVE_UNAVAILABLE/g;
+    let match;
+
+    while ((match = blockRe.exec(text)) !== null) {
+        const name = match[1];
+        const body = match[2];
+        const moves = [];
+        const moveRe = /\b(MOVE_\w+)\b/g;
+        let m;
+        while ((m = moveRe.exec(body)) !== null) {
+            if (m[1] !== "MOVE_UNAVAILABLE") moves.push(m[1]);
+        }
+        learnsets[name] = moves;
+    }
+
+    return learnsets;
+}
+
+// ========================================================================
+// 5. parseEggMoves — egg_moves.h
+//    Mesmo padrao do teachable
+// ========================================================================
+export function parseEggMoves(text) {
+    const learnsets = {};
+    const blockRe = /\b(s\w+EggMoveLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)MOVE_UNAVAILABLE/g;
+    let match;
+
+    while ((match = blockRe.exec(text)) !== null) {
+        const name = match[1];
+        const body = match[2];
+        const moves = [];
+        const moveRe = /\b(MOVE_\w+)\b/g;
+        let m;
+        while ((m = moveRe.exec(body)) !== null) {
+            if (m[1] !== "MOVE_UNAVAILABLE") moves.push(m[1]);
+        }
+        learnsets[name] = moves;
+    }
+
+    return learnsets;
+}
+
+// ========================================================================
+// 6. parseTmsHms — include/constants/tms_hms.h
+//    FOREACH_TM(F) / FOREACH_HM(F) → Set de MOVE_XXX
+// ========================================================================
+export function parseTmsHms(text) {
+    const tmhmMoves = new Set();
+
+    // Capturar corpo do FOREACH_TM e FOREACH_HM
+    const macroRe = /FOREACH_(?:TM|HM)\s*\(\s*F\s*\)([\s\S]*?)(?=FOREACH_|#define\s+FOREACH_TMHM|#endif)/g;
+    let match;
+    while ((match = macroRe.exec(text)) !== null) {
+        const body = match[1];
+        // F(MOVE_NAME) — o nome do move esta sem MOVE_ prefix, é só o sufixo
+        const moveRe = /F\((\w+)\)/g;
+        let m;
+        while ((m = moveRe.exec(body)) !== null) {
+            tmhmMoves.add(`MOVE_${m[1]}`);
+        }
+    }
+
+    return tmhmMoves;
+}
+
+// ========================================================================
+// 7. parseSpriteRefs — src/data/graphics/pokemon.h
+//    gMonFrontPic_Xxx → path para sprite
+// ========================================================================
+export function parseSpriteRefs(text) {
+    const refs = {};
+    const re = /\b(gMonFrontPic_\w+)\b[^"]*INCBIN_U32\(\s*"([^"]+)"/g;
+    let match;
+
+    while ((match = re.exec(text)) !== null) {
+        const refName = match[1];
+        // Manter apenas a primeira ocorrencia (sprite novo, antes do #else GBA)
+        if (refs[refName]) continue;
+        const rawPath = match[2];
+        // Trocar extensao .4bpp.smol por .png para obter a imagem
+        const pngPath = rawPath.replace(/\.4bpp\.smol$/, ".png");
+        refs[refName] = `${repos.expansion}/${pngPath}`;
+    }
+
+    return refs;
+}
+
+// ========================================================================
+// Funcoes utilitarias reutilizadas do original
+// ========================================================================
+
+export function getEvolutionLine(species) {
     for (const name of Object.keys(species)) {
-        let evolutionLine = [name];
+        const evolutionLine = [name];
 
         for (let i = 0; i < evolutionLine.length; i++) {
-            const targetSpecies = evolutionLine[i];
-            for (
-                let j = 0;
-                j < species[evolutionLine[i]]["evolution"].length;
-                j++
-            ) {
-                const targetSpeciesEvo =
-                    species[targetSpecies]["evolution"][j][2];
-                if (!evolutionLine.includes(targetSpeciesEvo)) {
-                    evolutionLine.push(targetSpeciesEvo);
+            const current = evolutionLine[i];
+            if (!species[current]) continue;
+            for (let j = 0; j < species[current]["evolution"].length; j++) {
+                const target = species[current]["evolution"][j][2];
+                if (!evolutionLine.includes(target) && species[target]) {
+                    evolutionLine.push(target);
                 }
             }
         }
 
         for (let i = 0; i < evolutionLine.length; i++) {
-            const targetSpecies = evolutionLine[i];
+            const target = evolutionLine[i];
             if (
-                evolutionLine.length >
-                species[targetSpecies]["evolutionLine"].length
+                species[target] &&
+                evolutionLine.length > species[target]["evolutionLine"].length
             ) {
-                species[targetSpecies]["evolutionLine"] = evolutionLine;
+                species[target]["evolutionLine"] = evolutionLine;
             }
         }
     }
@@ -425,111 +348,9 @@ async function getEvolutionLine(species) {
     for (const name of Object.keys(species)) {
         species[name]["evolutionLine"] = Array.from(
             new Set(species[name]["evolutionLine"])
-        ); // remove duplicates
+        );
     }
 
-    return species;
-}
-
-export function regexForms(textForms, species) {
-    const lines = textForms.split("\n");
-    let speciesArray = [];
-
-    lines.forEach((line) => {
-        const matchSpecies = line.match(/SPECIES_\w+/i);
-
-        if (/FORM_SPECIES_END/i.test(line)) {
-            for (let i = 0; i < speciesArray.length; i++)
-                species[speciesArray[i]]["forms"] = speciesArray;
-            speciesArray = [];
-        } else if (matchSpecies) {
-            const name = matchSpecies[0];
-            speciesArray.push(name);
-        }
-    });
-    return species;
-}
-
-export function regexEggMovesLearnsets(textEggMoves, species) {
-    const lines = textEggMoves.split("\n");
-    const speciesString = JSON.stringify(Object.keys(species));
-    let name = null;
-
-    lines.forEach((line) => {
-        if (/egg_moves/i.test(line)) name = null;
-        const matchMove = line.match(/MOVE_\w+/i);
-        if (matchMove) {
-            const move = matchMove[0];
-            if (name) {
-                species[name]["eggMovesLearnsets"].push(move);
-            }
-        } else if (name === null) {
-            const matchLine = line.match(/(\w+),/i);
-            if (matchLine) {
-                const testSpecies = `SPECIES_${speciesString.match(matchLine[1])}`;
-                if (speciesString.includes(testSpecies)) name = testSpecies;
-            }
-        }
-    });
-
-    return altFormsLearnsets(species, "evolutionLine", "eggMovesLearnsets");
-}
-
-export function regexReplaceAbilities(replaceAbilities, species) {
-    Object.keys(replaceAbilities).forEach((oldAbility) => {
-        Object.keys(replaceAbilities[oldAbility]).forEach((newAbility) => {
-            for (
-                let i = 0;
-                i < replaceAbilities[oldAbility][newAbility].length;
-                i++
-            ) {
-                for (let j = 0; j < 3; j++) {
-                    if (
-                        species[replaceAbilities[oldAbility][newAbility][i]][
-                            "abilities"
-                        ][j] === oldAbility
-                    ) {
-                        species[replaceAbilities[oldAbility][newAbility][i]][
-                            "abilities"
-                        ][j] = newAbility;
-                    }
-                }
-            }
-        });
-    });
-
-    return species;
-}
-
-export function regexSprite(textSprite, species) {
-    const lines = textSprite.split("\n");
-
-    lines.forEach((line) => {
-        let url = null;
-        const matchSpecies = line.match(/SPECIES_\w+/i);
-        if (matchSpecies) {
-            let name = matchSpecies[0];
-            if (name === "SPECIES_ENAMORUS_T")
-                name = "SPECIES_ENAMORUS_THERIAN";
-
-            const matchURL = line.match(/gFrontSprite\w+Tiles/i);
-            if (matchURL || name === "SPECIES_SHADOW_WARRIOR") {
-                if (name === "SPECIES_SHADOW_WARRIOR") {
-                    url = `${repos.dpe}/graphics/frontspr/gSpriteShadowWarrior.png`;
-                } else {
-                    url = `${repos.dpe}/graphics/frontspr/${matchURL[0].replace("Tiles", ".png")}`;
-                }
-
-                if (name === "SPECIES_CASTFORM") {
-                    url = `${repos.dpe}/graphics/castform/gFrontSprite385Castform.png`;
-                }
-
-                if (name in species) {
-                    species[name]["sprite"] = url;
-                }
-            }
-        }
-    });
     return species;
 }
 
@@ -538,33 +359,14 @@ export function altFormsLearnsets(species, input, output) {
         if (species[name][input].length >= 2) {
             for (let j = 0; j < species[name][input].length; j++) {
                 const targetSpecies = species[name][input][j];
-
-                if (species[targetSpecies][output].length <= 0) {
+                if (
+                    species[targetSpecies] &&
+                    species[targetSpecies][output].length <= 0
+                ) {
                     species[targetSpecies][output] = species[name][output];
                 }
             }
         }
-    }
-    return species;
-}
-
-function getBST(species) {
-    for (const name of Object.keys(species)) {
-        const baseHP = species[name]["baseHP"];
-        const baseAttack = species[name]["baseAttack"];
-        const baseDefense = species[name]["baseDefense"];
-        const baseSpAttack = species[name]["baseSpAttack"];
-        const baseSpDefense = species[name]["baseSpDefense"];
-        const baseSpeed = species[name]["baseSpeed"];
-        const BST =
-            baseHP +
-            baseAttack +
-            baseDefense +
-            baseSpAttack +
-            baseSpDefense +
-            baseSpeed;
-
-        species[name]["BST"] = BST;
     }
     return species;
 }

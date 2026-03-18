@@ -1,36 +1,11 @@
-import { repos } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
 import { footerP } from "../../utils/utility.js";
 import { gameData, trackers } from "../../utils/state.js";
-import { regexWildLocations, regexRaidLocations } from "./regexLocations.js";
 
-async function getWildLocations(locations) {
-    footerP("Fetching wild locations");
-    const rawWildLocations = await fetch(
-        `${repos.dex}/src/locations/encounters.json`
-    );
-    const jsonWildLocations = await rawWildLocations.json();
-
-    return regexWildLocations(jsonWildLocations, locations);
-}
-
-async function getRaidLocations(locations) {
-    footerP("Fetching raid locations");
-    const rawRaidLocations = await fetch(
-        `${repos.cfru}/src/Tables/raid_encounters.h`
-    );
-    const textRaidLocations = await rawRaidLocations.text();
-
-    return regexRaidLocations(textRaidLocations, locations);
-}
-
+// TODO: implementar parser para wild_encounters.json do expansion
 async function buildLocationsObj() {
     try {
         let locations = {};
-
-        locations = await getWildLocations(locations);
-        locations = await getRaidLocations(locations);
-
         localStorage.setItem(
             "locations",
             LZString.compressToUTF16(JSON.stringify(locations))

@@ -1,76 +1,17 @@
 import { gameData, trackers } from "../../utils/state.js";
-import { repos } from "../../utils/config.js";
+import { dataSources } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
 import { footerP } from "../../utils/utility.js";
-import {
-    regexMoves,
-    regexMovesDescription,
-    regexMovesIngameName,
-    regexVanillaMovesDescription,
-    regexMovesFlags,
-} from "./regexMoves.js";
-
-async function getMoves(moves) {
-    footerP("Fetching moves");
-    const rawMoves = await fetch(`${repos.cfru}/src/Tables/battle_moves.c`);
-    const textMoves = await rawMoves.text();
-
-    return regexMoves(textMoves, moves);
-}
-
-async function getMovesDescription(moves) {
-    const rawMovesDescription = await fetch(
-        `${repos.cfru}/strings/attack_descriptions.string`
-    );
-    const textMovesDescription = await rawMovesDescription.text();
-
-    return regexMovesDescription(textMovesDescription, moves);
-}
-
-async function getMovesIngameName(moves) {
-    const rawMovesIngameName = await fetch(
-        `${repos.cfru}/strings/attack_name_table.string`
-    );
-    const textMovesIngameName = await rawMovesIngameName.text();
-
-    return regexMovesIngameName(textMovesIngameName, moves);
-}
-
-async function getVanillaMovesDescription(moves) {
-    const rawVanillaMovesDescription = await fetch(
-        `${repos.decap}/src/move_descriptions.c`
-    );
-    const textVanillaMovesDescription = await rawVanillaMovesDescription.text();
-
-    return regexVanillaMovesDescription(textVanillaMovesDescription, moves);
-}
-
-async function getMovesFlags(moves) {
-    const rawMovesFlags = await fetch(
-        `${repos.cfru}/assembly/data/move_tables.json`
-    );
-    const jsonMovesFlags = await rawMovesFlags.json();
-
-    const rawTutorFlags = await fetch(
-        `${repos.dex}/src/moves/tutor_flags.json`
-    );
-    const jsonTutorFlags = await rawTutorFlags.json();
-
-    return regexMovesFlags(jsonMovesFlags, jsonTutorFlags, moves);
-}
+import { parseMovesInfo } from "./regexMoves.js";
 
 async function buildMovesObj() {
     try {
-        let moves = {};
-        moves = await getMoves(moves);
-        //moves = await getFlags(moves) // file missing for unbound
-        await Promise.all([
-            getVanillaMovesDescription(moves),
-            getMovesDescription(moves),
-            getMovesIngameName(moves),
-            getMovesFlags(moves),
-        ]);
+        footerP("Fetching moves");
+        const raw = await fetch(dataSources.movesInfo);
+        const text = await raw.text();
+        let moves = parseMovesInfo(text);
 
+        // Adicionar flags de prioridade (mesmo comportamento do original)
         Object.keys(moves).forEach((move) => {
             if (moves[move]["priority"] > 0) {
                 moves[move]["flags"].push(

@@ -1,239 +1,240 @@
 import { gameData, trackers } from "../../utils/state.js";
-import { repos } from "../../utils/config.js";
+import { dataSources } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
 import { setTracker } from "../../utils/domRefs.js";
 import { footerP } from "../../utils/utility.js";
 import {
-    regexSpecies,
-    regexBaseStats,
-    regexLevelUpLearnsets,
-    getLevelUpLearnsetsConversionTable,
-    regexTMHMLearnsets,
-    regexTutorLearnsets,
-    regexEvolution,
-    regexForms,
-    regexEggMovesLearnsets,
-    regexSprite,
-    regexReplaceAbilities,
-    regexAbilitiesArrayForChanges,
-    regexChanges,
+    parseSpeciesConstants,
+    parseSpeciesInfo,
+    parseLevelUpLearnsets,
+    parseTeachableLearnsets,
+    parseEggMoves,
+    parseTmsHms,
+    parseSpriteRefs,
+    getEvolutionLine,
     altFormsLearnsets,
 } from "./regexSpecies.js";
 
-// --- FUNÇÕES DE FETCH ---
+// --- FASE 1: FETCH PARALELO ---
 
-async function getSpecies(speciesObj) {
+async function fetchAllData() {
     footerP("Fetching species");
-    const rawSpecies = await fetch(`${repos.cfru}/include/constants/species.h`);
-    const textSpecies = await rawSpecies.text();
-    return regexSpecies(textSpecies, speciesObj);
+
+    const [
+        constantsText,
+        infoTexts,
+        learnsetText,
+        teachableText,
+        eggMovesText,
+        tmsHmsText,
+        spritesText,
+    ] = await Promise.all([
+        fetch(dataSources.speciesConstants).then((r) => r.text()),
+        Promise.all(
+            dataSources.speciesInfo.map((url) =>
+                fetch(url).then((r) => r.text())
+            )
+        ),
+        Array.isArray(dataSources.levelUpLearnsets)
+            ? Promise.all(
+                  dataSources.levelUpLearnsets.map((url) =>
+                      fetch(url).then((r) => r.text())
+                  )
+              ).then((texts) => texts.join("\n"))
+            : fetch(dataSources.levelUpLearnsets).then((r) => r.text()),
+        fetch(dataSources.teachableLearnsets).then((r) => r.text()),
+        fetch(dataSources.eggMoves).then((r) => r.text()),
+        fetch(dataSources.tmsHms).then((r) => r.text()),
+        fetch(dataSources.pokemonGraphics).then((r) => r.text()),
+    ]);
+
+    return {
+        constantsText,
+        infoTexts,
+        learnsetText,
+        teachableText,
+        eggMovesText,
+        tmsHmsText,
+        spritesText,
+    };
 }
 
-async function getBaseStats(speciesObj) {
-    const rawBaseStats = await fetch(`${repos.dpe}/src/Base_Stats.c`);
-    const textBaseStats = await rawBaseStats.text();
-    return regexBaseStats(textBaseStats, speciesObj);
+// --- FASE 2: PARSE ---
+
+function parseAllData(raw) {
+    footerP("Parsing species data");
+
+    const constants = parseSpeciesConstants(raw.constantsText);
+
+    // Merge speciesInfo de todos os 9 arquivos gen
+    const allInfoData = {};
+    const allFamilies = {};
+    for (const text of raw.infoTexts) {
+        const result = parseSpeciesInfo(text);
+        Object.assign(allInfoData, result.data);
+        Object.assign(allFamilies, result.families);
+    }
+
+    const levelUpLearnsets = parseLevelUpLearnsets(raw.learnsetText);
+    const teachableLearnsets = parseTeachableLearnsets(raw.teachableText);
+    const eggMoveLearnsets = parseEggMoves(raw.eggMovesText);
+    const tmhmSet = parseTmsHms(raw.tmsHmsText);
+    const spriteRefs = parseSpriteRefs(raw.spritesText);
+
+    return {
+        constants,
+        allInfoData,
+        allFamilies,
+        levelUpLearnsets,
+        teachableLearnsets,
+        eggMoveLearnsets,
+        tmhmSet,
+        spriteRefs,
+    };
 }
 
-async function getLevelUpLearnsets(species) {
-    const rawLevelUpLearnsets = await fetch(`${repos.dpe}/src/Learnsets.c`);
-    const textLevelUpLearnsets = await rawLevelUpLearnsets.text();
+// --- FASE 3: MONTAR SPECIES ---
 
-    const rawLevelUpLearnsetsPointers = await fetch(
-        `${repos.dpe}/src/Learnsets.c`
-    );
-    const textLevelUpLearnsetsPointers =
-        await rawLevelUpLearnsetsPointers.text();
+function assembleSpecies(parsed) {
+    footerP("Building species objects");
+    const species = {};
+    const {
+        constants,
+        allInfoData,
+        allFamilies,
+        levelUpLearnsets,
+        teachableLearnsets,
+        eggMoveLearnsets,
+        tmhmSet,
+        spriteRefs,
+    } = parsed;
 
-    const levelUpLearnsetsConversionTable = getLevelUpLearnsetsConversionTable(
-        textLevelUpLearnsetsPointers
-    );
+    // Para cada species definida em constants, montar o objeto
+    for (const [name, constData] of Object.entries(constants)) {
+        const info = allInfoData[name];
+        if (!info) continue; // species sem dados no speciesInfo (placeholder)
 
-    return regexLevelUpLearnsets(
-        textLevelUpLearnsets,
-        levelUpLearnsetsConversionTable,
-        species
-    );
-}
+        const baseHP = info.baseHP;
+        const baseAttack = info.baseAttack;
+        const baseDefense = info.baseDefense;
+        const baseSpeed = info.baseSpeed;
+        const baseSpAttack = info.baseSpAttack;
+        const baseSpDefense = info.baseSpDefense;
+        const BST =
+            baseHP +
+            baseAttack +
+            baseDefense +
+            baseSpAttack +
+            baseSpDefense +
+            baseSpeed;
 
-async function getTMHMLearnsets(species) {
-    const rawTMHMLearnsets = await fetch(`${repos.dpe}/src/TM_Tutor_Tables.c`);
-    const textTMHMLearnsets = await rawTMHMLearnsets.text();
+        // Resolver learnsets por referencia
+        const levelUp = info.levelUpRef
+            ? levelUpLearnsets[info.levelUpRef] || []
+            : [];
 
-    return regexTMHMLearnsets(
-        textTMHMLearnsets,
-        species,
-        "gTMHMMoves",
-        "gMoveTutorMoves"
-    );
-}
+        const teachable = info.teachableRef
+            ? teachableLearnsets[info.teachableRef] || []
+            : [];
 
-async function getTutorLearnsets(species) {
-    const rawTutorLearnsets = await fetch(`${repos.dpe}/src/TM_Tutor_Tables.c`);
-    const textTutorLearnsets = await rawTutorLearnsets.text();
+        // Separar teachable em TMHM e tutor
+        const TMHMLearnsets = [];
+        const tutorLearnsets = [];
+        for (const move of teachable) {
+            if (tmhmSet.has(move)) {
+                TMHMLearnsets.push(move);
+            } else {
+                tutorLearnsets.push(move);
+            }
+        }
 
-    return regexTutorLearnsets(
-        textTutorLearnsets,
-        species,
-        "gMoveTutorMoves",
-        "gTMHMMoves"
-    );
-}
+        const eggMoves = info.eggMoveRef
+            ? eggMoveLearnsets[info.eggMoveRef] || []
+            : [];
 
-async function getEvolution(species) {
-    const rawEvolution = await fetch(`${repos.dpe}/src/Evolution%20Table.c`);
-    const textEvolution = await rawEvolution.text();
+        // Resolver sprite
+        let sprite = "";
+        if (info.frontPicRef && spriteRefs[info.frontPicRef]) {
+            sprite = spriteRefs[info.frontPicRef];
+        }
 
-    return regexEvolution(textEvolution, species);
-}
+        species[name] = {
+            name: name,
+            ID: constData.ID,
+            baseHP,
+            baseAttack,
+            baseDefense,
+            baseSpeed,
+            baseSpAttack,
+            baseSpDefense,
+            BST,
+            type1: info.type1,
+            type2: info.type2,
+            abilities: info.abilities.slice(),
+            item1: info.item1,
+            item2: info.item2,
+            eggGroup1: info.eggGroup1,
+            eggGroup2: info.eggGroup2,
+            evolution: info.evolution.map((e) => [...e]),
+            evolutionLine: [name],
+            forms: [],
+            levelUpLearnsets: levelUp,
+            TMHMLearnsets,
+            tutorLearnsets,
+            eggMovesLearnsets: eggMoves,
+            sprite,
+            changes: [],
+        };
+    }
 
-async function getForms(species) {
-    const rawForms = await fetch(
-        `${repos.cfru}/src/data/pokemon/form_species_tables.h`
-    );
-    const textForms = await rawForms.text();
-
-    return regexForms(textForms, species);
-}
-
-async function getEggMovesLearnsets(species) {
-    const rawEggMoves = await fetch(`${repos.dpe}/src/Egg_Moves.c`);
-    const textEggMoves = await rawEggMoves.text();
-
-    return regexEggMovesLearnsets(textEggMoves, species);
-}
-
-async function getSprite(species) {
-    const rawSprite = await fetch(`${repos.dpe}/src/Front_Pic_Table.c`);
-    const textSprite = await rawSprite.text();
-
-    return regexSprite(textSprite, species);
-}
-
-async function getReplaceAbilities(species) {
-    const rawReplaceAbilities = await fetch(
-        `${repos.dex}/src/abilities/duplicate_abilities.json`
-    );
-    const jsonReplaceAbilities = await rawReplaceAbilities.json();
-
-    return regexReplaceAbilities(jsonReplaceAbilities, species);
-}
-
-async function getChanges(species, url) {
-    const rawAbilitiesChanges = await fetch(
-        `${repos.cfru}/include/constants/abilities.h`
-    );
-    const textAbilitiesForChanges = await rawAbilitiesChanges.text();
-
-    const abilitiesArrayForChanges = await regexAbilitiesArrayForChanges(
-        textAbilitiesForChanges
-    );
-
-    const rawChanges = await fetch(url);
-    const textChanges = await rawChanges.text();
-
-    return regexChanges(textChanges, species, abilitiesArrayForChanges);
-}
-
-async function fixFormAbilities(species) {
-    Object.entries(species)
-        .filter(
-            ([name, pokemon]) =>
-                species[name + "_F"] !== undefined && pokemon.forms.length === 2
-        )
-        .forEach(([name, male]) => {
-            const female = species[name + "_F"];
-            female.id = male.id;
-            female.abilities = male.abilities.slice();
-        });
-    Object.entries(species)
-        .filter(
-            ([name, pokemon]) =>
-                species[name + "_FEMALE"] !== undefined &&
-                pokemon.forms.length === 2
-        )
-        .forEach(([name, male]) => {
-            const female = species[name + "_FEMALE"];
-            female.id = male.id;
-            female.abilities = male.abilities.slice();
-        });
-    species["SPECIES_UNOWN"].forms.forEach(
-        (form) =>
-            (species[form].abilities =
-                species["SPECIES_UNOWN"].abilities.slice())
-    );
     return species;
 }
 
-async function cleanSpecies(species) {
+// --- FASE 4: FORMS (familias) ---
+
+function resolveForms(species, allFamilies) {
+    footerP("Resolving forms");
+
+    for (const familyMembers of Object.values(allFamilies)) {
+        // Filtrar apenas species que existem no objeto final
+        const validMembers = familyMembers.filter((name) => species[name]);
+        for (const name of validMembers) {
+            species[name]["forms"] = validMembers;
+        }
+    }
+
+    return species;
+}
+
+// --- FASE 5: CLEANUP ---
+
+function cleanSpecies(species) {
     footerP("Cleaning up...");
+
     Object.keys(species).forEach((name) => {
         if (species[name]["baseSpeed"] <= 0) {
-            for (let i = 0; i < species[name]["forms"].length; i++) {
-                const targetSpecies = species[name]["forms"][i];
-                for (
-                    let j = 0;
-                    j < species[targetSpecies]["forms"].length;
-                    j++
-                ) {
-                    if (species[targetSpecies]["forms"][j] === name) {
-                        species[targetSpecies]["forms"].splice(j, 1);
-                    }
+            // Remover species de forms e evolutionLines de outros
+            for (const targetName of species[name]["forms"]) {
+                if (species[targetName]) {
+                    species[targetName]["forms"] = species[targetName][
+                        "forms"
+                    ].filter((f) => f !== name);
                 }
             }
-            for (let i = 0; i < species[name]["evolutionLine"].length; i++) {
-                const targetSpecies = species[name]["evolutionLine"][i];
-                for (
-                    let j = 0;
-                    j < species[targetSpecies]["evolutionLine"].length;
-                    j++
-                ) {
-                    if (species[targetSpecies]["evolutionLine"][j] === name) {
-                        species[targetSpecies]["evolutionLine"].splice(j, 1);
-                    }
+            for (const targetName of species[name]["evolutionLine"]) {
+                if (species[targetName]) {
+                    species[targetName]["evolutionLine"] = species[targetName][
+                        "evolutionLine"
+                    ].filter((f) => f !== name);
                 }
             }
-        } else if (
-            name.match(/_GIGA$/i) &&
-            species[name]["evolution"].toString().includes("EVO_MEGA")
-        ) {
-            const replaceName = name.replace(/_GIGA$/i, "_MEGA");
-            species[name]["name"] = replaceName;
-            species[name]["changes"] = [];
-            species[name]["evolution"] = [];
-            species[replaceName] = species[name];
-            let arraySpeciesToClean = [];
-            species[name]["forms"].forEach((targetSpecies) => {
-                if (!arraySpeciesToClean.includes(targetSpecies)) {
-                    arraySpeciesToClean.push(targetSpecies);
-                }
-            });
-            species[name]["evolutionLine"].forEach((targetSpecies) => {
-                if (!arraySpeciesToClean.includes(targetSpecies)) {
-                    arraySpeciesToClean.push(targetSpecies);
-                }
-            });
-            arraySpeciesToClean.forEach((speciesToClean) => {
-                species[speciesToClean]["forms"] = JSON.parse(
-                    JSON.stringify(species[speciesToClean]["forms"]).replaceAll(
-                        name,
-                        replaceName
-                    )
-                );
-                species[speciesToClean]["evolution"] = JSON.parse(
-                    JSON.stringify(
-                        species[speciesToClean]["evolution"]
-                    ).replaceAll(name, replaceName)
-                );
-                species[speciesToClean]["evolutionLine"] = JSON.parse(
-                    JSON.stringify(
-                        species[speciesToClean]["evolutionLine"]
-                    ).replaceAll(name, replaceName)
-                );
-            });
-            species[replaceName] = species[name];
             delete species[name];
-        } else if (name.match(/_MEGA$|_MEGA_Y$|_MEGA_X$|_GIGA$/i)) {
+        }
+    });
+
+    // Limpar evolution de megas (nao evoluem mais)
+    Object.keys(species).forEach((name) => {
+        if (/_MEGA$|_MEGA_Y$|_MEGA_X$/i.test(name)) {
             species[name]["evolution"] = [];
         }
     });
@@ -241,33 +242,34 @@ async function cleanSpecies(species) {
     return species;
 }
 
-// --- CONSTRUÇÃO DO OBJETO ---
+// --- CONSTRUCAO DO OBJETO ---
 
 async function buildSpeciesObj() {
     try {
-        let species = {};
-        species = await getSpecies(species);
+        // Fase 1: fetch
+        const raw = await fetchAllData();
 
-        species = await initializeSpeciesObj(species);
-        species = await getEvolution(species);
-        //species = await getForms(species) // should be called in that order until here    // done in getLevelUpLearnsets for CFRU
-        await Promise.all([
-            getBaseStats(species),
-            getLevelUpLearnsets(species),
-            getTMHMLearnsets(species),
-            getEggMovesLearnsets(species),
-            getTutorLearnsets(species),
-            getSprite(species),
-        ]);
-        species = await getReplaceAbilities(species);
-        species = await altFormsLearnsets(species, "forms", "tutorLearnsets");
-        species = await altFormsLearnsets(species, "forms", "TMHMLearnsets");
-        ((species = await getChanges(
-            species,
-            `${repos.dpeMaster}/src/Base_Stats.c`
-        )),
-            (species = await cleanSpecies(species)));
+        // Fase 2: parse
+        const parsed = parseAllData(raw);
 
+        // Fase 3: montar
+        let species = assembleSpecies(parsed);
+
+        // Fase 4: forms
+        species = resolveForms(species, parsed.allFamilies);
+
+        // Fase 5: evolution lines
+        species = getEvolutionLine(species);
+
+        // Fase 6: propagar learnsets para alt forms
+        species = altFormsLearnsets(species, "forms", "tutorLearnsets");
+        species = altFormsLearnsets(species, "forms", "TMHMLearnsets");
+        species = altFormsLearnsets(species, "evolutionLine", "eggMovesLearnsets");
+
+        // Fase 7: cleanup
+        species = cleanSpecies(species);
+
+        // Draco Meteor para tipos dragao
         Object.keys(species).forEach((name) => {
             if (
                 (species[name]["type1"] === "TYPE_DRAGON" ||
@@ -278,7 +280,7 @@ async function buildSpeciesObj() {
             }
         });
 
-        species = await fixFormAbilities(species);
+        // Cache
         localStorage.setItem(
             "species",
             LZString.compressToUTF16(JSON.stringify(species))
@@ -295,37 +297,7 @@ async function buildSpeciesObj() {
     }
 }
 
-function initializeSpeciesObj(species) {
-    footerP("Initializing species");
-    for (const name of Object.keys(species)) {
-        species[name]["baseHP"] = 0;
-        species[name]["baseAttack"] = 0;
-        species[name]["baseDefense"] = 0;
-        species[name]["baseSpAttack"] = 0;
-        species[name]["baseSpDefense"] = 0;
-        species[name]["baseSpeed"] = 0;
-        species[name]["BST"] = 0;
-        species[name]["abilities"] = [];
-        species[name]["type1"] = "";
-        species[name]["type2"] = "";
-        species[name]["item1"] = "";
-        species[name]["item2"] = "";
-        species[name]["eggGroup1"] = "";
-        species[name]["eggGroup2"] = "";
-        species[name]["changes"] = [];
-        species[name]["levelUpLearnsets"] = [];
-        species[name]["TMHMLearnsets"] = [];
-        species[name]["eggMovesLearnsets"] = [];
-        species[name]["tutorLearnsets"] = [];
-        species[name]["evolution"] = [];
-        species[name]["evolutionLine"] = [name];
-        species[name]["forms"] = [];
-        species[name]["sprite"] = "";
-    }
-    return species;
-}
-
-// --- FUNÇÃO PRINCIPAL CHAMADA PELO APP ---
+// --- FUNCAO PRINCIPAL CHAMADA PELO APP ---
 
 export async function fetchSpeciesObj() {
     if (!localStorage.getItem("species"))
