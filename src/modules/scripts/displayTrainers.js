@@ -355,7 +355,7 @@ function createPopupItem(itemArray) {
     );
 }
 
-async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
+export async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
     let sprite = new Image();
     let canvas = document.createElement("canvas");
     canvas.width = 64;

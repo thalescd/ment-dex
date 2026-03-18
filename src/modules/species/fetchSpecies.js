@@ -1,5 +1,5 @@
 import { gameData, trackers } from '../../utils/state.js';
-import { repo1, repo2, repoDex } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { setTracker } from '../../utils/domRefs.js';
 import { footerP } from '../../utils/utility.js';
@@ -14,25 +14,25 @@ import {
 
 async function getSpecies(speciesObj) {
     footerP("Fetching species");
-    const rawSpecies = await fetch(`https://raw.githubusercontent.com/${repo1}/include/constants/species.h`);
+    const rawSpecies = await fetch(`${repos.cfru}/include/constants/species.h`);
     const textSpecies = await rawSpecies.text();
     return regexSpecies(textSpecies, speciesObj);
 }
 
 async function getBaseStats(speciesObj) {
-    const rawBaseStats = await fetch(`https://raw.githubusercontent.com/${repo2}/src/Base_Stats.c`);
+    const rawBaseStats = await fetch(`${repos.dpe}/src/Base_Stats.c`);
     const textBaseStats = await rawBaseStats.text();
     return regexBaseStats(textBaseStats, speciesObj);
 }
 
 async function getLevelUpLearnsets(species) {
     const rawLevelUpLearnsets = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Learnsets.c`
+        `${repos.dpe}/src/Learnsets.c`
     );
     const textLevelUpLearnsets = await rawLevelUpLearnsets.text();
 
     const rawLevelUpLearnsetsPointers = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Learnsets.c`
+        `${repos.dpe}/src/Learnsets.c`
     );
     const textLevelUpLearnsetsPointers =
         await rawLevelUpLearnsetsPointers.text();
@@ -50,7 +50,7 @@ async function getLevelUpLearnsets(species) {
 
 async function getTMHMLearnsets(species) {
     const rawTMHMLearnsets = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/TM_Tutor_Tables.c`
+        `${repos.dpe}/src/TM_Tutor_Tables.c`
     );
     const textTMHMLearnsets = await rawTMHMLearnsets.text();
 
@@ -64,7 +64,7 @@ async function getTMHMLearnsets(species) {
 
 async function getTutorLearnsets(species) {
     const rawTutorLearnsets = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/TM_Tutor_Tables.c`
+        `${repos.dpe}/src/TM_Tutor_Tables.c`
     );
     const textTutorLearnsets = await rawTutorLearnsets.text();
 
@@ -78,7 +78,7 @@ async function getTutorLearnsets(species) {
 
 async function getEvolution(species) {
     const rawEvolution = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Evolution%20Table.c`
+        `${repos.dpe}/src/Evolution%20Table.c`
     );
     const textEvolution = await rawEvolution.text();
 
@@ -87,7 +87,7 @@ async function getEvolution(species) {
 
 async function getForms(species) {
     const rawForms = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/pokemon/form_species_tables.h`
+        `${repos.cfru}/src/data/pokemon/form_species_tables.h`
     );
     const textForms = await rawForms.text();
 
@@ -96,7 +96,7 @@ async function getForms(species) {
 
 async function getEggMovesLearnsets(species) {
     const rawEggMoves = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Egg_Moves.c`
+        `${repos.dpe}/src/Egg_Moves.c`
     );
     const textEggMoves = await rawEggMoves.text();
 
@@ -105,7 +105,7 @@ async function getEggMovesLearnsets(species) {
 
 async function getSprite(species) {
     const rawSprite = await fetch(
-        `https://raw.githubusercontent.com/${repo2}/src/Front_Pic_Table.c`
+        `${repos.dpe}/src/Front_Pic_Table.c`
     );
     const textSprite = await rawSprite.text();
 
@@ -114,7 +114,7 @@ async function getSprite(species) {
 
 async function getReplaceAbilities(species) {
     const rawReplaceAbilities = await fetch(
-        `https://raw.githubusercontent.com/${repoDex}/main/src/abilities/duplicate_abilities.json`
+        `${repos.dex}/src/abilities/duplicate_abilities.json`
     );
     const jsonReplaceAbilities = await rawReplaceAbilities.json();
 
@@ -123,7 +123,7 @@ async function getReplaceAbilities(species) {
 
 async function getChanges(species, url) {
     const rawAbilitiesChanges = await fetch(
-        "https://raw.githubusercontent.com/Skeli789/Complete-Fire-Red-Upgrade/master/include/constants/abilities.h"
+        `${repos.cfru}/include/constants/abilities.h`
     );
     const textAbilitiesForChanges = await rawAbilitiesChanges.text();
 
@@ -266,7 +266,7 @@ async function buildSpeciesObj() {
         species = await altFormsLearnsets(species, "forms", "TMHMLearnsets");
         ((species = await getChanges(
             species,
-            "https://raw.githubusercontent.com/Skeli789/Dynamic-Pokemon-Expansion/master/src/Base_Stats.c"
+            `${repos.dpeMaster}/src/Base_Stats.c`
         )),
             (species = await cleanSpecies(species)));
 

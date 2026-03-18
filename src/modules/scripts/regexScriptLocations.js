@@ -1,5 +1,5 @@
 import { sanitizeString } from '../../utils/utility.js';
-import { repo1 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { gameData, trackers } from '../../utils/state.js';
 import { initTrainer } from './regexTrainers.js';
 import { initItem } from './regexItems.js';
@@ -100,7 +100,7 @@ function regexScript(
             gameData.items[tutorName]["locations"]["Tutor"] = [];
         }
         gameData.items[tutorName]["url"] =
-            "https://raw.githubusercontent.com/ydarissep/dex-core/main/src/locations/sprites/Tutor.png";
+            `${repos.dexCore}/src/locations/sprites/Tutor.png`;
         if (move in gameData.moves) {
             gameData.items[tutorName]["description"] =
                 gameData.moves[move]["description"].join("");
@@ -164,7 +164,7 @@ export async function regexScripts(textScripts, tradeText, specialFunctions) {
 
     const scripts = textScripts.match(/data\/.*.inc/gi);
     for (let i = 0, j = scripts.length; i < j; i++) {
-        fetch(`https://raw.githubusercontent.com/${repo1}/${scripts[i]}`).then(
+        fetch(`${repos.cfru}/${scripts[i]}`).then(
             (promises) => {
                 promises.text().then((text) => {
                     regexScript(

@@ -1,5 +1,5 @@
 import { sanitizeString } from '../../utils/utility.js';
-import { repo1 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { gameData } from '../../utils/state.js';
 
 export function initTrainer(trainers, trainer, zone) {
@@ -31,7 +31,7 @@ export async function regexTrainers(textTrainers) {
     });
 
     const rawRematch = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/battle_setup.c`
+        `${repos.cfru}/src/battle_setup.c`
     );
     const textRematch = await rawRematch.text();
 
@@ -142,7 +142,7 @@ export async function regexTrainersParties(
         mon = {};
 
     const rawTrainerSpreads = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/trainer_spreads.h`
+        `${repos.cfru}/src/data/trainer_spreads.h`
     );
     const textTrainerSpreads = await rawTrainerSpreads.text();
 

@@ -1,5 +1,5 @@
 import { sanitizeString } from '../../utils/utility.js';
-import { repo1 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { gameData } from '../../utils/state.js';
 
 export function initItem(name) {
@@ -103,7 +103,7 @@ export async function regexItemIcon(textItemIconTable, textItemsIcon) {
             iconToItem[itemIcon].forEach((itemName) => {
                 if (itemName in gameData.items) {
                     gameData.items[itemName]["url"] =
-                        `https://raw.githubusercontent.com/${repo1}/${itemPath}`;
+                        `${repos.cfru}/${itemPath}`;
                     if (/gItemIcon_(?:HM|TM)$/.test(itemIcon)) {
                         const moveMatch = itemName.match(
                             /ITEM_(?:HM\d+_|TM\d+_)(\w+)/

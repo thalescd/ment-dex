@@ -1,4 +1,4 @@
-import { repo1 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
 import { gameData, trackers } from '../../utils/state.js';
@@ -13,7 +13,7 @@ import {
 async function getAbilities(abilities) {
     footerP("Fetching abilities");
     const rawAbilities = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/include/constants/abilities.h`
+        `${repos.cfru}/include/constants/abilities.h`
     );
     const textAbilities = await rawAbilities.text();
 
@@ -22,7 +22,7 @@ async function getAbilities(abilities) {
 
 async function getVanillaAbilitiesDescription(abilities) {
     const rawVanillaAbilitiesDescription = await fetch(
-        "https://raw.githubusercontent.com/ProfLeonDias/pokefirered/decapitalization/src/data/text/abilities.h"
+        `${repos.decap}/src/data/text/abilities.h`
     );
     const textVanillaAbilitiesDescription =
         await rawVanillaAbilitiesDescription.text();
@@ -36,7 +36,7 @@ async function getVanillaAbilitiesDescription(abilities) {
 async function getAbilitiesIngameName(abilities) {
     footerP("Fetching abilities ingame name");
     const rawAbilitiesIngameName = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/strings/ability_name_table.string`
+        `${repos.cfru}/strings/ability_name_table.string`
     );
     const textAbilitiesIngameName = await rawAbilitiesIngameName.text();
 
@@ -46,7 +46,7 @@ async function getAbilitiesIngameName(abilities) {
 async function getAbilitiesDescription(abilities) {
     footerP("Fetching abilities description");
     const rawAbilitiesDescription = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/strings/ability_descriptions.string`
+        `${repos.cfru}/strings/ability_descriptions.string`
     );
     const textAbilitiesDescription = await rawAbilitiesDescription.text();
 
@@ -55,7 +55,7 @@ async function getAbilitiesDescription(abilities) {
 
 async function getNewAbilities(abilities) {
     const rawNewAbilities = await fetch(
-        `https://raw.githubusercontent.com/ydarissep/Unbound-Pokedex/main/src/abilities/duplicate_abilities.json`
+        `${repos.dex}/src/abilities/duplicate_abilities.json`
     );
     const jsonNewAbilities = await rawNewAbilities.json();
 

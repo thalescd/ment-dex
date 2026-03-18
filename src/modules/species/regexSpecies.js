@@ -1,4 +1,4 @@
-import { repo2 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { gameData } from '../../utils/state.js';
 
 export function regexSpecies(textSpecies, species) {
@@ -255,7 +255,7 @@ export async function regexTMHMLearnsets(textTMHMLearnsets, species, start, end)
                 else if (move === "Drainingkiss") move = "Draining Kiss";
 
                 const rawTMHM = fetch(
-                    `https://raw.githubusercontent.com/${repo2}/src/tm_compatibility/${count} - ${move}.txt`
+                    `${repos.dpe}/src/tm_compatibility/${count} - ${move}.txt`
                 )
                     .then((raw) => raw.text())
                     .then((text) => {
@@ -320,7 +320,7 @@ export async function regexTutorLearnsets(textTutorLearnsets, species, start, en
                 else if (move === "DualWingbeat") move = "Dual Wingbeat";
 
                 const rawTutor = fetch(
-                    `https://raw.githubusercontent.com/${repo2}/src/tutor_compatibility/${count} - ${move}.txt`
+                    `${repos.dpe}/src/tutor_compatibility/${count} - ${move}.txt`
                 )
                     .then((raw) => raw.text())
                     .then((text) => {
@@ -497,13 +497,13 @@ export function regexSprite(textSprite, species) {
             const matchURL = line.match(/gFrontSprite\w+Tiles/i);
             if (matchURL || name === "SPECIES_SHADOW_WARRIOR") {
                 if (name === "SPECIES_SHADOW_WARRIOR") {
-                    url = `https://raw.githubusercontent.com/${repo2}/graphics/frontspr/gSpriteShadowWarrior.png`;
+                    url = `${repos.dpe}/graphics/frontspr/gSpriteShadowWarrior.png`;
                 } else {
-                    url = `https://raw.githubusercontent.com/${repo2}/graphics/frontspr/${matchURL[0].replace("Tiles", ".png")}`;
+                    url = `${repos.dpe}/graphics/frontspr/${matchURL[0].replace("Tiles", ".png")}`;
                 }
 
                 if (name === "SPECIES_CASTFORM") {
-                    url = `https://raw.githubusercontent.com/${repo2}/graphics/castform/gFrontSprite385Castform.png`;
+                    url = `${repos.dpe}/graphics/castform/gFrontSprite385Castform.png`;
                 }
 
                 if (name in species) {

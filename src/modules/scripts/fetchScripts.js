@@ -1,4 +1,4 @@
-import { repo1 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
 import { gameData, trackers, uiState } from '../../utils/state.js';
@@ -7,6 +7,7 @@ import { lazyLoading, filterTrainersTableInput } from '../../utils/tableUtility.
 import { trainerSpeciesMatchFilter } from '../../utils/tableFilters.js';
 import { spriteRemoveBgReturnBase64 } from '../../utils/spriteUtils.js';
 import { spriteRemoveItemBgReturnBase64 } from './displayItems.js';
+import { spriteRemoveTrainerBgReturnBase64 } from './displayTrainers.js';
 import { regexTrainers, regexTrainersParties } from './regexTrainers.js';
 import {
     regexItems,
@@ -21,17 +22,17 @@ import { regexScripts, regexSpecialsFunctions } from './regexScriptLocations.js'
 async function getScripts() {
     footerP("Fetching scripts");
     const rawScripts = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/data/event_scripts.s`
+        `${repos.cfru}/data/event_scripts.s`
     );
     const textScripts = await rawScripts.text();
 
     const rawTrade = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/trade.h`
+        `${repos.cfru}/src/data/trade.h`
     );
     const tradeText = await rawTrade.text();
 
     const rawSpecials = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/field_specials.c`
+        `${repos.cfru}/src/field_specials.c`
     );
     const textSpecials = await rawSpecials.text();
 
@@ -47,14 +48,14 @@ async function getScripts() {
 async function getItems() {
     footerP("Fetching items");
     const rawItems = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/items.h`
+        `${repos.cfru}/src/data/items.h`
     );
     const textItems = await rawItems.text();
 
     const descriptionConversionTable = await regexItems(textItems);
 
     const rawItemDescriptions = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/text/item_descriptions.h`
+        `${repos.cfru}/src/data/text/item_descriptions.h`
     );
     const textItemDescriptions = await rawItemDescriptions.text();
 
@@ -66,7 +67,7 @@ async function getItems() {
 
 async function getItemBallSripts(textScripts) {
     const rawItemBallSripts = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/data/scripts/item_ball_scripts.inc`
+        `${repos.cfru}/data/scripts/item_ball_scripts.inc`
     );
     const textItemBallScripts = await rawItemBallSripts.text();
 
@@ -75,7 +76,7 @@ async function getItemBallSripts(textScripts) {
 
 async function getHiddenItems() {
     const rawFlags = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/include/constants/flags.h`
+        `${repos.cfru}/include/constants/flags.h`
     );
     const textFlags = await rawFlags.text();
 
@@ -84,12 +85,12 @@ async function getHiddenItems() {
 
 async function getItemsIcon() {
     const rawItemIconTable = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/item_icon_table.h`
+        `${repos.cfru}/src/data/item_icon_table.h`
     );
     const textItemIconTable = await rawItemIconTable.text();
 
     const rawItemsIcon = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/graphics/items.h`
+        `${repos.cfru}/src/data/graphics/items.h`
     );
     const textItemsIcon = await rawItemsIcon.text();
 
@@ -99,12 +100,12 @@ async function getItemsIcon() {
 async function getTrainers() {
     footerP("Fetching trainers");
     const rawTrainers = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/trainers.h`
+        `${repos.cfru}/src/data/trainers.h`
     );
     const textTrainers = await rawTrainers.text();
 
     const rawTrainersParties = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/data/trainer_parties.h`
+        `${repos.cfru}/src/data/trainer_parties.h`
     );
     const textTrainersParties = await rawTrainersParties.text();
 
@@ -232,7 +233,7 @@ export async function fetchScripts() {
                     localStorage.removeItem(sprite);
                     spriteRemoveBgReturnBase64(
                         sprite,
-                        `https://raw.githubusercontent.com/${repo1}/graphics/trainers/front_pics/${sprite.replace(/^TRAINER_PIC_/, "").toLowerCase()}_front_pic.png`
+                        `${repos.cfru}/graphics/trainers/front_pics/${sprite.replace(/^TRAINER_PIC_/, "").toLowerCase()}_front_pic.png`
                     );
                 }
             }
@@ -256,7 +257,7 @@ export function getItemSpriteSrc(itemName) {
 }
 
 export function getTrainerSpriteSrc(trainerSprite) {
-    const url = `https://raw.githubusercontent.com/${repo1}/graphics/trainers/front_pics/${trainerSprite.replace(/^TRAINER_PIC_/, "").toLowerCase()}_front_pic.png`;
+    const url = `${repos.cfru}/graphics/trainers/front_pics/${trainerSprite.replace(/^TRAINER_PIC_/, "").toLowerCase()}_front_pic.png`;
     if (gameData.sprites[trainerSprite]) {
         if (gameData.sprites[trainerSprite].length < 500) {
             localStorage.removeItem(trainerSprite);

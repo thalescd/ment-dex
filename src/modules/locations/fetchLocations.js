@@ -1,4 +1,4 @@
-import { repo1 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
 import { gameData, trackers } from '../../utils/state.js';
@@ -7,7 +7,7 @@ import { regexWildLocations, regexRaidLocations } from './regexLocations.js';
 async function getWildLocations(locations) {
     footerP("Fetching wild locations");
     const rawWildLocations = await fetch(
-        `https://raw.githubusercontent.com/ydarissep/Unbound-Pokedex/refs/heads/main/src/locations/encounters.json`
+        `${repos.dex}/src/locations/encounters.json`
     );
     const jsonWildLocations = await rawWildLocations.json();
 
@@ -17,7 +17,7 @@ async function getWildLocations(locations) {
 async function getRaidLocations(locations) {
     footerP("Fetching raid locations");
     const rawRaidLocations = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/Tables/raid_encounters.h`
+        `${repos.cfru}/src/Tables/raid_encounters.h`
     );
     const textRaidLocations = await rawRaidLocations.text();
 

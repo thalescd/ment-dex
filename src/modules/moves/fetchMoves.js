@@ -1,5 +1,5 @@
 import { gameData, trackers } from '../../utils/state.js';
-import { repo1 } from '../../utils/config.js';
+import { repos } from '../../utils/config.js';
 import { LZString } from '../../utils/lz-string.js';
 import { footerP } from '../../utils/utility.js';
 import {
@@ -13,7 +13,7 @@ import {
 async function getMoves(moves) {
     footerP("Fetching moves");
     const rawMoves = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/src/Tables/battle_moves.c`
+        `${repos.cfru}/src/Tables/battle_moves.c`
     );
     const textMoves = await rawMoves.text();
 
@@ -22,7 +22,7 @@ async function getMoves(moves) {
 
 async function getMovesDescription(moves) {
     const rawMovesDescription = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/strings/attack_descriptions.string`
+        `${repos.cfru}/strings/attack_descriptions.string`
     );
     const textMovesDescription = await rawMovesDescription.text();
 
@@ -31,7 +31,7 @@ async function getMovesDescription(moves) {
 
 async function getMovesIngameName(moves) {
     const rawMovesIngameName = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/strings/attack_name_table.string`
+        `${repos.cfru}/strings/attack_name_table.string`
     );
     const textMovesIngameName = await rawMovesIngameName.text();
 
@@ -40,7 +40,7 @@ async function getMovesIngameName(moves) {
 
 async function getVanillaMovesDescription(moves) {
     const rawVanillaMovesDescription = await fetch(
-        "https://raw.githubusercontent.com/ProfLeonDias/pokefirered/decapitalization/src/move_descriptions.c"
+        `${repos.decap}/src/move_descriptions.c`
     );
     const textVanillaMovesDescription = await rawVanillaMovesDescription.text();
 
@@ -49,12 +49,12 @@ async function getVanillaMovesDescription(moves) {
 
 async function getMovesFlags(moves) {
     const rawMovesFlags = await fetch(
-        `https://raw.githubusercontent.com/${repo1}/assembly/data/move_tables.json`
+        `${repos.cfru}/assembly/data/move_tables.json`
     );
     const jsonMovesFlags = await rawMovesFlags.json();
 
     const rawTutorFlags = await fetch(
-        `https://raw.githubusercontent.com/ydarissep/Unbound-Pokedex/refs/heads/main/src/moves/tutor_flags.json`
+        `${repos.dex}/src/moves/tutor_flags.json`
     );
     const jsonTutorFlags = await rawTutorFlags.json();
 
