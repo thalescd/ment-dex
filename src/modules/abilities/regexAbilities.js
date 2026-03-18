@@ -6,8 +6,7 @@ export function parseAbilitiesInfo(text) {
 
     // Regex para capturar cada bloco [ABILITY_XXX] = { ... }
     // Suporta um nivel de chaves aninhadas (ex: nested structs)
-    const blockRegex =
-        /\[(ABILITY_\w+)\]\s*=\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g;
+    const blockRegex = /\[(ABILITY_\w+)\]\s*=\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g;
 
     let match;
     while ((match = blockRegex.exec(text)) !== null) {

@@ -264,7 +264,11 @@ async function buildSpeciesObj() {
         // Fase 6: propagar learnsets para alt forms
         species = altFormsLearnsets(species, "forms", "tutorLearnsets");
         species = altFormsLearnsets(species, "forms", "TMHMLearnsets");
-        species = altFormsLearnsets(species, "evolutionLine", "eggMovesLearnsets");
+        species = altFormsLearnsets(
+            species,
+            "evolutionLine",
+            "eggMovesLearnsets"
+        );
 
         // Fase 7: cleanup
         species = cleanSpecies(species);

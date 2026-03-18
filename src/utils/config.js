@@ -18,7 +18,7 @@ export const repos = {
 // ---------------------------------------------------------------------------
 export const dataSources = {
     // === SPECIES ===
-    speciesConstants:       `${repos.expansion}/include/constants/species.h`,
+    speciesConstants: `${repos.expansion}/include/constants/species.h`,
     // species_info contem: base stats, tipos, abilities, egg groups, evolutions,
     // formas, sprites, nomes — tudo num unico entry por species
     speciesInfo: [
@@ -32,27 +32,27 @@ export const dataSources = {
         `${repos.expansion}/src/data/pokemon/species_info/gen_8_families.h`,
         `${repos.expansion}/src/data/pokemon/species_info/gen_9_families.h`,
     ],
-    levelUpLearnsets:       `${repos.expansion}/src/data/pokemon/level_up_learnsets/gen_x.h`,
-    teachableLearnsets:     `${repos.expansion}/src/data/pokemon/teachable_learnsets.h`,
-    eggMoves:               `${repos.expansion}/src/data/pokemon/egg_moves.h`,
-    tmsHms:                 `${repos.expansion}/include/constants/tms_hms.h`,
+    levelUpLearnsets: `${repos.expansion}/src/data/pokemon/level_up_learnsets/gen_x.h`,
+    teachableLearnsets: `${repos.expansion}/src/data/pokemon/teachable_learnsets.h`,
+    eggMoves: `${repos.expansion}/src/data/pokemon/egg_moves.h`,
+    tmsHms: `${repos.expansion}/include/constants/tms_hms.h`,
     // sprite paths: extraidos de pokemon.h, imagens em graphics/pokemon/{name}/
-    pokemonGraphics:        `${repos.expansion}/src/data/graphics/pokemon.h`,
-    spriteBaseDir:          `${repos.expansion}/graphics/pokemon`, // {dir}/{species_name}/front.png
+    pokemonGraphics: `${repos.expansion}/src/data/graphics/pokemon.h`,
+    spriteBaseDir: `${repos.expansion}/graphics/pokemon`, // {dir}/{species_name}/front.png
 
     // === MOVES ===
     // moves_info contem: nome, descricao, tipo, power, accuracy, pp, flags — tudo junto
-    movesInfo:              `${repos.expansion}/src/data/moves_info.h`,
+    movesInfo: `${repos.expansion}/src/data/moves_info.h`,
 
     // === ABILITIES ===
     // abilities contem: nome + descricao no mesmo entry
-    abilitiesInfo:          `${repos.expansion}/src/data/abilities.h`,
+    abilitiesInfo: `${repos.expansion}/src/data/abilities.h`,
 
     // === LOCATIONS ===
-    wildEncountersJson:     `${repos.expansion}/src/data/wild_encounters.json`,
+    wildEncountersJson: `${repos.expansion}/src/data/wild_encounters.json`,
 
     // === TYPE CHART ===
-    typeChart:              "src/data/typeChart.json",
+    typeChart: "src/data/typeChart.json",
 };
 export const checkUpdate = "22 Unbound";
 export const regexSpChar = new RegExp("-|'|\u2019| |,|\\.|_|!|\\?", "g");

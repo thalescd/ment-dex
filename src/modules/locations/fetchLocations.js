@@ -73,7 +73,9 @@ async function buildLocationsObj() {
                 const mons = encounter.fishing_mons.mons;
                 const rates = ratesMap.fishing_mons;
 
-                for (const [rodKey, slotIndices] of Object.entries(fishingGroups)) {
+                for (const [rodKey, slotIndices] of Object.entries(
+                    fishingGroups
+                )) {
                     const rodName = rodKey
                         .replace(/_/g, " ")
                         .replace(/\b\w/g, (c) => c.toUpperCase());

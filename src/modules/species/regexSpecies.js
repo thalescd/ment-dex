@@ -52,7 +52,11 @@ export function parseSpeciesInfo(text) {
             familyName = `P_FAMILY_${startMatch[1]}`;
         }
         if (familyEndRe.test(lines[i]) && rangeStart !== -1) {
-            familyRanges.push({ family: familyName, start: rangeStart, end: i });
+            familyRanges.push({
+                family: familyName,
+                start: rangeStart,
+                end: i,
+            });
             rangeStart = -1;
             familyName = null;
         }
@@ -121,7 +125,8 @@ function parseSpeciesBody(body, defines) {
     };
 
     // Types: MON_TYPES(TYPE_X, TYPE_Y) ou macro (CLEFAIRY_FAMILY_TYPES)
-    let type1 = "", type2 = "";
+    let type1 = "",
+        type2 = "";
     const typesMatch = body.match(/\.types\s*=\s*MON_TYPES\(([^)]+)\)/);
     if (typesMatch) {
         const types = typesMatch[1].match(/TYPE_\w+/g) || [];
@@ -154,7 +159,8 @@ function parseSpeciesBody(body, defines) {
     }
 
     // Egg groups: MON_EGG_GROUPS(EGG_GROUP_X, EGG_GROUP_Y)
-    let eggGroup1 = "", eggGroup2 = "";
+    let eggGroup1 = "",
+        eggGroup2 = "";
     const eggMatch = body.match(/\.eggGroups\s*=\s*MON_EGG_GROUPS\(([^)]+)\)/);
     if (eggMatch) {
         const groups = eggMatch[1].match(/EGG_GROUP_\w+/g) || [];
@@ -171,7 +177,9 @@ function parseSpeciesBody(body, defines) {
     // Evolutions: EVOLUTION({METHOD, COND, TARGET}, {METHOD, COND, TARGET}, ...)
     // Algumas podem ter 4+ campos com CONDITIONS — pegar apenas os 3 primeiros
     const evolution = [];
-    const evoMatch = body.match(/\.evolutions\s*=\s*EVOLUTION\(([\s\S]*?)\)(?:\s*,|\s*$)/);
+    const evoMatch = body.match(
+        /\.evolutions\s*=\s*EVOLUTION\(([\s\S]*?)\)(?:\s*,|\s*$)/
+    );
     if (evoMatch) {
         const evoContent = evoMatch[1];
         // Cada evolucao esta dentro de { ... }
@@ -187,15 +195,23 @@ function parseSpeciesBody(body, defines) {
     }
 
     // Learnset references
-    const levelUpRef = body.match(/\.levelUpLearnset\s*=\s*(s\w+LevelUpLearnset)/);
-    const teachableRef = body.match(/\.teachableLearnset\s*=\s*(s\w+TeachableLearnset)/);
-    const eggMoveRef = body.match(/\.eggMoveLearnset\s*=\s*(s\w+EggMoveLearnset)/);
+    const levelUpRef = body.match(
+        /\.levelUpLearnset\s*=\s*(s\w+LevelUpLearnset)/
+    );
+    const teachableRef = body.match(
+        /\.teachableLearnset\s*=\s*(s\w+TeachableLearnset)/
+    );
+    const eggMoveRef = body.match(
+        /\.eggMoveLearnset\s*=\s*(s\w+EggMoveLearnset)/
+    );
 
     // Sprite reference
     const frontPicMatch = body.match(/\.frontPic\s*=\s*(gMonFrontPic_\w+)/);
 
     // Species display name
-    const speciesNameMatch = body.match(/\.speciesName\s*=\s*_\(\s*"([^"]*)"\s*\)/);
+    const speciesNameMatch = body.match(
+        /\.speciesName\s*=\s*_\(\s*"([^"]*)"\s*\)/
+    );
 
     return {
         baseHP: intField("baseHP"),
@@ -204,10 +220,13 @@ function parseSpeciesBody(body, defines) {
         baseSpeed: intField("baseSpeed"),
         baseSpAttack: intField("baseSpAttack"),
         baseSpDefense: intField("baseSpDefense"),
-        type1, type2,
+        type1,
+        type2,
         abilities,
-        eggGroup1, eggGroup2,
-        item1, item2,
+        eggGroup1,
+        eggGroup2,
+        item1,
+        item2,
         evolution,
         levelUpRef: levelUpRef ? levelUpRef[1] : null,
         teachableRef: teachableRef ? teachableRef[1] : null,
@@ -223,7 +242,8 @@ function parseSpeciesBody(body, defines) {
 // ========================================================================
 export function parseLevelUpLearnsets(text) {
     const learnsets = {};
-    const blockRe = /\b(s\w+LevelUpLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)LEVEL_UP_END/g;
+    const blockRe =
+        /\b(s\w+LevelUpLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)LEVEL_UP_END/g;
     let match;
 
     while ((match = blockRe.exec(text)) !== null) {
@@ -247,7 +267,8 @@ export function parseLevelUpLearnsets(text) {
 // ========================================================================
 export function parseTeachableLearnsets(text) {
     const learnsets = {};
-    const blockRe = /\b(s\w+TeachableLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)MOVE_UNAVAILABLE/g;
+    const blockRe =
+        /\b(s\w+TeachableLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)MOVE_UNAVAILABLE/g;
     let match;
 
     while ((match = blockRe.exec(text)) !== null) {
@@ -271,7 +292,8 @@ export function parseTeachableLearnsets(text) {
 // ========================================================================
 export function parseEggMoves(text) {
     const learnsets = {};
-    const blockRe = /\b(s\w+EggMoveLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)MOVE_UNAVAILABLE/g;
+    const blockRe =
+        /\b(s\w+EggMoveLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)MOVE_UNAVAILABLE/g;
     let match;
 
     while ((match = blockRe.exec(text)) !== null) {
@@ -297,7 +319,8 @@ export function parseTmsHms(text) {
     const tmhmMoves = new Set();
 
     // Capturar corpo do FOREACH_TM e FOREACH_HM
-    const macroRe = /FOREACH_(?:TM|HM)\s*\(\s*F\s*\)([\s\S]*?)(?=FOREACH_|#define\s+FOREACH_TMHM|#endif)/g;
+    const macroRe =
+        /FOREACH_(?:TM|HM)\s*\(\s*F\s*\)([\s\S]*?)(?=FOREACH_|#define\s+FOREACH_TMHM|#endif)/g;
     let match;
     while ((match = macroRe.exec(text)) !== null) {
         const body = match[1];

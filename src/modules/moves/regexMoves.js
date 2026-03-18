@@ -76,8 +76,7 @@ export function parseMovesInfo(text) {
 
     // Regex para capturar cada bloco [MOVE_XXX] = { ... }
     // Suporta chaves aninhadas de um nivel (ex: .additionalEffects, .contestComboMoves)
-    const blockRegex =
-        /\[(MOVE_\w+)\]\s*=\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g;
+    const blockRegex = /\[(MOVE_\w+)\]\s*=\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g;
 
     let match;
     while ((match = blockRegex.exec(text)) !== null) {
@@ -112,7 +111,9 @@ export function parseMovesInfo(text) {
         // Category → Split
         const categoryRaw = body.match(/\.category\s*=\s*([^,\n]+)/);
         const split = categoryRaw
-            ? CATEGORY_TO_SPLIT[resolveStr(categoryRaw[1], "DAMAGE_CATEGORY_")] || ""
+            ? CATEGORY_TO_SPLIT[
+                  resolveStr(categoryRaw[1], "DAMAGE_CATEGORY_")
+              ] || ""
             : "";
 
         // Chance (de additionalEffects)
