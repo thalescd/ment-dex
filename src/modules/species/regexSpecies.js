@@ -67,7 +67,10 @@ export function parseSpeciesInfo(text) {
     const defineRe = /#define\s+(\w+)\s+(.+)/g;
     let defMatch;
     while ((defMatch = defineRe.exec(text)) !== null) {
-        defines[defMatch[1]] = defMatch[2].trim();
+        // Manter apenas a primeira definicao (a versao "updated" antes do #else)
+        if (!defines[defMatch[1]]) {
+            defines[defMatch[1]] = defMatch[2].trim();
+        }
     }
 
     // Processar cada familia
@@ -117,21 +120,37 @@ function parseSpeciesBody(body, defines) {
         return m ? resolveIntValue(m[1], defines) : 0;
     };
 
-    // Types: MON_TYPES(TYPE_X) ou MON_TYPES(TYPE_X, TYPE_Y)
+    // Types: MON_TYPES(TYPE_X, TYPE_Y) ou macro (CLEFAIRY_FAMILY_TYPES)
     let type1 = "", type2 = "";
     const typesMatch = body.match(/\.types\s*=\s*MON_TYPES\(([^)]+)\)/);
     if (typesMatch) {
         const types = typesMatch[1].match(/TYPE_\w+/g) || [];
         type1 = types[0] || "";
-        type2 = types[1] || type1; // se 1 tipo, duplicar
+        type2 = types[1] || type1;
+    } else {
+        // Pode ser macro: .types = SOME_MACRO,
+        const typesMacroMatch = body.match(/\.types\s*=\s*(\w+)/);
+        if (typesMacroMatch && defines && defines[typesMacroMatch[1]]) {
+            const resolved = defines[typesMacroMatch[1]];
+            const types = resolved.match(/TYPE_\w+/g) || [];
+            type1 = types[0] || "";
+            type2 = types[1] || type1;
+        }
     }
 
-    // Abilities: { ABILITY_X, ABILITY_Y, ABILITY_Z }
+    // Abilities: { ABILITY_X, ABILITY_Y, ABILITY_Z } ou macro (GENGAR_ABILITIES)
     const abilities = [];
     const abilitiesMatch = body.match(/\.abilities\s*=\s*\{([^}]+)\}/);
     if (abilitiesMatch) {
         const abs = abilitiesMatch[1].match(/ABILITY_\w+/g) || [];
         abilities.push(...abs);
+    } else {
+        const abilitiesMacroMatch = body.match(/\.abilities\s*=\s*(\w+)/);
+        if (abilitiesMacroMatch && defines && defines[abilitiesMacroMatch[1]]) {
+            const resolved = defines[abilitiesMacroMatch[1]];
+            const abs = resolved.match(/ABILITY_\w+/g) || [];
+            abilities.push(...abs);
+        }
     }
 
     // Egg groups: MON_EGG_GROUPS(EGG_GROUP_X, EGG_GROUP_Y)
