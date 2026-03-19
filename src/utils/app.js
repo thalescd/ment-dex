@@ -23,13 +23,7 @@ import { fetchLocationsObj } from "../modules/locations/fetchLocations.js";
 import { fetchScripts } from "../modules/scripts/fetchScripts.js";
 import { fetchStrategiesObj } from "../modules/strategies/fetchStrategies.js";
 
-export async function fetchData(urlParams = "") {
-    if (urlParams === "") {
-        history.pushState(null, null, location.href);
-        const queryString = window.location.search;
-        urlParams = new URLSearchParams(queryString);
-    }
-
+export async function fetchData(urlParams) {
     try {
         await forceUpdate();
 
@@ -41,11 +35,11 @@ export async function fetchData(urlParams = "") {
         await fetchStrategiesObj();
 
         await fetchTypeChart();
-        await getLocationsByPokemon();
+        getLocationsByPokemon();
 
-        await setDataList();
+        setDataList();
         await setFilters();
-        await applySettings();
+        applySettings();
         await displaySetup();
         await displayParams(urlParams);
 
@@ -71,7 +65,7 @@ export async function fetchTypeChart() {
     }
 }
 
-export async function getLocationsByPokemon() {
+export function getLocationsByPokemon() {
     gameData.locationsByPokemon = {};
 
     Object.keys(gameData.locations).forEach((location) => {
@@ -126,7 +120,7 @@ export async function displayParams(urlParams) {
             .dispatchEvent(new Event("input"));
     }
 
-    await refreshURLParams();
+    refreshURLParams();
 }
 
 export async function displayHistoryObj(historyStateObj) {

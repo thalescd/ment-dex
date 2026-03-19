@@ -9,6 +9,7 @@ import {
     speciesTableTbody,
     changelogMode,
     panelSpecies,
+    speciesFilterContainer,
 } from "../../utils/domRefs.js";
 import {
     createSpeciesPanel,
@@ -23,7 +24,7 @@ uiState.speciesMoveFilter = null;
 export function updateSpeciesMoveFilter(sortTable = false) {
     uiState.speciesMoveFilter = null;
     const moveFiltersContainer =
-        window.speciesFilterContainer.getElementsByClassName(
+        speciesFilterContainer.getElementsByClassName(
             "speciesFilterMoveContainer"
         )[0];
     if (moveFiltersContainer) {
@@ -217,27 +218,7 @@ export function appendSpeciesToTable(speciesName) {
     }
     row.append(abilitiesContainer);
 
-    if (typeof window.innatesDefined !== "undefined") {
-        let innatesContainer = document.createElement("td");
-        innatesContainer.className = "innates";
-        for (
-            let j = 0;
-            j < gameData.species[speciesName]["innates"].length;
-            j++
-        ) {
-            let innates = document.createElement("div");
-            let innatesName = gameData.species[speciesName]["innates"][j];
-
-            if (innatesName !== "ABILITY_NONE") {
-                innates.innerText = `${sanitizeString(innatesName)} `;
-
-                innatesContainer.append(innates);
-            }
-        }
-        row.append(innatesContainer);
-    } else {
-        row.classList.add("noInnates");
-    }
+    row.classList.add("noInnates");
 
     [
         ["HP", "baseHP"],

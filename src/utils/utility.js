@@ -96,7 +96,7 @@ export function getTextWidth(text) {
     return context.measureText(text).width;
 }
 
-export async function setDataList() {
+export function setDataList() {
     uiState.speciesIngameNameArray = [];
     for (const name in gameData.species) {
         if (gameData.species[name]["baseSpeed"] <= 0) {
@@ -162,7 +162,7 @@ export function returnTargetSpeciesSprite(speciesName) {
     return speciesName;
 }
 
-export async function refreshURLParams() {
+export function refreshURLParams() {
     const url = document.location.href.split("?")[0] + "?";
     let params = "";
 
@@ -200,12 +200,12 @@ export async function refreshURLParams() {
         }
     }
 
-    await getHistoryState();
+    getHistoryState();
     window.history.replaceState(`${url}${params}`, null, `${url}${params}`);
     return `${url}${params}`;
 }
 
-export async function getHistoryState() {
+export function getHistoryState() {
     let historyStateObj = {};
     if (!speciesPanelMainContainer.classList.contains("hide")) {
         historyStateObj["species"] = panelSpecies;

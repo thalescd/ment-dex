@@ -189,53 +189,7 @@ export async function createSpeciesPanel(name) {
         speciesAbilitiesMainContainer.classList.add("hide");
     }
 
-    if (typeof window.innatesDefined !== "undefined") {
-        clearChildren(speciesInnates);
 
-        for (let i = 0; i < gameData.species[name]["innates"].length; i++) {
-            const ability = gameData.species[name]["innates"][i];
-            if (gameData.species[name]["innates"][i] !== "ABILITY_NONE") {
-                const abilityContainer = document.createElement("div");
-                const abilityName = document.createElement("span");
-                const abilityDescription = document.createElement("span");
-
-                abilityName.innerText =
-                    gameData.abilities[ability]["ingameName"];
-                abilityDescription.innerText =
-                    gameData.abilities[ability]["description"];
-
-                abilityName.classList.add("hyperlink");
-
-                abilityDescription.className =
-                    "speciesPanelAbilitiesDescriptionPadding";
-                abilityContainer.className = "flex wrap";
-
-                abilityName.addEventListener("click", async () => {
-                    if (!speciesButton.classList.contains("activeButton")) {
-                        setTracker(trackers.species);
-                        await tableButtonClick("species");
-                    }
-                    deleteFiltersFromTable();
-
-                    createFilter(
-                        gameData.abilities[ability]["ingameName"],
-                        "Ability"
-                    );
-                    speciesPanel("hide");
-                    window.scrollTo({ top: 0 });
-                });
-
-                abilityContainer.append(abilityName);
-                abilityContainer.append(abilityDescription);
-                speciesInnates.append(abilityContainer);
-            }
-        }
-        if (gameData.species[name]["innates"].length === 0) {
-            speciesInnatesMainContainer.classList.add("hide");
-        } else {
-            speciesInnatesMainContainer.classList.remove("hide");
-        }
-    }
 
     let monStats = [
         gameData.species[name]["baseHP"],

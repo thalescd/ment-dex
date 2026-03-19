@@ -167,16 +167,11 @@ function createTrainerSpeciesTbody(trainerObj) {
             trainerSpeciesAbility.className =
                 "hyperlink bold trainerSpeciesAbility";
             trainerSpeciesAbility.addEventListener("click", () => {
-                let abilityArray = [
+                const abilityArray = [
                     gameData.species[trainerSpeciesObj["name"]]["abilities"][
                         trainerSpeciesObj["ability"]
                     ],
                 ];
-                if (typeof window.innatesDefined !== "undefined") {
-                    abilityArray = abilityArray.concat(
-                        gameData.species[trainerSpeciesObj["name"]]["innates"]
-                    );
-                }
                 createPopupAbility(abilityArray);
             });
             trainerSpeciesContainer.append(trainerSpeciesAbility);

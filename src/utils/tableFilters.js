@@ -1,6 +1,15 @@
 import { regexSpChar, MIN_FILTER_INPUT_LENGTH } from "./config.js";
 import { clearChildren } from "./domUtils.js";
-import { tracker, trainersFilter, trainersInput } from "./domRefs.js";
+import {
+    tracker,
+    trainersFilter,
+    trainersInput,
+    trainersFilterContainer,
+    speciesFilterList,
+    locationsFilterList,
+    movesFilterList,
+    trainersFilterList,
+} from "./domRefs.js";
 import { sanitizeString, speciesCanLearnMove } from "./utility.js";
 import { lazyLoading } from "./tableUtility.js";
 import { updateSpeciesMoveFilter } from "../modules/species/displaySpecies.js";
@@ -198,15 +207,7 @@ function filterSpeciesAbility(
                 name = tracker[i]["key"].split("\\")[2];
             }
             if (!gameData.species[name]["abilities"].includes(abilityName)) {
-                if (typeof window.innatesDefined !== "undefined") {
-                    if (
-                        !gameData.species[name]["innates"].includes(abilityName)
-                    ) {
-                        passed = false;
-                    }
-                } else {
-                    passed = false;
-                }
+                passed = false;
             }
 
             tracker[i]["filter"] = filterLogicalConnector(
@@ -455,27 +456,27 @@ export async function setFilters() {
     });
 
     createFilterGroup(["Mega", "Alolan", "Galarian", "Hisuian"], "Form", [
-        window.speciesFilterList,
-        window.locationsFilterList,
+        speciesFilterList,
+        locationsFilterList,
     ]);
     createFilterGroup(createFilterArray(["type"], gameData.moves), "Type", [
-        window.speciesFilterList,
-        window.movesFilterList,
-        window.locationsFilterList,
+        speciesFilterList,
+        movesFilterList,
+        locationsFilterList,
     ]);
     createFilterGroup(createFilterArray(["split"], gameData.moves), "Split", [
-        window.movesFilterList,
+        movesFilterList,
     ]);
     createFilterGroup(createFilterArray(["flags"], gameData.moves), "Flag", [
-        window.movesFilterList,
+        movesFilterList,
     ]);
     createFilterGroup(createFilterArray(["target"], gameData.moves), "Target", [
-        window.movesFilterList,
+        movesFilterList,
     ]);
     createFilterGroup(
         createFilterArray(["item1", "item2"], gameData.species),
         "Item",
-        [window.speciesFilterList, window.locationsFilterList]
+        [speciesFilterList, locationsFilterList]
     );
     try {
         createFilterGroup(
@@ -487,7 +488,7 @@ export async function setFilters() {
                 )
             ),
             "Item",
-            [window.trainersFilterList]
+            [trainersFilterList]
         );
     } catch (e) {
         console.warn("Failed to create trainer item filters:", e.message);
@@ -496,29 +497,29 @@ export async function setFilters() {
         createFilterArray(["ingameName"], gameData.abilities, false),
         "Ability",
         [
-            window.speciesFilterList,
-            window.locationsFilterList,
-            window.trainersFilterList,
+            speciesFilterList,
+            locationsFilterList,
+            trainersFilterList,
         ]
     );
     createFilterGroup(
         createFilterArray(["ingameName"], gameData.moves, false),
         "Move",
         [
-            window.speciesFilterList,
-            window.locationsFilterList,
-            window.trainersFilterList,
+            speciesFilterList,
+            locationsFilterList,
+            trainersFilterList,
         ]
     );
     createFilterGroup(
         createFilterArray(["eggGroup1", "eggGroup2"], gameData.species),
         "Egg Group",
-        [window.speciesFilterList, window.locationsFilterList]
+        [speciesFilterList, locationsFilterList]
     );
     createFilterGroup(
         ["HP", "Atk", "Def", "SpA", "SpD", "Spe", "BST"],
         "Base Stats",
-        [window.speciesFilterList, window.locationsFilterList],
+        [speciesFilterList, locationsFilterList],
         true
     );
 }
@@ -824,7 +825,7 @@ export function deleteFiltersFromTable() {
 
 export function trainerSpeciesMatchFilter(resetInput = true) {
     const trainersFilterElements =
-        window.trainersFilterContainer.getElementsByClassName("filter");
+        trainersFilterContainer.getElementsByClassName("filter");
     trainersTrackerLoop: for (
         let i = 0, j = trackers.trainers.length;
         i < j;
@@ -882,16 +883,6 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                             ] === abilityName
                         ) {
                             continue trainerTeamLoop;
-                        } else if (
-                            typeof window.innatesDefined !== "undefined"
-                        ) {
-                            if (
-                                gameData.species[speciesObj["name"]][
-                                    "innates"
-                                ].includes(abilityName)
-                            ) {
-                                continue trainerTeamLoop;
-                            }
                         }
                     }
                 } else if (label === "Move") {

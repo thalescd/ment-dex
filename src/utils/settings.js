@@ -19,7 +19,7 @@ if (localStorage.getItem("DEXsettings")) {
     settings = JSON.parse(localStorage.getItem("DEXsettings"));
 }
 
-export async function applySettings() {
+export function applySettings() {
     if (settings.includes("speciesPanelHistoryHide")) {
         speciesPanelHistoryContainer.classList.add("hide");
     } else {

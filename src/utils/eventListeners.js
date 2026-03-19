@@ -67,7 +67,6 @@ import {
     headerSpeciesName,
     headerSpeciesTypes,
     headerSpeciesAbilities,
-    headerSpeciesInnates,
     headerSpeciesHP,
     headerSpeciesAtk,
     headerSpeciesDef,
@@ -272,15 +271,6 @@ headerSpeciesAbilities.addEventListener("click", () => {
         (asc = headerSpeciesAbilities.classList.contains("th-sort-desc"))
     );
 });
-headerSpeciesInnates.addEventListener("click", () => {
-    sortTableByClassName(
-        speciesTable,
-        gameData.species,
-        ["innates"],
-        "innates",
-        (asc = headerSpeciesInnates.classList.contains("th-sort-desc"))
-    );
-});
 headerSpeciesHP.addEventListener("click", () => {
     sortTableByClassName(
         speciesTable,
@@ -353,11 +343,7 @@ speciesInput.addEventListener("input", (e) => {
     typingTimer = setTimeout(function () {
         const value = e.target.value;
         filterFilters(value);
-        filterTableInput(value, gameData.species, [
-            "name",
-            "abilities",
-            "innates",
-        ]);
+        filterTableInput(value, gameData.species, ["name", "abilities"]);
     }, doneTypingInterval);
 });
 abilitiesInput.addEventListener("input", (e) => {
@@ -682,9 +668,9 @@ window.addEventListener("popstate", async () => {
     const temp = historyObj.length;
     await displayHistoryObj(historyObj.slice(-1)[0]);
     if (historyObj.length > 0) {
-        window.history.pushState(null, null, await refreshURLParams());
+        window.history.pushState(null, null, refreshURLParams());
     } else {
-        window.history.replaceState(null, null, await refreshURLParams());
+        window.history.replaceState(null, null, refreshURLParams());
     }
 
     while (historyObj.length > temp && temp > 0) {

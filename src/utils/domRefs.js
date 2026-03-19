@@ -8,21 +8,13 @@ export let historyObj = [];
 // Setters para estado mutavel (imports ES sao read-only para quem importa)
 export function setTracker(value) {
     tracker = value;
-    window.tracker = value;
 }
 export function setPanelSpecies(value) {
     panelSpecies = value;
-    window.panelSpecies = value;
 }
 export function setHistoryObj(value) {
     historyObj = value;
-    window.historyObj = value;
 }
-
-// Compatibilidade temporaria
-window.tracker = tracker;
-window.panelSpecies = panelSpecies;
-window.historyObj = historyObj;
 
 // --- Elementos DOM gerais ---
 export const tableFilter = document.getElementById("tableFilter");
@@ -253,9 +245,6 @@ export const headerSpeciesTypes = document.querySelector(
 export const headerSpeciesAbilities = document.querySelector(
     "#speciesTableThead th.abilities"
 );
-export const headerSpeciesInnates = document.querySelector(
-    "#speciesTableThead th.innates"
-);
 export const headerSpeciesHP = document.querySelector(
     "#speciesTableThead th.baseHP"
 );
@@ -294,3 +283,23 @@ export const headerLocationsZone = document.querySelector(
 
 // --- Botao utilitario ---
 export const utilityButton = document.querySelector(".utilityButton");
+
+// --- Containers de input/botao da tabela ---
+export const tableInput = document.getElementById("tableInput");
+export const tableButton = document.getElementById("tableButton");
+
+// --- Containers de filtro ---
+export const speciesFilterContainer = document.getElementById(
+    "speciesFilterContainer"
+);
+export const trainersFilterContainer = document.getElementById(
+    "trainersFilterContainer"
+);
+
+// --- Listas de filtros por tabela ---
+export const speciesFilterList = document.getElementById("speciesFilterList");
+export const locationsFilterList = document.getElementById(
+    "locationsFilterList"
+);
+export const movesFilterList = document.getElementById("movesFilterList");
+export const trainersFilterList = document.getElementById("trainersFilterList");

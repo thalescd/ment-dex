@@ -77,6 +77,9 @@ export function parseSpeciesInfo(text) {
         }
     }
 
+    // Extrair macros de função (com parâmetros) para expansão inline
+    const functionMacros = extractFunctionMacros(text);
+
     // Processar cada familia
     for (const range of familyRanges) {
         const chunk = lines.slice(range.start, range.end + 1).join("\n");
@@ -89,13 +92,59 @@ export function parseSpeciesInfo(text) {
             const body = match[2];
             familySpecies.push(speciesKey);
 
-            data[speciesKey] = parseSpeciesBody(body, defines);
+            data[speciesKey] = parseSpeciesBody(body, defines, functionMacros);
         }
 
         families[range.family] = familySpecies;
     }
 
     return { data, families };
+}
+
+// Extrai macros de função (com parâmetros) e seus corpos completos (multi-linha)
+function extractFunctionMacros(text) {
+    const macros = {};
+    // Juntar linhas de continuação antes de parsear
+    const joined = text.replace(/\\\n[ \t]*/g, ' ');
+    const re = /#define\s+(\w+)\(([^)]*)\)\s+(.*)/g;
+    let m;
+    while ((m = re.exec(joined)) !== null) {
+        const name = m[1];
+        const params = m[2].split(',').map(p => p.trim()).filter(Boolean);
+        const body = m[3].trim();
+        if (!macros[name]) {
+            macros[name] = { params, body };
+        }
+    }
+    return macros;
+}
+
+// Expande chamadas de macros de função no corpo de uma espécie.
+// Expande apenas macros que fornecem campos de espécie (.types ou .abilities).
+function expandBodyMacros(body, functionMacros) {
+    let result = body;
+    const callRe = /\b([A-Z][A-Z0-9_]+)\s*\(([^)]*)\)/g;
+    let m;
+    while ((m = callRe.exec(result)) !== null) {
+        const macroName = m[1];
+        const macro = functionMacros[macroName];
+        if (macro && (macro.body.includes('.types') || macro.body.includes('.abilities'))) {
+            const args = m[2].split(',').map(a => a.trim());
+            let expanded = macro.body;
+            for (let i = 0; i < macro.params.length; i++) {
+                const param = macro.params[i];
+                const arg = args[i] !== undefined ? args[i] : '';
+                // Concatenação de tokens ##param e param##
+                expanded = expanded.replace(new RegExp(`##\\s*${param}\\b`, 'g'), arg);
+                expanded = expanded.replace(new RegExp(`\\b${param}\\s*##`, 'g'), arg);
+                // Substituição normal de parâmetro
+                expanded = expanded.replace(new RegExp(`\\b${param}\\b`, 'g'), arg);
+            }
+            result = result.slice(0, m.index) + expanded + result.slice(m.index + m[0].length);
+            callRe.lastIndex = 0;
+        }
+    }
+    return result;
 }
 
 function resolveIntValue(raw, defines) {
@@ -118,7 +167,11 @@ function resolveIntValue(raw, defines) {
     return 0;
 }
 
-function parseSpeciesBody(body, defines) {
+function parseSpeciesBody(body, defines, functionMacros = null) {
+    // Expandir macros de função que fornecem campos (.types, .abilities, etc.)
+    if (functionMacros) {
+        body = expandBodyMacros(body, functionMacros);
+    }
     const intField = (name) => {
         const m = body.match(new RegExp(`\\.${name}\\s*=\\s*([^,\\n]+)`));
         return m ? resolveIntValue(m[1], defines) : 0;

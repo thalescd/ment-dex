@@ -26,6 +26,9 @@ import {
     speciesTable,
     tracker,
     setTracker,
+    tableInput,
+    tableButton,
+    trainersFilterContainer,
 } from "./domRefs.js";
 import { gameData, trackers, uiState } from "./state.js";
 import { displayFunctions } from "./displayRegistry.js";
@@ -60,19 +63,14 @@ export async function displaySetup() {
     } else {
         await setupItemsButtonFilters();
     }
-    if (typeof window.innatesDefined !== "undefined") {
-        document
-            .getElementsByClassName("innatesHeader")[0]
-            .classList.remove("hide");
-    }
     if (typeof window.showShinyToggle !== "undefined") {
         document.getElementById("shinyContainer").classList.remove("hide");
     }
 
     lazyLoading(true);
 
-    window.tableInput.classList.remove("hide");
-    window.tableButton.classList.remove("hide");
+    tableInput.classList.remove("hide");
+    tableButton.classList.remove("hide");
     tableFilter.classList.remove("hide");
     table.classList.remove("hide");
     utilityButton.classList.remove("hide");
@@ -183,21 +181,16 @@ export function filterTableInput(input, obj, keyArray) {
         tracker[i]["filter"].push("input");
         for (let k = 0; k < keyArray.length; k++) {
             if (
-                keyArray[k] !== "innates" ||
-                typeof window.innatesDefined !== "undefined"
+                regexInput.test(
+                    sanitizeString(
+                        "" + obj[tracker[i]["key"]][keyArray[k]]
+                    ).replaceAll(regexSpChar, "")
+                )
             ) {
-                if (
-                    regexInput.test(
-                        sanitizeString(
-                            "" + obj[tracker[i]["key"]][keyArray[k]]
-                        ).replaceAll(regexSpChar, "")
-                    )
-                ) {
-                    tracker[i]["filter"] = tracker[i]["filter"].filter(
-                        (value) => value !== "input"
-                    );
-                    break;
-                }
+                tracker[i]["filter"] = tracker[i]["filter"].filter(
+                    (value) => value !== "input"
+                );
+                break;
             }
         }
     }
@@ -302,7 +295,7 @@ export function filterTrainersTableInput(input) {
         }
         if (
             input.trim().length === 0 &&
-            window.trainersFilterContainer.children.length === 0
+            trainersFilterContainer.children.length === 0
         ) {
             delete gameData.trainers[zone][trainer]["match"];
         }
