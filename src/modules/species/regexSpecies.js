@@ -295,8 +295,10 @@ function parseSpeciesBody(body, defines, functionMacros = null) {
 // ========================================================================
 export function parseLevelUpLearnsets(text) {
     const learnsets = {};
+    // Termina no fechamento }; da struct — evita que um learnset sem
+    // LEVEL_UP_END "invada" o learnset seguinte via scan guloso
     const blockRe =
-        /\b(s\w+LevelUpLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)LEVEL_UP_END/g;
+        /\b(s\w+LevelUpLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)\n\s*\}/g;
     let match;
 
     while ((match = blockRe.exec(text)) !== null) {

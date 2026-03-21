@@ -54,7 +54,7 @@ export const dataSources = {
     // === TYPE CHART ===
     typeChart: "src/data/typeChart.json",
 };
-export const checkUpdate = "22 Unbound";
+export const checkUpdate = "24 Unbound";
 export const regexSpChar = new RegExp("-|'|\u2019| |,|\\.|_|!|\\?", "g");
 export const appTitle = "MENT Dex";
 export const footerText = "Unbound\nYdarissep Pokedex";

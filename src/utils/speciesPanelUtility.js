@@ -84,12 +84,17 @@ export async function createSpeciesPanel(name) {
     ) {
         return;
     }
+
+    const isReopen = panelSpecies === name;
+
     setPanelSpecies(name);
     speciesPanel("show");
-
     refreshURLParams();
-
     await manageSpeciesPanelHistory(name);
+
+    if (isReopen) {
+        return;
+    }
 
     speciesNameEl.innerText = sanitizeString(name);
     speciesID.innerText = `#${gameData.species[name]["ID"]}`;
@@ -410,10 +415,21 @@ export async function createSpeciesPanel(name) {
         speciesStrategiesContainer.classList.add("hide");
     }
 
+    // Tutor learnsets: WIP
+    const tutorTbody = speciesPanelTutorTable.querySelector("tbody");
+    clearChildren(tutorTbody);
+    const wipRow = document.createElement("tr");
+    const wipCell = document.createElement("td");
+    wipCell.colSpan = 7;
+    wipCell.style.textAlign = "center";
+    wipCell.textContent = "WIP";
+    wipRow.append(wipCell);
+    tutorTbody.append(wipRow);
+    speciesPanelTutorTable.classList.remove("hide");
+
     [
         [speciesPanelLevelUpTable, "levelUpLearnsets"],
         [speciesPanelTMHMTable, "TMHMLearnsets"],
-        [speciesPanelTutorTable, "tutorLearnsets"],
         [speciesPanelEggMovesTable, "eggMovesLearnsets"],
     ].forEach((learnsets) => {
         try {
@@ -560,6 +576,9 @@ async function fetchSpeciesPal(speciesName, type = "normal") {
                 `${gameData.species[gameData.species[speciesName]["forms"][0]]["sprite"].replace(/\w+\.png/, `${type}.pal`)}`
             );
         }
+    }
+    if (!rawPal.ok) {
+        return [];
     }
     const textPal = await rawPal.text();
 

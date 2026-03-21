@@ -70,13 +70,39 @@ function resolveStr(raw, prefix) {
     return direct ? direct[0] : "";
 }
 
+// Pre-passo: extrai todas as variaveis de descricao do tipo:
+//   static const u8 sXxxDescription[] = _("...");
+// ou com #if/#else/#endif — pega apenas o primeiro ramo (#if).
+// Retorna mapa { sXxxDescription: "texto da descricao" }
+function extractDescriptionVars(text) {
+    const map = {};
+
+    // Remove blocos #else ... #endif para ficar so com o ramo #if
+    const stripped = text.replace(/#else[\s\S]*?#endif/g, "");
+
+    // Remove diretivas de pre-processador restantes (#if, #ifdef, #endif, etc.)
+    const clean = stripped.replace(/^\s*#[^\n]*/gm, "");
+
+    const varRegex = /static\s+const\s+u8\s+(s\w+Description)\s*\[\]\s*=\s*_\(([\s\S]*?)\)\s*;/g;
+    let m;
+    while ((m = varRegex.exec(clean)) !== null) {
+        const varName = m[1];
+        const raw = m[2];
+        map[varName] = extractCompoundString(raw);
+    }
+    return map;
+}
+
 export function parseMovesInfo(text) {
     const moves = {};
     let idx = 0;
 
+    // Pre-passo: mapa de variaveis de descricao (sXxxDescription → texto)
+    const descVars = extractDescriptionVars(text);
+
     // Regex para capturar cada bloco [MOVE_XXX] = { ... }
-    // Suporta chaves aninhadas de um nivel (ex: .additionalEffects, .contestComboMoves)
-    const blockRegex = /\[(MOVE_\w+)\]\s*=\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g;
+    // Suporta chaves aninhadas de dois niveis (ex: additionalEffects com .self = { ... })
+    const blockRegex = /\[(MOVE_\w+)\]\s*=\s*\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g;
 
     let match;
     while ((match = blockRegex.exec(text)) !== null) {
@@ -89,13 +115,19 @@ export function parseMovesInfo(text) {
         );
         const ingameName = nameMatch ? nameMatch[1] : "";
 
-        // description: COMPOUND_STRING(...) — pode ser multi-line
-        const descMatch = body.match(
+        // description: inline COMPOUND_STRING(...) ou referencia a variavel sXxxDescription
+        const descInlineMatch = body.match(
             /\.description\s*=\s*COMPOUND_STRING\(([\s\S]*?)\)(?:\s*,)/
         );
-        const description = descMatch
-            ? [extractCompoundString(descMatch[1])]
-            : [];
+        let description = [];
+        if (descInlineMatch) {
+            description = [extractCompoundString(descInlineMatch[1])];
+        } else {
+            const descVarMatch = body.match(/\.description\s*=\s*(s\w+Description)/);
+            if (descVarMatch && descVars[descVarMatch[1]]) {
+                description = [descVars[descVarMatch[1]]];
+            }
+        }
 
         // Campos numericos (suportam ternarios: B_UPDATED >= GEN_X ? val1 : val2)
         const powerRaw = body.match(/\.power\s*=\s*([^,\n]+)/);

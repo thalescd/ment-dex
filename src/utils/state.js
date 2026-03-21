@@ -33,4 +33,6 @@ export const uiState = {
     abilitiesIngameNameArray: [],
     speciesPanelHistory: [],
     trainersDifficulty: "Normal",
+    abilityIngameNameToKey: {},
+    moveIngameNameToKey: {},
 };

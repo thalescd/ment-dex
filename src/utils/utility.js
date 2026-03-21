@@ -109,6 +109,7 @@ export function setDataList() {
     }
 
     uiState.abilitiesIngameNameArray = [];
+    uiState.abilityIngameNameToKey = {};
     for (const abilityName in gameData.abilities) {
         if (
             !gameData.abilities[abilityName]["description"] ||
@@ -121,7 +122,15 @@ export function setDataList() {
         uiState.abilitiesIngameNameArray.push(
             gameData.abilities[abilityName]["ingameName"]
         );
+        uiState.abilityIngameNameToKey[gameData.abilities[abilityName]["ingameName"]] = abilityName;
         abilitiesInputDataList.append(option);
+    }
+
+    uiState.moveIngameNameToKey = {};
+    for (const moveName in gameData.moves) {
+        if (gameData.moves[moveName]["ingameName"]) {
+            uiState.moveIngameNameToKey[gameData.moves[moveName]["ingameName"]] = moveName;
+        }
     }
 }
 

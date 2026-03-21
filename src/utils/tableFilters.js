@@ -193,12 +193,7 @@ function filterSpeciesAbility(
     label = "Placeholder",
     operator
 ) {
-    let abilityName = null;
-    Object.keys(gameData.abilities).forEach((ability) => {
-        if (gameData.abilities[ability]["ingameName"] === value) {
-            abilityName = ability;
-        }
-    });
+    const abilityName = uiState.abilityIngameNameToKey[value] ?? null;
     if (abilityName) {
         for (let i = 0, j = tracker.length; i < j; i++) {
             let passed = true;
@@ -222,12 +217,7 @@ function filterSpeciesAbility(
 }
 
 function filterSpeciesMove(value, label, operator) {
-    let moveName = null;
-    Object.keys(gameData.moves).forEach((move) => {
-        if (gameData.moves[move]["ingameName"] === value) {
-            moveName = move;
-        }
-    });
+    const moveName = uiState.moveIngameNameToKey[value] ?? null;
     if (moveName) {
         for (let i = 0, j = tracker.length; i < j; i++) {
             let passed = true;
@@ -868,14 +858,7 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 passed = false;
                 const speciesObj = trainerTeam[l];
                 if (label === "Ability") {
-                    let abilityName = null;
-                    Object.keys(gameData.abilities).forEach((ability) => {
-                        if (
-                            gameData.abilities[ability]["ingameName"] === value
-                        ) {
-                            abilityName = ability;
-                        }
-                    });
+                    const abilityName = uiState.abilityIngameNameToKey[value] ?? null;
                     if (abilityName) {
                         if (
                             gameData.species[speciesObj["name"]]["abilities"][
@@ -886,12 +869,7 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                         }
                     }
                 } else if (label === "Move") {
-                    let moveName = null;
-                    Object.keys(gameData.moves).forEach((move) => {
-                        if (gameData.moves[move]["ingameName"] === value) {
-                            moveName = move;
-                        }
-                    });
+                    const moveName = uiState.moveIngameNameToKey[value] ?? null;
                     if (moveName) {
                         if (speciesObj["moves"].includes(moveName)) {
                             continue trainerTeamLoop;
@@ -939,9 +917,11 @@ function filterOperators(value, label, obj) {
     } else {
         operator = operator[0];
     }
-    const number = document
+    const numberMatch = document
         .getElementsByClassName("activeInput")[0]
-        .value.match(/\d+/)[0];
+        .value.match(/\d+/);
+    if (!numberMatch) return;
+    const number = parseInt(numberMatch[0], 10);
 
     for (let i = 0, j = tracker.length; i < j; i++) {
         let name = tracker[i]["key"];

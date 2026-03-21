@@ -87,18 +87,21 @@ export function getLocationsByPokemon() {
 
 export async function displayParams(urlParams) {
     if (urlParams.get("species")) {
-        let scrollToSpecies = urlParams.get("species");
-        await createSpeciesPanel(scrollToSpecies);
+        const scrollToSpecies = urlParams.get("species");
+        if (gameData.species[scrollToSpecies]) {
+            await createSpeciesPanel(scrollToSpecies);
+        }
     } else {
         speciesPanel("hide");
     }
     if (urlParams.get("table")) {
-        await tableButtonClick(
-            document
-                .getElementById(urlParams.get("table"))
-                .id.replace("Table", ""),
-            urlParams.get("species")
-        );
+        const tableEl = document.getElementById(urlParams.get("table"));
+        if (tableEl) {
+            await tableButtonClick(
+                tableEl.id.replace("Table", ""),
+                urlParams.get("species")
+            );
+        }
     }
     if (urlParams.get("filter")) {
         urlParams
