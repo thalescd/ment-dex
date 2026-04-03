@@ -57,7 +57,7 @@ export const dataSources = {
 export const checkUpdate = "24 Unbound";
 export const regexSpChar = new RegExp("-|'|\u2019| |,|\\.|_|!|\\?", "g");
 export const appTitle = "MENT Dex";
-export const footerText = "Unbound\nYdarissep Pokedex";
+export const footerText = "MENT\nPokédex";
 
 // Lazy loading
 export const LAZY_LOAD_BATCH_SIZE = 75;
