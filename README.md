@@ -1,5 +1,7 @@
 # MENT Dex
 
+**Live:** https://thalescd.github.io/ment-dex/
+
 A web-based Pokédex for my [pokeemerald](https://github.com/thalescd/pokeemerald-expansion) ROM hack. It pulls data directly from the game's source files on GitHub and presents them in an interactive interface.
 
 Heavily inspired by [Unbound Pokedex](https://github.com/Ydarissep/Unbound-Pokedex) by [Ydarissep](https://github.com/Ydarissep).
