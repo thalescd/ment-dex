@@ -1,11 +1,11 @@
 import { repos } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
-import { footerP } from "../../utils/utility.js";
+import { statusMsg } from "../../utils/utility.js";
 import { gameData } from "../../utils/state.js";
 import { regexStrategies } from "./regexStrategies.js";
 
 async function getStrategies(strategies) {
-    footerP("Fetching strategies");
+    statusMsg("Fetching strategies");
     const rawStrategies = await fetch(`${repos.strats}/data/dex-strategy.md`);
     const textStrategies = await rawStrategies.text();
 

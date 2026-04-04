@@ -150,7 +150,7 @@ body {
 }
 
 #tableButton,
-#footerButtonContainer,
+#headerButtons,
 #tableFilter {
     user-select: none;
 }
@@ -183,6 +183,17 @@ button[type="button"] {
 
 .setting.activeSetting {
     border: 1px solid green !important;
+}
+
+#update.updateAvailable {
+    border-color: #f5a623;
+    color: #f5a623;
+    animation: pulseUpdate 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseUpdate {
+    0%, 100% { box-shadow: 0 0 0px #f5a62300; }
+    50% { box-shadow: 0 0 8px #f5a623aa; }
 }
 
 .activeButton,
@@ -404,7 +415,7 @@ input[type="search"]:hover {
     font-family: sans-serif, Arial;
 }
 
-#footerName {
+#appTitle {
     font-size: revert !important;
 }
 

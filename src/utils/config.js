@@ -55,9 +55,10 @@ export const dataSources = {
     typeChart: "src/data/typeChart.json",
 };
 export const checkUpdate = "24 Unbound";
+export const expansionApiRef = "https://api.github.com/repos/thalescd/pokeemerald-expansion/git/refs/heads/master";
 export const regexSpChar = new RegExp("-|'|\u2019| |,|\\.|_|!|\\?", "g");
 export const appTitle = "MENT Dex";
-export const footerText = "MENT\nPokédex";
+export const titleText = "MENT Dex";
 
 // Lazy loading
 export const LAZY_LOAD_BATCH_SIZE = 75;

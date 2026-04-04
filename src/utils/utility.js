@@ -1,4 +1,4 @@
-import { checkUpdate } from "./config.js";
+import { checkUpdate, expansionApiRef } from "./config.js";
 import { LZString } from "./lz-string.js";
 import { gameData, uiState } from "./state.js";
 import {
@@ -50,7 +50,7 @@ export function forceUpdate() {
     if (localStorage.getItem("update") !== `${checkUpdate}`) {
         clearLocalStorage();
         localStorage.setItem("update", `${checkUpdate}`);
-        footerP("Fetching data please wait... this is only run once");
+        statusMsg("Fetching data please wait... this is only run once");
     }
 }
 
@@ -66,16 +66,32 @@ export function clearLocalStorage() {
     });
 }
 
-export function footerP(input) {
+export async function checkForUpdates(updateBtn) {
+    try {
+        const response = await fetch(expansionApiRef);
+        if (!response.ok) return;
+        const data = await response.json();
+        const remoteSha = data.object.sha;
+        sessionStorage.setItem("pendingSha", remoteSha);
+        const localSha = localStorage.getItem("expansionSha");
+        if (!localSha) {
+            localStorage.setItem("expansionSha", remoteSha);
+        } else if (localSha !== remoteSha) {
+            updateBtn.classList.add("updateAvailable");
+        }
+    } catch {
+        // silently fail — não bloqueia o app se a API estiver indisponível
+    }
+}
+
+export function statusMsg(input) {
     if (input === "")
         document
-            .querySelectorAll("#footer > p")
+            .querySelectorAll("#appHeader > p")
             .forEach((paragraph) => paragraph.remove());
 
     const paragraph = document.createElement("p");
-    const footer = document.getElementById("footer");
-    paragraph.innerText = input;
-    footer.append(paragraph);
+    document.getElementById("appHeader")?.append(paragraph);
 }
 
 export function copyToClipboard(text) {

@@ -1,12 +1,12 @@
 import { dataSources } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
-import { footerP } from "../../utils/utility.js";
+import { statusMsg } from "../../utils/utility.js";
 import { gameData, trackers } from "../../utils/state.js";
 import { parseAbilitiesInfo } from "./regexAbilities.js";
 
 async function buildAbilitiesObj() {
     try {
-        footerP("Fetching abilities");
+        statusMsg("Fetching abilities");
         const raw = await fetch(dataSources.abilitiesInfo);
         const text = await raw.text();
         let abilities = parseAbilitiesInfo(text);
@@ -25,7 +25,7 @@ async function buildAbilitiesObj() {
         return abilities;
     } catch (e) {
         console.error("Failed to build abilities data:", e.message, e.stack);
-        footerP("Error fetching abilities data. Please refresh the page.");
+        statusMsg("Error fetching abilities data. Please refresh the page.");
         throw e;
     }
 }

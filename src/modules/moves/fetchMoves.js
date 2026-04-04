@@ -1,12 +1,12 @@
 import { gameData, trackers } from "../../utils/state.js";
 import { dataSources } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
-import { footerP } from "../../utils/utility.js";
+import { statusMsg } from "../../utils/utility.js";
 import { parseMovesInfo } from "./regexMoves.js";
 
 async function buildMovesObj() {
     try {
-        footerP("Fetching moves");
+        statusMsg("Fetching moves");
         const raw = await fetch(dataSources.movesInfo);
         const text = await raw.text();
         let moves = parseMovesInfo(text);
@@ -31,7 +31,7 @@ async function buildMovesObj() {
         return moves;
     } catch (e) {
         console.error("Failed to build moves data:", e.message, e.stack);
-        footerP("Error fetching moves data. Please refresh the page.");
+        statusMsg("Error fetching moves data. Please refresh the page.");
         throw e;
     }
 }

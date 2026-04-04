@@ -2,12 +2,14 @@
 // Separado de utility.js para evitar dependencias circulares
 
 import { gameData } from "./state.js";
+import { update } from "./domRefs.js";
 import { applySettings } from "./settings.js";
 import {
-    footerP,
+    statusMsg,
     forceUpdate,
     setDataList,
     refreshURLParams,
+    checkForUpdates,
 } from "./utility.js";
 import {
     setFilters,
@@ -44,14 +46,15 @@ export async function fetchData(urlParams) {
         await displayParams(urlParams);
 
         window.scrollTo(0, 0);
+        checkForUpdates(update);
     } catch (e) {
         console.error("Failed to load application data:", e.message, e.stack);
-        footerP("Error loading data. Please clear cache and refresh the page.");
+        statusMsg("Error loading data. Please clear cache and refresh the page.");
     }
 }
 
 export async function fetchTypeChart() {
-    footerP("Fetching type chart");
+    statusMsg("Fetching type chart");
     gameData.typeChart = {};
     try {
         let typeChartUrl = "src/data/typeChart.json";

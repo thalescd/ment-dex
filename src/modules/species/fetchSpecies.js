@@ -2,7 +2,7 @@ import { gameData, trackers } from "../../utils/state.js";
 import { dataSources } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
 import { setTracker } from "../../utils/domRefs.js";
-import { footerP } from "../../utils/utility.js";
+import { statusMsg } from "../../utils/utility.js";
 import {
     parseSpeciesConstants,
     parseSpeciesInfo,
@@ -18,7 +18,7 @@ import {
 // --- FASE 1: FETCH PARALELO ---
 
 async function fetchAllData() {
-    footerP("Fetching species");
+    statusMsg("Fetching species");
 
     const [
         constantsText,
@@ -62,7 +62,7 @@ async function fetchAllData() {
 // --- FASE 2: PARSE ---
 
 function parseAllData(raw) {
-    footerP("Parsing species data");
+    statusMsg("Parsing species data");
 
     const constants = parseSpeciesConstants(raw.constantsText);
 
@@ -96,7 +96,7 @@ function parseAllData(raw) {
 // --- FASE 3: MONTAR SPECIES ---
 
 function assembleSpecies(parsed) {
-    footerP("Building species objects");
+    statusMsg("Building species objects");
     const species = {};
     const {
         constants,
@@ -193,7 +193,7 @@ function assembleSpecies(parsed) {
 // --- FASE 4: FORMS (familias) ---
 
 function resolveForms(species, allFamilies) {
-    footerP("Resolving forms");
+    statusMsg("Resolving forms");
 
     for (const familyMembers of Object.values(allFamilies)) {
         // Filtrar apenas species que existem no objeto final
@@ -209,7 +209,7 @@ function resolveForms(species, allFamilies) {
 // --- FASE 5: CLEANUP ---
 
 function cleanSpecies(species) {
-    footerP("Cleaning up...");
+    statusMsg("Cleaning up...");
 
     Object.keys(species).forEach((name) => {
         if (species[name]["baseSpeed"] <= 0) {
@@ -296,7 +296,7 @@ async function buildSpeciesObj() {
         return species;
     } catch (e) {
         console.error("Failed to build species data:", e.message, e.stack);
-        footerP("Error fetching species data. Please refresh the page.");
+        statusMsg("Error fetching species data. Please refresh the page.");
         throw e;
     }
 }

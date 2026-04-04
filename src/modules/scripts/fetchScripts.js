@@ -1,6 +1,6 @@
 import { repos } from "../../utils/config.js";
 import { LZString } from "../../utils/lz-string.js";
-import { footerP } from "../../utils/utility.js";
+import { statusMsg } from "../../utils/utility.js";
 import { gameData, trackers, uiState } from "../../utils/state.js";
 import {
     difficultyButtonContainer,
@@ -32,7 +32,7 @@ import {
 } from "./regexScriptLocations.js";
 
 async function getScripts() {
-    footerP("Fetching scripts");
+    statusMsg("Fetching scripts");
     const rawScripts = await fetch(`${repos.cfru}/data/event_scripts.s`);
     const textScripts = await rawScripts.text();
 
@@ -52,7 +52,7 @@ async function getScripts() {
 }
 
 async function getItems() {
-    footerP("Fetching items");
+    statusMsg("Fetching items");
     const rawItems = await fetch(`${repos.cfru}/src/data/items.h`);
     const textItems = await rawItems.text();
 
@@ -98,7 +98,7 @@ async function getItemsIcon() {
 }
 
 async function getTrainers() {
-    footerP("Fetching trainers");
+    statusMsg("Fetching trainers");
     const rawTrainers = await fetch(`${repos.cfru}/src/data/trainers.h`);
     const textTrainers = await rawTrainers.text();
 
@@ -147,7 +147,7 @@ async function buildScriptsObjs() {
         );
     } catch (e) {
         console.error("Failed to build scripts data:", e.message, e.stack);
-        footerP("Error fetching scripts data. Please refresh the page.");
+        statusMsg("Error fetching scripts data. Please refresh the page.");
         throw e;
     }
 }

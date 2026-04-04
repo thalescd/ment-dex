@@ -1,6 +1,6 @@
 // Event listeners e observers - modulo de side-effect (nao exporta nada)
 
-import { appTitle, footerText, TYPING_DEBOUNCE_MS } from "./config.js";
+import { appTitle, titleText, TYPING_DEBOUNCE_MS } from "./config.js";
 import { changeSetting, manageSettings } from "./settings.js";
 import {
     sortTableByClassName,
@@ -92,7 +92,8 @@ import {
 document.title = appTitle;
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("footerName").innerText = footerText;
+    const appTitle = document.getElementById("appTitle");
+    if (appTitle) appTitle.innerText = titleText;
 });
 
 // --- Settings toggle listeners ---
@@ -501,7 +502,7 @@ const options = {
     threshold: 0,
 };
 
-function footerIsTouching(entries) {
+function headerIsVisible(entries) {
     if (entries[0].isIntersecting) {
         lazyLoading(false);
         settingsButton.classList.remove("hide");
@@ -548,8 +549,9 @@ function CreditsIsTouching(entries) {
     }
 }
 
-const observerFooter = new IntersectionObserver(footerIsTouching, options);
-observerFooter.observe(document.getElementById("footer"));
+const observerHeader = new IntersectionObserver(headerIsVisible, options);
+const appHeaderEl = document.getElementById("appHeader");
+if (appHeaderEl) observerHeader.observe(appHeaderEl);
 
 const observeTable = new IntersectionObserver(tableIsTouching, options);
 observeTable.observe(document.getElementById("observerCheck"));
@@ -654,6 +656,8 @@ credits.addEventListener("click", () => {
 // --- Update button ---
 update.addEventListener("click", () => {
     clearLocalStorage();
+    const pendingSha = sessionStorage.getItem("pendingSha");
+    if (pendingSha) localStorage.setItem("expansionSha", pendingSha);
     window.location.reload();
 });
 

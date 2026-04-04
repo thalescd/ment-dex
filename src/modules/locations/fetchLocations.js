@@ -1,5 +1,5 @@
 import { LZString } from "../../utils/lz-string.js";
-import { footerP } from "../../utils/utility.js";
+import { statusMsg } from "../../utils/utility.js";
 import { gameData, trackers } from "../../utils/state.js";
 import { dataSources } from "../../utils/config.js";
 
@@ -32,7 +32,7 @@ function aggregateSlots(mons, rates) {
 
 async function buildLocationsObj() {
     try {
-        footerP("Fetching locations");
+        statusMsg("Fetching locations");
         const raw = await fetch(dataSources.wildEncountersJson);
         const json = await raw.json();
         const locations = {};
@@ -98,7 +98,7 @@ async function buildLocationsObj() {
         return locations;
     } catch (e) {
         console.error("Failed to build locations data:", e.message, e.stack);
-        footerP("Error fetching locations data. Please refresh the page.");
+        statusMsg("Error fetching locations data. Please refresh the page.");
         throw e;
     }
 }

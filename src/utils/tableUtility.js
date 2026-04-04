@@ -6,7 +6,7 @@ import {
 import { clearChildren } from "./domUtils.js";
 import { settings } from "./settings.js";
 import {
-    footerP,
+    statusMsg,
     sanitizeString,
     speciesCanLearnMove,
     refreshURLParams,
@@ -39,7 +39,7 @@ import {
 } from "../modules/scripts/displayTrainers.js";
 
 export async function displaySetup() {
-    footerP("");
+    statusMsg("");
 
     if (Object.keys(gameData.strategies).length === 0) {
         onlyShowStrategyPokemon.classList.add("hide");
