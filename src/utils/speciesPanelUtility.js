@@ -452,6 +452,120 @@ export async function createSpeciesPanel(name) {
     );
 }
 
+function formatEvoCondition(evoConditions) {
+    const [method, param, , conditions] = evoConditions;
+
+    const sanitizeItem = (str) => sanitizeString(str.replace(/^ITEM_/, ""));
+    const sanitizeMove = (str) => sanitizeString(str.replace(/^MOVE_/, ""));
+    const sanitizeRegion = (str) => sanitizeString(str.replace(/^REGION_/, ""));
+
+    let text = "";
+
+    if (method.includes("EVO_MEGA")) return "Mega Evolution";
+    if (method.includes("EVO_GIGA")) return "Gigantamax";
+
+    switch (method) {
+        case "EVO_LEVEL":
+        case "EVO_LEVEL_BATTLE_ONLY": {
+            const level = parseInt(param);
+            text = level > 0 ? `Level ${level}` : "Level Up";
+            if (method === "EVO_LEVEL_BATTLE_ONLY") text += " (in battle)";
+            break;
+        }
+        case "EVO_TRADE":
+            text = "Trade";
+            break;
+        case "EVO_ITEM":
+            text = `Use ${sanitizeItem(param)}`;
+            break;
+        case "EVO_BATTLE_END":
+            text = "After battle";
+            break;
+        case "EVO_SPIN":
+            text = "Spin";
+            break;
+        case "EVO_SPLIT_FROM_EVO":
+            text = "Splits from evolution";
+            break;
+        case "EVO_SCRIPT_TRIGGER":
+            text = "Special trigger";
+            break;
+        default:
+            text = sanitizeString(method);
+            if (param && param !== "0") text += ` (${sanitizeString(param)})`;
+    }
+
+    if (conditions && conditions.length > 0) {
+        const condTexts = conditions.map(([cond, arg]) => {
+            switch (cond) {
+                case "IF_MIN_FRIENDSHIP":
+                    return "high friendship";
+                case "IF_GENDER":
+                    return arg === "MON_MALE" ? "male" : "female";
+                case "IF_TIME": {
+                    const times = {
+                        TIME_MORNING: "morning",
+                        TIME_DAY: "day",
+                        TIME_EVENING: "evening",
+                        TIME_NIGHT: "night",
+                    };
+                    return times[arg] ?? sanitizeString(arg);
+                }
+                case "IF_NOT_TIME": {
+                    const notTimes = {
+                        TIME_MORNING: "not morning",
+                        TIME_DAY: "not day",
+                        TIME_EVENING: "not evening",
+                        TIME_NIGHT: "day",
+                    };
+                    return notTimes[arg] ?? sanitizeString(arg);
+                }
+                case "IF_HOLD_ITEM":
+                    return `holding ${sanitizeItem(arg)}`;
+                case "IF_ATK_GT_DEF":
+                    return "Atk > Def";
+                case "IF_ATK_EQ_DEF":
+                    return "Atk = Def";
+                case "IF_ATK_LT_DEF":
+                    return "Atk < Def";
+                case "IF_KNOWS_MOVE":
+                    return `knows ${sanitizeMove(arg)}`;
+                case "IF_KNOWS_MOVE_TYPE":
+                    return `knows ${sanitizeString(arg)}-type move`;
+                case "IF_SPECIES_IN_PARTY": {
+                    const s = gameData.species[arg];
+                    return `${s ? s.name : sanitizeString(arg.replace(/^SPECIES_/, ""))} in party`;
+                }
+                case "IF_IN_MAPSEC":
+                    return sanitizeString(arg).replace(/Mapsec */i, "");
+                case "IF_IN_MAP":
+                    return `in ${sanitizeString(arg)}`;
+                case "IF_NOT_REGION":
+                    return `not in ${sanitizeRegion(arg)}`;
+                case "IF_REGION":
+                    return `in ${sanitizeRegion(arg)}`;
+                case "IF_NATURE":
+                    return `${sanitizeString(arg)} nature`;
+                case "IF_AMPED_NATURE":
+                    return "amped nature";
+                case "IF_LOW_KEY_NATURE":
+                    return "low-key nature";
+                case "IF_WEATHER":
+                    return `in ${sanitizeString(arg)} weather`;
+                case "IF_RECOIL_DAMAGE_GE":
+                    return `${arg}+ recoil damage`;
+                case "IF_CRITICAL_HITS_GE":
+                    return `${arg}+ crits in battle`;
+                default:
+                    return sanitizeString(cond);
+            }
+        });
+        text += `, ${condTexts.join(", ")}`;
+    }
+
+    return text;
+}
+
 function createClickableImgAndName(
     speciesName,
     evoConditions = false,
@@ -474,18 +588,7 @@ function createClickableImgAndName(
 
     if (evoConditions) {
         const evoCondition = document.createElement("span");
-        if (evoConditions[0].includes("EVO_MEGA")) {
-            evoCondition.innerText = `Mega`;
-        } else if (evoConditions[0].includes("EVO_GIGA")) {
-            evoCondition.innerText = `Giga`;
-        } else if (evoConditions[0].includes("MAPSEC")) {
-            evoCondition.innerText = `Level Up (${sanitizeString(evoConditions[1]).replace(/Mapsec */i, "")})`;
-        } else {
-            evoCondition.innerText = `${sanitizeString(evoConditions[0])}`;
-            if (evoConditions[1]) {
-                evoCondition.innerText += ` (${sanitizeString(evoConditions[1])})`;
-            }
-        }
+        evoCondition.innerText = formatEvoCondition(evoConditions);
         evoCondition.className = "evoMethod";
         container.append(evoCondition);
     }

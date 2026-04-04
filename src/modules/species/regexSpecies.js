@@ -236,14 +236,21 @@ function parseSpeciesBody(body, defines, functionMacros = null) {
     if (evoMatch) {
         const evoContent = evoMatch[1];
         // Cada evolucao esta dentro de { ... }
-        const evoBlockRe = /\{(\w+)\s*,\s*(\w+)\s*,\s*(\w+)/g;
+        const evoBlockRe =
+            /\{(EVO_\w+)\s*,\s*(\w+)\s*,\s*(\w+)(?:[^{]*CONDITIONS\(((?:\s*\{[^}]*\}\s*,?\s*)*)\))?/g;
         let evoM;
         while ((evoM = evoBlockRe.exec(evoContent)) !== null) {
-            // Ignorar blocos internos de CONDITIONS (que também têm {})
-            // Verificar que o primeiro match é um EVO_ method
-            if (evoM[1].startsWith("EVO_")) {
-                evolution.push([evoM[1], evoM[2], evoM[3]]);
+            const entry = [evoM[1], evoM[2], evoM[3]];
+            if (evoM[4]) {
+                const conditions = [];
+                const condRe = /\{(\w+)\s*,\s*(\w+)\s*\}/g;
+                let condM;
+                while ((condM = condRe.exec(evoM[4])) !== null) {
+                    conditions.push([condM[1], condM[2]]);
+                }
+                if (conditions.length > 0) entry.push(conditions);
             }
+            evolution.push(entry);
         }
     }
 
