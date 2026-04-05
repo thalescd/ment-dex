@@ -504,7 +504,6 @@ const options = {
 
 function headerIsVisible(entries) {
     if (entries[0].isIntersecting) {
-        lazyLoading(false);
         settingsButton.classList.remove("hide");
         credits.classList.remove("hide");
         update.classList.remove("hide");
@@ -563,7 +562,8 @@ const observeSpeciesPanel = new IntersectionObserver(
 observeSpeciesPanel.observe(speciesPanelMainContainer);
 
 const observeCredits = new IntersectionObserver(CreditsIsTouching, options);
-observeCredits.observe(credits);
+const pageFooterEl = document.getElementById("pageFooter");
+if (pageFooterEl) observeCredits.observe(pageFooterEl);
 
 // --- Utility button + keyboard shortcuts ---
 function utilityButtonOnClick() {
