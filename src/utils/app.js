@@ -6,7 +6,6 @@ import { update } from "./domRefs.js";
 import { applySettings } from "./settings.js";
 import {
     statusMsg,
-    forceUpdate,
     setDataList,
     refreshURLParams,
     checkForUpdates,
@@ -27,8 +26,6 @@ import { fetchStrategiesObj } from "../modules/strategies/fetchStrategies.js";
 
 export async function fetchData(urlParams) {
     try {
-        await forceUpdate();
-
         await fetchMovesObj();
         await fetchAbilitiesObj();
         await fetchSpeciesObj();

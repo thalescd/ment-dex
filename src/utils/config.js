@@ -54,7 +54,6 @@ export const dataSources = {
     // === TYPE CHART ===
     typeChart: "src/data/typeChart.json",
 };
-export const checkUpdate = "24 Unbound";
 export const expansionApiRef = "https://api.github.com/repos/thalescd/pokeemerald-expansion/git/refs/heads/master";
 export const regexSpChar = new RegExp("-|'|\u2019| |,|\\.|_|!|\\?", "g");
 export const appTitle = "MENT Dex";

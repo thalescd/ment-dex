@@ -1,4 +1,4 @@
-import { checkUpdate, expansionApiRef } from "./config.js";
+import { expansionApiRef } from "./config.js";
 import { LZString } from "./lz-string.js";
 import { gameData, uiState } from "./state.js";
 import {
@@ -46,13 +46,6 @@ export function sanitizeString(string, removeSpecial = true) {
 // fetchData, fetchTypeChart, getLocationsByPokemon, displayParams,
 // displayHistoryObj, exportData foram movidos para app.js
 
-export function forceUpdate() {
-    if (localStorage.getItem("update") !== `${checkUpdate}`) {
-        clearLocalStorage();
-        localStorage.setItem("update", `${checkUpdate}`);
-        statusMsg("Fetching data please wait... this is only run once");
-    }
-}
 
 export function clearLocalStorage() {
     Object.keys(localStorage).forEach((key) => {
