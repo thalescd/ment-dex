@@ -89,6 +89,7 @@ import {
 } from "./domRefs.js";
 
 // --- Configuracao inicial ---
+let asc;
 document.title = appTitle;
 
 document.addEventListener("DOMContentLoaded", () => {
