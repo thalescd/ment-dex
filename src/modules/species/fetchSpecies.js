@@ -10,6 +10,7 @@ import {
     parseEggMoves,
     parseTmsHms,
     parseSpriteRefs,
+    parseFormSpeciesTables,
     getEvolutionLine,
     altFormsLearnsets,
 } from "./regexSpecies.js";
@@ -27,6 +28,7 @@ async function fetchAllData() {
         eggMovesText,
         tmsHmsText,
         spritesText,
+        formTablesText,
     ] = await Promise.all([
         fetch(dataSources.speciesConstants).then((r) => r.text()),
         Promise.all(
@@ -45,6 +47,7 @@ async function fetchAllData() {
         fetch(dataSources.eggMoves).then((r) => r.text()),
         fetch(dataSources.tmsHms).then((r) => r.text()),
         fetch(dataSources.pokemonGraphics).then((r) => r.text()),
+        fetch(dataSources.formSpeciesTables).then((r) => r.text()),
     ]);
 
     return {
@@ -55,6 +58,7 @@ async function fetchAllData() {
         eggMovesText,
         tmsHmsText,
         spritesText,
+        formTablesText,
     };
 }
 
@@ -79,6 +83,7 @@ function parseAllData(raw) {
     const eggMoveLearnsets = parseEggMoves(raw.eggMovesText);
     const tmhmSet = parseTmsHms(raw.tmsHmsText);
     const spriteRefs = parseSpriteRefs(raw.spritesText);
+    const formClassification = parseFormSpeciesTables(raw.formTablesText);
 
     return {
         constants,
@@ -89,6 +94,7 @@ function parseAllData(raw) {
         eggMoveLearnsets,
         tmhmSet,
         spriteRefs,
+        formClassification,
     };
 }
 
@@ -106,6 +112,7 @@ function assembleSpecies(parsed) {
         eggMoveLearnsets,
         tmhmSet,
         spriteRefs,
+        formClassification,
     } = parsed;
 
     // Para cada species definida em constants, montar o objeto
@@ -181,6 +188,7 @@ function assembleSpecies(parsed) {
             eggMovesLearnsets: eggMoves,
             sprite,
             changes: [],
+            formType: formClassification[name] || "base",
         };
     }
 
@@ -311,10 +319,13 @@ export async function fetchSpeciesObj() {
     gameData.sprites = {};
     trackers.species = [];
 
-    for (let i = 0, j = Object.keys(gameData.species).length; i < j; i++) {
-        trackers.species[i] = {};
-        trackers.species[i]["key"] = Object.keys(gameData.species)[i];
-        trackers.species[i]["filter"] = [];
+    const speciesMap = /** @type {Record<string, any>} */ (gameData.species);
+    const speciesList = /** @type {any[]} */ (trackers.species);
+    for (const name of Object.keys(speciesMap)) {
+        const ft = speciesMap[name].formType;
+        if (ft === "base" || ft === "regional") {
+            speciesList.push({ key: name, filter: [] });
+        }
     }
 
     setTracker(trackers.species);

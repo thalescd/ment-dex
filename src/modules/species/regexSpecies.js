@@ -418,6 +418,56 @@ export function parseSpriteRefs(text) {
 }
 
 // ========================================================================
+// 8. parseFormSpeciesTables — src/data/pokemon/form_species_tables.h
+//    Classifica cada espécie como: base | regional | functional | cosmetic
+// ========================================================================
+const REGIONAL_GUARDS = new Set([
+    "P_ALOLAN_FORMS", "P_GALARIAN_FORMS", "P_HISUIAN_FORMS", "P_PALDEAN_FORMS",
+]);
+const FUNCTIONAL_GUARDS = new Set([
+    "P_MEGA_EVOLUTIONS", "P_GEN_9_MEGA_EVOLUTIONS", "P_GIGANTAMAX_FORMS",
+]);
+
+/** @param {string} text */
+export function parseFormSpeciesTables(text) {
+    /** @type {Record<string, string>} */
+    const formMap = {};
+    const tableRe =
+        /static const u16 s\w+FormSpeciesIdTable\[\]\s*=\s*\{([\s\S]*?)FORM_SPECIES_END/g;
+    let tableMatch;
+
+    while ((tableMatch = tableRe.exec(text)) !== null) {
+        const lines = tableMatch[1].split("\n");
+        let currentGuard = null;
+        let baseSeen = false;
+
+        for (const line of lines) {
+            const t = line.trim();
+            const ifMatch = t.match(/^#if\s+(\w+)/);
+            if (ifMatch) { currentGuard = ifMatch[1]; continue; }
+            if (/^#endif|^#else/.test(t)) { currentGuard = null; continue; }
+
+            const sm = t.match(/^(SPECIES_\w+)/);
+            if (!sm || sm[1] === "FORM_SPECIES_END") continue;
+            const species = sm[1];
+
+            if (!currentGuard) {
+                formMap[species] = baseSeen ? "cosmetic" : "base";
+                baseSeen = true;
+            } else if (REGIONAL_GUARDS.has(currentGuard)) {
+                formMap[species] = "regional";
+            } else if (FUNCTIONAL_GUARDS.has(currentGuard)) {
+                formMap[species] = "functional";
+            } else {
+                formMap[species] = "cosmetic";
+            }
+        }
+    }
+
+    return formMap;
+}
+
+// ========================================================================
 // Funcoes utilitarias reutilizadas do original
 // ========================================================================
 

@@ -51,6 +51,9 @@ export const dataSources = {
     // === LOCATIONS ===
     wildEncountersJson: `${repos.expansion}/src/data/wild_encounters.json`,
 
+    // === FORM TABLES ===
+    formSpeciesTables: `${repos.expansion}/src/data/pokemon/form_species_tables.h`,
+
     // === TYPE CHART ===
     typeChart: "src/data/typeChart.json",
 };
