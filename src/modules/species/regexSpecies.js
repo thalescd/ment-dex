@@ -128,15 +128,15 @@ function expandBodyMacros(body, functionMacros) {
     while ((m = callRe.exec(result)) !== null) {
         const macroName = m[1];
         const macro = functionMacros[macroName];
-        if (macro && (macro.body.includes('.types') || macro.body.includes('.abilities'))) {
+        if (macro && (macro.body.includes('.types') || macro.body.includes('.abilities') || macro.body.includes('.frontPic'))) {
             const args = m[2].split(',').map(a => a.trim());
             let expanded = macro.body;
             for (let i = 0; i < macro.params.length; i++) {
                 const param = macro.params[i];
                 const arg = args[i] !== undefined ? args[i] : '';
-                // Concatenação de tokens ##param e param##
-                expanded = expanded.replace(new RegExp(`##\\s*${param}\\b`, 'g'), arg);
-                expanded = expanded.replace(new RegExp(`\\b${param}\\s*##`, 'g'), arg);
+                // Concatenação de tokens: consumir espaço antes/depois de ##
+                expanded = expanded.replace(new RegExp(`\\s*##\\s*${param}\\b`, 'g'), arg);
+                expanded = expanded.replace(new RegExp(`\\b${param}\\s*##\\s*`, 'g'), arg);
                 // Substituição normal de parâmetro
                 expanded = expanded.replace(new RegExp(`\\b${param}\\b`, 'g'), arg);
             }
