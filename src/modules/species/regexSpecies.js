@@ -403,7 +403,7 @@ export function parseTmsHms(text) {
 // ========================================================================
 export function parseSpriteRefs(text) {
     const refs = {};
-    const re = /\b(gMonFrontPic_\w+)\b[^"]*INCBIN_U32\(\s*"([^"]+)"/g;
+    const re = /\b(gMonFrontPic_\w+)\b[^"]*INCGFX_U32\(\s*"([^"]+)"/g;
     let match;
 
     while ((match = re.exec(text)) !== null) {
@@ -411,9 +411,7 @@ export function parseSpriteRefs(text) {
         // Manter apenas a primeira ocorrencia (sprite novo, antes do #else GBA)
         if (refs[refName]) continue;
         const rawPath = match[2];
-        // Trocar extensao .4bpp.smol por .png para obter a imagem
-        const pngPath = rawPath.replace(/\.4bpp\.smol$/, ".png");
-        refs[refName] = `${repos.expansion}/${pngPath}`;
+        refs[refName] = `${repos.expansion}/${rawPath}`;
     }
 
     return refs;

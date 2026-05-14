@@ -33,7 +33,7 @@ export const dataSources = {
         `${repos.expansion}/src/data/pokemon/species_info/gen_9_families.h`,
     ],
     levelUpLearnsets: `${repos.expansion}/src/data/pokemon/level_up_learnsets/gen_x.h`,
-    teachableLearnsets: `${repos.expansion}/src/data/pokemon/teachable_learnsets.h`,
+    teachableLearnsets: `${repos.expansion}/src/data/pokemon/all_learnables.json`,
     eggMoves: `${repos.expansion}/src/data/pokemon/egg_moves.h`,
     tmsHms: `${repos.expansion}/include/constants/tms_hms.h`,
     // sprite paths: extraidos de pokemon.h, imagens em graphics/pokemon/{name}/

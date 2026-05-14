@@ -7,7 +7,6 @@ import {
     parseSpeciesConstants,
     parseSpeciesInfo,
     parseLevelUpLearnsets,
-    parseTeachableLearnsets,
     parseEggMoves,
     parseTmsHms,
     parseSpriteRefs,
@@ -24,7 +23,7 @@ async function fetchAllData() {
         constantsText,
         infoTexts,
         learnsetText,
-        teachableText,
+        teachableData,
         eggMovesText,
         tmsHmsText,
         spritesText,
@@ -42,7 +41,7 @@ async function fetchAllData() {
                   )
               ).then((texts) => texts.join("\n"))
             : fetch(dataSources.levelUpLearnsets).then((r) => r.text()),
-        fetch(dataSources.teachableLearnsets).then((r) => r.text()),
+        fetch(dataSources.teachableLearnsets).then((r) => r.json()),
         fetch(dataSources.eggMoves).then((r) => r.text()),
         fetch(dataSources.tmsHms).then((r) => r.text()),
         fetch(dataSources.pokemonGraphics).then((r) => r.text()),
@@ -52,7 +51,7 @@ async function fetchAllData() {
         constantsText,
         infoTexts,
         learnsetText,
-        teachableText,
+        teachableData,
         eggMovesText,
         tmsHmsText,
         spritesText,
@@ -76,7 +75,7 @@ function parseAllData(raw) {
     }
 
     const levelUpLearnsets = parseLevelUpLearnsets(raw.learnsetText);
-    const teachableLearnsets = parseTeachableLearnsets(raw.teachableText);
+    const teachableLearnsets = raw.teachableData;
     const eggMoveLearnsets = parseEggMoves(raw.eggMovesText);
     const tmhmSet = parseTmsHms(raw.tmsHmsText);
     const spriteRefs = parseSpriteRefs(raw.spritesText);
@@ -133,9 +132,7 @@ function assembleSpecies(parsed) {
             ? levelUpLearnsets[info.levelUpRef] || []
             : [];
 
-        const teachable = info.teachableRef
-            ? teachableLearnsets[info.teachableRef] || []
-            : [];
+        const teachable = teachableLearnsets[name.replace(/^SPECIES_/, "")] || [];
 
         // Separar teachable em TMHM e tutor
         const TMHMLearnsets = [];
