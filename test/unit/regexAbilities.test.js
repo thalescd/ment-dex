@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fixture } from "../fixtures/load.js";
-import { parseAbilitiesInfo } from "../../src/modules/abilities/regexAbilities.js";
+import { parseAbilitiesInfo } from "../../src/features/abilities/parse.js";
 
 test("parseAbilitiesInfo: nome e descricao", () => {
     const abilities = parseAbilitiesInfo(fixture("abilities.h"));

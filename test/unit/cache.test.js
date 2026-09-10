@@ -11,7 +11,7 @@ globalThis.localStorage = {
 };
 
 const { loadCached, readCache, writeCache } =
-    await import("../../src/utils/cache.js");
+    await import("../../src/core/cache.js");
 
 beforeEach(() => store.clear());
 

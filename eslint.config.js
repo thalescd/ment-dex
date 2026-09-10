@@ -4,7 +4,7 @@ import globals from "globals";
 export default [
     // Codigo vendorizado: nao e nosso, nao lintar
     {
-        ignores: ["src/utils/lz-string.js", "node_modules/**"],
+        ignores: ["src/vendor/**", "node_modules/**"],
     },
 
     // Codigo da aplicacao: roda no browser, ES modules

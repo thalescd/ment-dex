@@ -7,7 +7,7 @@
 // eventListeners.js registra os handlers no momento do import (efeito
 // colateral). O carregamento dos dados fica explicito aqui, e nao escondido
 // na ultima linha dele.
-import "./utils/eventListeners.js";
-import { fetchData } from "./utils/app.js";
+import "./app/events.js";
+import { fetchData } from "./app/dataLoader.js";
 
 fetchData(new URLSearchParams(window.location.search));

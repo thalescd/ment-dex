@@ -9,7 +9,7 @@ import {
     parseTmsHms,
     parseSpriteRefs,
     parseFormSpeciesTables,
-} from "../../src/modules/species/regexSpecies.js";
+} from "../../src/features/species/parse.js";
 
 // ---------------------------------------------------------------------------
 // parseSpeciesConstants

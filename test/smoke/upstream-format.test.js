@@ -11,7 +11,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { dataSources } from "../../src/utils/config.js";
+import { dataSources } from "../../src/core/config.js";
 import {
     parseSpeciesConstants,
     parseSpeciesInfo,
@@ -19,9 +19,9 @@ import {
     parseEggMoves,
     parseTmsHms,
     parseSpriteRefs,
-} from "../../src/modules/species/regexSpecies.js";
-import { parseMovesInfo } from "../../src/modules/moves/regexMoves.js";
-import { parseAbilitiesInfo } from "../../src/modules/abilities/regexAbilities.js";
+} from "../../src/features/species/parse.js";
+import { parseMovesInfo } from "../../src/features/moves/parse.js";
+import { parseAbilitiesInfo } from "../../src/features/abilities/parse.js";
 
 async function get(url) {
     const response = await fetch(url);

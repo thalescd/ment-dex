@@ -32,6 +32,24 @@ Planned, not implemented yet:
 
 The app fetches C header files directly from the pokeemerald-expansion repository on GitHub and parses them with regex into JavaScript objects. No backend, no build step — just vanilla JS running in the browser.
 
+## Layout
+
+```
+src/
+├── index.js              entry point: wires the app and starts the load
+├── app/                  orchestration — may know about everything
+├── features/             species, species-panel, moves, abilities,
+│                         locations, scripts (trainers + items, parked)
+├── shared/table/         table infrastructure that knows no feature
+├── core/                 generic leaves: state, config, DOM refs, http, cache
+└── vendor/               third-party code, not linted or type-checked
+```
+
+Dependencies point inward: `core` and `vendor` never import a feature, and
+`shared` never imports one either. That rule is enforced by
+`test/unit/architecture.test.js`, which also fails if the import graph gains a
+cycle. Two deliberate exceptions are listed there with the reason.
+
 ## Stack
 
 - Vanilla JavaScript (ES modules), no build step
