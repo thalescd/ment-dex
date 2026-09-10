@@ -4,7 +4,6 @@ import {
     returnTargetSpeciesSprite,
     getTextWidth,
 } from "../../utils/utility.js";
-import { LZString } from "../../utils/lz-string.js";
 import {
     trainersTableTbody,
     overlayAbilities,
@@ -12,16 +11,12 @@ import {
     overlay,
     body,
 } from "../../utils/domRefs.js";
-import { tableButtonClick } from "../../utils/tableUtility.js";
-import {
-    deleteFiltersFromTable,
-    createFilter,
-} from "../../utils/tableFilters.js";
 import { createSpeciesPanel } from "../../utils/speciesPanelUtility.js";
 import { createPopupForMove } from "../moves/displayMoves.js";
 import { getItemSpriteSrc, getTrainerSpriteSrc } from "./fetchScripts.js";
-import { gameData, trackers, uiState } from "../../utils/state.js";
-import { clearChildren, createPopup } from "../../utils/domUtils.js";
+import { checkTrainerDifficulty } from "./trainersLogic.js";
+import { gameData, uiState } from "../../utils/state.js";
+import { createPopup } from "../../utils/domUtils.js";
 import { MOVE_NAME_MAX_WIDTH_PX } from "../../utils/config.js";
 
 export function appendTrainersToTable(key) {
@@ -372,59 +367,6 @@ function createPopupItem(itemArray) {
     );
 }
 
-export async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
-    let sprite = new Image();
-    let canvas = document.createElement("canvas");
-    canvas.width = 64;
-    canvas.height = 64;
-    sprite.crossOrigin = "anonymous";
-    sprite.src = url;
-
-    const context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    sprite.onload = async () => {
-        context.drawImage(sprite, 0, 0);
-        const imageData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-        const backgroundColor = [];
-        for (let i = 0; i < 4; i++) {
-            backgroundColor.push(imageData.data[i]);
-        }
-        for (let i = 0; i < imageData.data.length; i += 4) {
-            if (
-                imageData.data[i] === backgroundColor[0] &&
-                imageData.data[i + 1] === backgroundColor[1] &&
-                imageData.data[i + 2] === backgroundColor[2]
-            )
-                imageData.data[i + 3] = 0;
-        }
-        context.putImageData(imageData, 0, 0);
-
-        if (!localStorage.getItem(`${trainerSprite}`)) {
-            localStorage.setItem(
-                `${trainerSprite}`,
-                LZString.compressToUTF16(canvas.toDataURL())
-            );
-            gameData.sprites[trainerSprite] = canvas.toDataURL();
-        }
-        if (
-            document.getElementsByClassName(`sprite${trainerSprite}`).length > 0
-        ) {
-            const els = document.getElementsByClassName(
-                `sprite${trainerSprite}`
-            );
-            for (let i = 0; i < els.length; i++) {
-                els[i].src = canvas.toDataURL();
-            }
-        }
-    };
-}
-
 function replaceTbody(key, zone, trainer) {
     const trainerEl = document.getElementById(key);
     if (trainerEl) {
@@ -445,14 +387,6 @@ function replaceTbody(key, zone, trainer) {
         }
 
         trainerFormat.innerText = `${format} ${checkTrainerDifficulty(zone, trainer)}`;
-    }
-}
-
-export function checkTrainerDifficulty(zone, trainer) {
-    if (gameData.trainers[zone][trainer]["party"][uiState.trainersDifficulty]) {
-        return uiState.trainersDifficulty;
-    } else {
-        return "Normal";
     }
 }
 
@@ -486,50 +420,5 @@ function setActiveRematch(zone, trainer) {
         document.getElementsByName(trainer)[0].classList.add("activeRematch");
     } catch (e) {
         console.warn("Failed to update rematch UI:", e.message);
-    }
-}
-
-export function showRematch() {
-    for (let i = 0, j = trackers.trainers.length; i < j; i++) {
-        const zone = trackers.trainers[i]["key"].split("\\")[0];
-        const trainer = trackers.trainers[i]["key"].split("\\")[1];
-        if (
-            (gameData.trainers[zone][trainer]["rematch"] ||
-                gameData.trainers[zone][trainer]["rematchArray"]) &&
-            trackers.trainers[i]["filter"].length === 0
-        ) {
-            let rememberI = i;
-            let baseTrainer = trainer;
-            if (gameData.trainers[zone][trainer]["rematch"]) {
-                baseTrainer = gameData.trainers[zone][trainer]["rematch"];
-            }
-            //setActiveRematch(zone, trainer)
-            if (gameData.trainers[zone][baseTrainer]["rematchArray"]) {
-                const rematchArray =
-                    gameData.trainers[zone][baseTrainer]["rematchArray"].concat(
-                        baseTrainer
-                    );
-                for (let k = 0; k < rematchArray.length; k++) {
-                    if (
-                        i - k > 0 &&
-                        rematchArray.includes(
-                            trackers.trainers[i - k]["key"].split("\\")[1]
-                        )
-                    ) {
-                        trackers.trainers[i - k]["show"] = true;
-                    }
-                    if (
-                        i + k < j &&
-                        rematchArray.includes(
-                            trackers.trainers[i + k]["key"].split("\\")[1]
-                        )
-                    ) {
-                        trackers.trainers[i + k]["show"] = true;
-                        rememberI = i + k + 1;
-                    }
-                }
-                i = rememberI;
-            }
-        }
     }
 }

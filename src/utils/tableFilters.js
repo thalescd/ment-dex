@@ -16,7 +16,7 @@ import { updateSpeciesMoveFilter } from "../modules/species/displaySpecies.js";
 import {
     checkTrainerDifficulty,
     showRematch,
-} from "../modules/scripts/displayTrainers.js";
+} from "../modules/scripts/trainersLogic.js";
 import { updateLocationsMoveFilter } from "../modules/locations/displayLocations.js";
 import { gameData, trackers, uiState } from "./state.js";
 

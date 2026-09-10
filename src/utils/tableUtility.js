@@ -1,8 +1,4 @@
-import {
-    regexSpChar,
-    LAZY_LOAD_BATCH_SIZE,
-    TRAINER_BATCH_SIZE,
-} from "./config.js";
+import { regexSpChar } from "./config.js";
 import { clearChildren } from "./domUtils.js";
 import { settings } from "./settings.js";
 import {
@@ -30,12 +26,11 @@ import {
     trainersFilterContainer,
 } from "./domRefs.js";
 import { gameData, trackers, uiState } from "./state.js";
-import { displayFunctions } from "./displayRegistry.js";
-import { setupItemsButtonFilters } from "../modules/scripts/displayItems.js";
+import { getTable } from "./displayRegistry.js";
 import {
     checkTrainerDifficulty,
     showRematch,
-} from "../modules/scripts/displayTrainers.js";
+} from "../modules/scripts/trainersLogic.js";
 
 export async function displaySetup() {
     statusMsg("");
@@ -56,8 +51,6 @@ export async function displaySetup() {
     }
     if (Object.keys(gameData.items).length === 0) {
         itemsButton.classList.add("hide");
-    } else {
-        await setupItemsButtonFilters();
     }
     if (typeof window.showShinyToggle !== "undefined") {
         document.getElementById("shinyContainer").classList.remove("hide");
@@ -358,35 +351,24 @@ export async function lazyLoading(reset = false) {
             clearChildren(activeTable);
             refreshURLParams();
         }
-        let target = LAZY_LOAD_BATCH_SIZE;
         let counter = 0;
 
-        const displayFunction = `append${sanitizeString(activeTable.id).replace("tabletbody", "ToTable")}`;
-        if (displayFunction === "appendTrainersToTable") {
-            target = TRAINER_BATCH_SIZE;
-        }
+        // id do tbody -> nome da tabela: "speciesTableTbody" -> "species"
+        const table = getTable(activeTable.id.replace(/TableTbody$/, ""));
+        const target = table.batchSize;
 
         for (let i = 0, j = tracker.length; i < j; i++) {
             if (counter < target) {
-                if (
-                    displayFunction === "appendTrainersToTable" &&
-                    (passAllFilters(tracker[i]["filter"]) ||
-                        tracker[i]["show"]) &&
-                    !document.getElementById(tracker[i]["key"])
-                ) {
-                    if (displayFunctions[displayFunction](tracker[i]["key"])) {
-                        counter++;
-                    }
-                } else if (
-                    passAllFilters(tracker[i]["filter"]) &&
-                    !document.getElementById(tracker[i]["key"])
-                ) {
-                    if (displayFunctions[displayFunction](tracker[i]["key"])) {
+                const visible = table.useShowFlag
+                    ? passAllFilters(tracker[i]["filter"]) || tracker[i]["show"]
+                    : passAllFilters(tracker[i]["filter"]);
+                if (visible && !document.getElementById(tracker[i]["key"])) {
+                    if (table.append(tracker[i]["key"])) {
                         counter++;
                     }
                 }
             } else {
-                if (displayFunction === "appendLocationsToTable") {
+                if (table.groupByMap) {
                     const map = tracker[i - 1]["key"].match(/.*?\\/)[0];
                     while (
                         i < j &&
@@ -396,9 +378,7 @@ export async function lazyLoading(reset = false) {
                             tracker[i]["filter"].length === 0 &&
                             !document.getElementById(tracker[i]["key"])
                         ) {
-                            displayFunctions[displayFunction](
-                                tracker[i]["key"]
-                            );
+                            table.append(tracker[i]["key"]);
                         }
                         i++;
                     }

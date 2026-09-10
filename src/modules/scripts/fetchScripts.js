@@ -14,9 +14,11 @@ import {
     filterTrainersTableInput,
 } from "../../utils/tableUtility.js";
 import { trainerSpeciesMatchFilter } from "../../utils/tableFilters.js";
-import { spriteRemoveBgReturnBase64 } from "../../utils/spriteUtils.js";
-import { spriteRemoveItemBgReturnBase64 } from "./displayItems.js";
-import { spriteRemoveTrainerBgReturnBase64 } from "./displayTrainers.js";
+import {
+    spriteRemoveBgReturnBase64,
+    spriteRemoveItemBgReturnBase64,
+    spriteRemoveTrainerBgReturnBase64,
+} from "../../utils/spriteUtils.js";
 import { regexTrainers, regexTrainersParties } from "./regexTrainers.js";
 import {
     regexItems,

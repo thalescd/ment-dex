@@ -120,3 +120,122 @@ export function decodeSpriteDataString(spriteDataString) {
 
     return canvas.toDataURL();
 }
+
+// ---------------------------------------------------------------------------
+// Variantes de remocao de fundo para items e trainers, vindas de
+// displayItems.js / displayTrainers.js — de onde fetchScripts.js as importava,
+// fechando um ciclo fetch <-> display.
+//
+// NAO foram fundidas com spriteRemoveBgReturnBase64 acima de proposito: aquela
+// tambem faz encoding RLE do sprite e compara cor com tolerancia via
+// isSameColor(), enquanto estas duas comparam igualdade exata e so devolvem
+// base64. Unificar exige decidir qual dos dois comportamentos vale.
+// ---------------------------------------------------------------------------
+
+export async function spriteRemoveItemBgReturnBase64(itemName) {
+    let sprite = new Image();
+    let canvas = document.createElement("canvas");
+    canvas.width = 24;
+    canvas.height = 24;
+    sprite.crossOrigin = "anonymous";
+    sprite.src = gameData.items[itemName]["url"];
+
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    sprite.onload = async () => {
+        context.drawImage(sprite, 0, 0);
+        const imageData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+        const backgroundColor = [];
+        for (let i = 0; i < 4; i++) {
+            backgroundColor.push(imageData.data[i]);
+        }
+        if (backgroundColor[3] === 255) {
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                if (
+                    imageData.data[i] === backgroundColor[0] &&
+                    imageData.data[i + 1] === backgroundColor[1] &&
+                    imageData.data[i + 2] === backgroundColor[2]
+                )
+                    imageData.data[i + 3] = 0;
+            }
+            context.putImageData(imageData, 0, 0);
+
+            if (!localStorage.getItem(`${itemName}`)) {
+                localStorage.setItem(
+                    `${itemName}`,
+                    LZString.compressToUTF16(canvas.toDataURL())
+                );
+                gameData.sprites[itemName] = canvas.toDataURL();
+            }
+            if (
+                document.getElementsByClassName(`sprite${itemName}`).length > 0
+            ) {
+                const els = document.getElementsByClassName(
+                    `sprite${itemName}`
+                );
+                for (let i = 0; i < els.length; i++) {
+                    els[i].src = canvas.toDataURL();
+                }
+            }
+        }
+    };
+}
+
+export async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
+    let sprite = new Image();
+    let canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    sprite.crossOrigin = "anonymous";
+    sprite.src = url;
+
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    sprite.onload = async () => {
+        context.drawImage(sprite, 0, 0);
+        const imageData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+        const backgroundColor = [];
+        for (let i = 0; i < 4; i++) {
+            backgroundColor.push(imageData.data[i]);
+        }
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            if (
+                imageData.data[i] === backgroundColor[0] &&
+                imageData.data[i + 1] === backgroundColor[1] &&
+                imageData.data[i + 2] === backgroundColor[2]
+            )
+                imageData.data[i + 3] = 0;
+        }
+        context.putImageData(imageData, 0, 0);
+
+        if (!localStorage.getItem(`${trainerSprite}`)) {
+            localStorage.setItem(
+                `${trainerSprite}`,
+                LZString.compressToUTF16(canvas.toDataURL())
+            );
+            gameData.sprites[trainerSprite] = canvas.toDataURL();
+        }
+        if (
+            document.getElementsByClassName(`sprite${trainerSprite}`).length > 0
+        ) {
+            const els = document.getElementsByClassName(
+                `sprite${trainerSprite}`
+            );
+            for (let i = 0; i < els.length; i++) {
+                els[i].src = canvas.toDataURL();
+            }
+        }
+    };
+}

@@ -22,6 +22,31 @@ import { fetchMovesObj } from "../modules/moves/fetchMoves.js";
 import { fetchAbilitiesObj } from "../modules/abilities/fetchAbilities.js";
 import { fetchLocationsObj } from "../modules/locations/fetchLocations.js";
 import { fetchScripts } from "../modules/scripts/fetchScripts.js";
+import { setupItemsButtonFilters } from "../modules/scripts/displayItems.js";
+import { appendSpeciesToTable } from "../modules/species/displaySpecies.js";
+import { appendMovesToTable } from "../modules/moves/displayMoves.js";
+import { appendAbilitiesToTable } from "../modules/abilities/displayAbilities.js";
+import { appendLocationsToTable } from "../modules/locations/displayLocations.js";
+import { appendTrainersToTable } from "../modules/scripts/displayTrainers.js";
+import { appendItemsToTable } from "../modules/scripts/displayItems.js";
+import { registerTable } from "./displayRegistry.js";
+import { TRAINER_BATCH_SIZE } from "./config.js";
+
+// Ligacao feature -> infra de tabela. Fica aqui, no orquestrador, porque
+// displayRegistry.js e tableUtility.js nao devem conhecer as features.
+registerTable("species", { append: appendSpeciesToTable });
+registerTable("moves", { append: appendMovesToTable });
+registerTable("abilities", { append: appendAbilitiesToTable });
+registerTable("locations", {
+    append: appendLocationsToTable,
+    groupByMap: true,
+});
+registerTable("trainers", {
+    append: appendTrainersToTable,
+    batchSize: TRAINER_BATCH_SIZE,
+    useShowFlag: true,
+});
+registerTable("items", { append: appendItemsToTable });
 
 export async function fetchData(urlParams) {
     try {
@@ -38,6 +63,11 @@ export async function fetchData(urlParams) {
         await setFilters();
         applySettings();
         await displaySetup();
+        // Setup de filtros especifico de items: a infra de tabela nao precisa
+        // conhecer a feature, entao a orquestracao fica aqui.
+        if (Object.keys(gameData.items).length > 0) {
+            await setupItemsButtonFilters();
+        }
         await displayParams(urlParams);
 
         window.scrollTo(0, 0);
