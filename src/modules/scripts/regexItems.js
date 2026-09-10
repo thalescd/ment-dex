@@ -84,7 +84,7 @@ export async function regexItemDescriptions(
 }
 
 export async function regexItemIcon(textItemIconTable, textItemsIcon) {
-    let iconToItem = {};
+    const iconToItem = {};
 
     textItemIconTable
         .match(/ITEM_\w+\s*\].*gItemIcon_\w+/gi)

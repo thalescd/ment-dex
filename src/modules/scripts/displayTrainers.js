@@ -24,7 +24,7 @@ export function appendTrainersToTable(key) {
     const trainer = key.split("\\")[1];
 
     if (!gameData.trainers[zone][trainer]["rematch"]) {
-        let trainerMainContainer = document.createElement("table");
+        const trainerMainContainer = document.createElement("table");
         trainerMainContainer.setAttribute("id", key);
         trainerMainContainer.className = "trainerTable";
         const trainerThead = document.createElement("thead");
@@ -139,7 +139,7 @@ function createTrainerSpeciesTbody(trainerObj) {
 
             const speciesSpriteContainer = document.createElement("div");
             speciesSpriteContainer.className = "trainerSpeciesSprite";
-            let speciesName = trainerSpeciesObj["name"];
+            const speciesName = trainerSpeciesObj["name"];
             const speciesSprite = document.createElement("img");
             speciesSprite.className = `sprite${returnTargetSpeciesSprite(speciesName)}`;
             speciesSprite.src = getSpeciesSpriteSrc(speciesName);
@@ -261,8 +261,8 @@ function returnMovesObj(trainerSpeciesObj) {
 function returnEVsIVsObj(trainerSpeciesObj) {
     const stats = ["HP", "Atk", "Def", "SpA", "SpD", "Spe"];
     const nature = returnNature(trainerSpeciesObj["nature"]);
-    let EVs = trainerSpeciesObj["evs"];
-    let IVs = trainerSpeciesObj["ivs"];
+    const EVs = trainerSpeciesObj["evs"];
+    const IVs = trainerSpeciesObj["ivs"];
 
     while (EVs.length < 6) {
         EVs.push(0);

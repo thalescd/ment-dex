@@ -10,6 +10,8 @@
         "lint": "eslint src",
         "lint:fix": "eslint src --fix",
         "typecheck": "tsc -p jsconfig.json --noEmit",
+        "test": "node --test \"test/unit/*.test.js\"",
+        "test:smoke": "node --test \"test/smoke/*.test.js\"",
         "prepare": "husky"
     },
     "keywords": [],

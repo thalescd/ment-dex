@@ -19,20 +19,20 @@ export function appendAbilitiesToTable(abilitiesName) {
         return false;
     }
 
-    let tBody = abilitiesTableTbody;
+    const tBody = abilitiesTableTbody;
 
-    let row = document.createElement("tr");
+    const row = document.createElement("tr");
 
     row.setAttribute("id", `${abilitiesName}`);
 
     if (gameData.abilities[abilitiesName]["ID"]) {
-        let abilityID = document.createElement("td");
+        const abilityID = document.createElement("td");
         abilityID.className = "abilityID";
         abilityID.innerText = gameData.abilities[abilitiesName]["ID"];
         row.append(abilityID);
     }
 
-    let ability = document.createElement("td");
+    const ability = document.createElement("td");
     const abilityName = document.createElement("span");
     ability.className = "ability";
     ability.innerText = gameData.abilities[abilitiesName]["ingameName"];
@@ -42,7 +42,7 @@ export function appendAbilitiesToTable(abilitiesName) {
 
     row.append(ability);
 
-    let description = document.createElement("td");
+    const description = document.createElement("td");
     description.className = "description";
     description.innerText = gameData.abilities[abilitiesName]["description"];
     row.append(description);

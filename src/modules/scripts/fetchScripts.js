@@ -193,7 +193,9 @@ export async function fetchScripts() {
             trackers.trainers[counter]["filter"] = [];
             counter++;
 
-            for (let difficulty in gameData.trainers[zone][trainer]["party"]) {
+            for (const difficulty in gameData.trainers[zone][trainer][
+                "party"
+            ]) {
                 if (
                     difficulty !== "Normal" &&
                     !document.getElementById(`difficulty${difficulty}`)
@@ -274,7 +276,7 @@ export function getTrainerSpriteSrc(trainerSprite) {
 }
 
 async function bugFixTrainers() {
-    let trainerToZone = {};
+    const trainerToZone = {};
     let stop = false;
     let correctZone = false;
     Object.keys(gameData.trainers).forEach((zone) => {
@@ -356,8 +358,8 @@ async function bugFixTrainers() {
     });
 
     Object.keys(gameData.trainers).forEach((zone) => {
-        let rematchObj = {};
-        let sortedZoneObj = {};
+        const rematchObj = {};
+        const sortedZoneObj = {};
         Object.keys(gameData.trainers[zone])
             .sort(function (a, b) {
                 return a < b ? -1 : a > b ? 1 : 0;

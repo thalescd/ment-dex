@@ -26,22 +26,22 @@ export function appendMovesToTable(moveName) {
         return false;
     }
 
-    let tBody = movesTableTbody;
+    const tBody = movesTableTbody;
 
-    let row = document.createElement("tr");
+    const row = document.createElement("tr");
 
     row.setAttribute("id", `${moveName}`);
 
     if (gameData.moves[moveName].ID) {
-        let movesID = document.createElement("td");
+        const movesID = document.createElement("td");
         movesID.className = "moveID";
         movesID.innerText = gameData.moves[moveName].ID;
         row.append(movesID);
     }
 
-    let nameContainer = document.createElement("td");
-    let name = document.createElement("div");
-    let ingameName = document.createElement("div");
+    const nameContainer = document.createElement("td");
+    const name = document.createElement("div");
+    const ingameName = document.createElement("div");
     nameContainer.className = "nameContainer";
     name.className = "key hide";
     name.innerText = gameData.moves[moveName].name;
@@ -52,9 +52,9 @@ export function appendMovesToTable(moveName) {
 
     row.append(nameContainer);
 
-    let typeContainer = document.createElement("td");
-    let type = document.createElement("div");
-    let hiddenSplit = document.createElement("div");
+    const typeContainer = document.createElement("td");
+    const type = document.createElement("div");
+    const hiddenSplit = document.createElement("div");
     typeContainer.className = "type";
     type.className = `${gameData.moves[moveName].type} background`;
     type.innerText = sanitizeString(gameData.moves[moveName].type);
@@ -64,10 +64,10 @@ export function appendMovesToTable(moveName) {
     typeContainer.append(hiddenSplit);
     row.append(typeContainer);
 
-    let splitContainer = document.createElement("td");
-    let split = document.createElement("div");
-    let hiddenType = document.createElement("div");
-    let splitIcon = document.createElement("img");
+    const splitContainer = document.createElement("td");
+    const split = document.createElement("div");
+    const hiddenType = document.createElement("div");
+    const splitIcon = document.createElement("img");
     splitContainer.className = "split";
     split.className = "hide";
     split.innerText = sanitizeString(gameData.moves[moveName].split);
@@ -88,21 +88,21 @@ export function appendMovesToTable(moveName) {
 
     row.append(createInputContainer("PP", "PP", moveObj));
 
-    let effectContainer = document.createElement("td");
-    let descriptionContainer = document.createElement("div");
+    const effectContainer = document.createElement("td");
+    const descriptionContainer = document.createElement("div");
 
     descriptionContainer.className = "description";
-    let description = document.createElement("div");
+    const description = document.createElement("div");
     description.innerText = gameData.moves[moveName].description.join("");
     descriptionContainer.append(description);
 
     effectContainer.append(descriptionContainer);
 
-    let effect = document.createElement("div");
+    const effect = document.createElement("div");
     effect.className = "effect";
     effect.innerText = `${sanitizeString(gameData.moves[moveName].effect)}`;
 
-    let chance = gameData.moves[moveName].chance;
+    const chance = gameData.moves[moveName].chance;
     if (chance > 0 && chance < 100) {
         effect.innerText += ` ${chance}%`;
     } else {
@@ -124,9 +124,9 @@ export function appendMovesToTable(moveName) {
 }
 
 function createInputContainer(headerText, input, moveObj) {
-    let inputContainer = document.createElement("td");
-    let inputValue = document.createElement("div");
-    let inputHeader = document.createElement("div"); //only used for mobile view
+    const inputContainer = document.createElement("td");
+    const inputValue = document.createElement("div");
+    const inputHeader = document.createElement("div"); //only used for mobile view
 
     inputHeader.innerText = headerText; //only used for mobile view
     inputHeader.style.display = "none"; //only used for mobile view

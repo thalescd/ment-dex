@@ -1,0 +1,78 @@
+name: CI
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+    schedule:
+        # 06:00 UTC diariamente: detecta mudanca de formato no upstream
+        - cron: "0 6 * * *"
+    workflow_dispatch:
+
+jobs:
+    # Rapido e deterministico, sem rede. Roda em todo push e PR.
+    check:
+        if: github.event_name != 'schedule'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+                  cache: npm
+            - run: npm ci
+            - run: npm run format:check
+            - run: npm run lint
+            # Os testes unitarios usam fixtures congeladas: pegam regressao no
+            # parser, nao mudanca no upstream.
+            - run: npm test
+
+    # Este e o job que teria pegado a quebra do species.h.
+    # Bate no pokeemerald-expansion de verdade, por isso nao roda em PR.
+    upstream-smoke:
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+            # Sem dependencias: node:test e nativo e os parsers sao puros.
+            - run: npm run test:smoke
+
+            - name: Abrir issue se o formato upstream mudou
+              if: failure()
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const title = "Formato upstream mudou: smoke test falhou";
+                      const existing = await github.rest.issues.listForRepo({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          state: "open",
+                          labels: "upstream-drift",
+                      });
+                      const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+                      if (existing.data.length > 0) {
+                          await github.rest.issues.createComment({
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                              issue_number: existing.data[0].number,
+                              body: `Falhou de novo: ${url}`,
+                          });
+                          return;
+                      }
+                      await github.rest.issues.create({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          title,
+                          body: [
+                              "O smoke test contra o pokeemerald-expansion falhou.",
+                              "",
+                              "Provavel mudanca de formato nos arquivos .h ou .json do upstream.",
+                              "Os parsers em `src/modules/*/regex*.js` precisam de ajuste.",
+                              "",
+                              `Run: ${url}`,
+                          ].join("\n"),
+                          labels: ["upstream-drift"],
+                      });

@@ -99,7 +99,7 @@ export function buildSpeciesPanelLevelUpFromPreviousEvoTable(
     label = "",
     asc = 0
 ) {
-    let evolutionLineArray = [name];
+    const evolutionLineArray = [name];
     for (
         let i = gameData.species[name]["evolutionLine"].indexOf(name) - 1;
         i >= 0;
@@ -131,7 +131,7 @@ export function buildSpeciesPanelLevelUpFromPreviousEvoTable(
 
     clearChildren(Tbody);
 
-    let movesArray = [];
+    const movesArray = [];
 
     for (let i = 1; i < evolutionLineArray.length; i++) {
         sortLearnsetsArray(
@@ -392,7 +392,7 @@ export function buildSpeciesPanelSingleLearnsetsTable(
 }
 
 // Setup thead click handlers for sorting
-let interval = setInterval(function () {
+const interval = setInterval(function () {
     if (
         document.querySelectorAll(
             "#speciesPanelLevelUpFromPreviousEvoTableTHead, #speciesPanelLevelUpTableTHead, #speciesPanelTMHMTableTHead, #speciesPanelTutorTableTHead, #speciesPanelEggMovesTableTHead"

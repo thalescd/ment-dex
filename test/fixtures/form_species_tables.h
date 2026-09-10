@@ -1,0 +1,12 @@
+#if P_FAMILY_BULBASAUR
+static const u16 sVenusaurFormSpeciesIdTable[] = {
+    SPECIES_VENUSAUR,
+#if P_MEGA_EVOLUTIONS
+    SPECIES_VENUSAUR_MEGA,
+#endif
+#if P_GIGANTAMAX_FORMS
+    SPECIES_VENUSAUR_GMAX,
+#endif
+    FORM_SPECIES_END,
+};
+#endif //P_FAMILY_BULBASAUR

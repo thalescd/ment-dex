@@ -33,7 +33,7 @@ export async function regexTrainers(textTrainers) {
     const rawRematch = await fetch(`${repos.cfru}/src/battle_setup.c`);
     const textRematch = await rawRematch.text();
 
-    let trainerToRematch = {};
+    const trainerToRematch = {};
     const rematches = textRematch.match(
         /REMATCH\(TRAINER_\w+, TRAINER_\w+, TRAINER_\w+, TRAINER_\w+/gi
     );
@@ -93,7 +93,7 @@ export async function regexTrainers(textTrainers) {
                             matchTrainerPic[0];
                     }
                 } else if (/.trainerName *=/i.test(line)) {
-                    const matchTrainerName = line.match(/_\(\"(.*)\"\)/i);
+                    const matchTrainerName = line.match(/_\("(.*)"\)/i);
                     if (matchTrainerName) {
                         gameData.trainers[zone][trainer]["ingameName"] =
                             matchTrainerName[1];
@@ -150,7 +150,7 @@ export async function regexTrainersParties(
     );
     const textTrainerSpreads = await rawTrainerSpreads.text();
 
-    let spreadToStats = {};
+    const spreadToStats = {};
     textTrainerSpreads
         .match(/\[SPREAD_\w+\].+?(?=.nature).+?(?=})/gs)
         .forEach((spread) => {
@@ -187,7 +187,7 @@ export async function regexTrainersParties(
         if (/\/\*/.test(line) || line === "/*") {
             comment = true;
         }
-        if (/[^\/]\*\//.test(line) || line === "*/") {
+        if (/[^/]\*\//.test(line) || line === "*/") {
             comment = false;
         }
 
@@ -276,7 +276,7 @@ export async function regexTrainersParties(
                         gameData.trainers[zone][trainer]["party"][
                             difficulty
                         ].forEach((trainerSpeciesObj) => {
-                            let speciesName = trainerSpeciesObj["name"];
+                            const speciesName = trainerSpeciesObj["name"];
                             for (
                                 let i = 0;
                                 i <

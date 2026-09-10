@@ -147,7 +147,7 @@ function returnMethodTableThead(method, time) {
     spriteContainer.append(sprite);
     row.append(spriteContainer);
 
-    let methodContainer = document.createElement("th");
+    const methodContainer = document.createElement("th");
     methodContainer.innerText = method;
     methodContainer.classList = "methodContainer";
     if (time) {
@@ -222,8 +222,6 @@ function returnMethodSprite(method) {
         return "Evening";
     } else if (method.match(/Night/i)) {
         return "Night";
-    } else if (method.match(/shard/i)) {
-        return "Egg";
     } else {
         return method;
     }

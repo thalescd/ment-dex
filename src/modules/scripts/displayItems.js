@@ -158,7 +158,7 @@ function returnItemTableTbody(key) {
     return itemsTableTbody;
 }
 
-let getItemsButtons = setInterval(function () {
+const getItemsButtons = setInterval(function () {
     if (
         !document.getElementById("hideCrossedItems") ||
         !document.getElementById("hideEmptyItems") ||
@@ -276,8 +276,8 @@ export async function setupItemsButtonFilters() {
     const pocketButtonsContainer = document.getElementById("pocketContainer");
     const methodButtonsContainer = document.getElementById("methodContainer");
 
-    let pocketsName = [];
-    let methods = [];
+    const pocketsName = [];
+    const methods = [];
     Object.keys(gameData.items).forEach((itemName) => {
         if (
             !pocketsName.includes(gameData.items[itemName]["pocket"]) &&

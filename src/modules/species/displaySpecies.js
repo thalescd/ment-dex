@@ -19,7 +19,7 @@ export function appendSpeciesToTable(speciesName) {
     if (gameData.species[speciesName].baseSpeed <= 0) {
         return false;
     }
-    let moveMethod = null;
+    let moveMethod;
 
     const tBody = speciesTableTbody;
 
@@ -27,15 +27,15 @@ export function appendSpeciesToTable(speciesName) {
     row.setAttribute("id", `${speciesName}`);
     tBody.append(row);
 
-    let IDcontainer = document.createElement("td");
-    let ID = document.createElement("div");
+    const IDcontainer = document.createElement("td");
+    const ID = document.createElement("div");
     IDcontainer.className = "ID";
     if (uiState.speciesMoveFilter) {
         moveMethod = speciesCanLearnMove(
             gameData.species[speciesName],
             uiState.speciesMoveFilter
         );
-        let moveFilter = document.createElement("div");
+        const moveFilter = document.createElement("div");
         moveFilter.className = "bold";
         const label = getMoveMethodLabel(moveMethod);
         if (label) {
@@ -49,9 +49,9 @@ export function appendSpeciesToTable(speciesName) {
     IDcontainer.append(ID);
     row.append(IDcontainer);
 
-    let spriteContainer = document.createElement("td");
+    const spriteContainer = document.createElement("td");
     spriteContainer.className = "sprite";
-    let sprite = document.createElement("img");
+    const sprite = document.createElement("img");
     sprite.setAttribute("width", 64);
     sprite.setAttribute("height", 64);
     sprite.className = `sprite${returnTargetSpeciesSprite(speciesName)}`;
@@ -59,9 +59,9 @@ export function appendSpeciesToTable(speciesName) {
     spriteContainer.append(sprite);
     row.append(spriteContainer);
 
-    let nameContainer = document.createElement("td");
-    let name = document.createElement("div");
-    let ingameName = document.createElement("div");
+    const nameContainer = document.createElement("td");
+    const name = document.createElement("div");
+    const ingameName = document.createElement("div");
     nameContainer.className = "nameContainer";
     name.className = "key hide";
     name.innerText = gameData.species[speciesName].name;
@@ -71,11 +71,11 @@ export function appendSpeciesToTable(speciesName) {
     nameContainer.append(name);
     row.append(nameContainer);
 
-    let typesContainer = document.createElement("td");
-    let types = document.createElement("div");
-    let type1 = document.createElement("div");
-    let type2 = document.createElement("div");
-    let type3 = document.createElement("div");
+    const typesContainer = document.createElement("td");
+    const types = document.createElement("div");
+    const type1 = document.createElement("div");
+    const type2 = document.createElement("div");
+    const type3 = document.createElement("div");
     typesContainer.className = "types";
     type1.innerText = `${sanitizeString(gameData.species[speciesName].type1)} `;
     type2.innerText = `${sanitizeString(gameData.species[speciesName].type2)} `;
@@ -124,11 +124,11 @@ export function appendSpeciesToTable(speciesName) {
     typesContainer.append(types);
     row.append(typesContainer);
 
-    let abilitiesContainer = document.createElement("td");
+    const abilitiesContainer = document.createElement("td");
     abilitiesContainer.className = "abilities";
     for (let j = 0; j < gameData.species[speciesName].abilities.length; j++) {
-        let ability = document.createElement("div");
-        let abilityName = gameData.species[speciesName].abilities[j];
+        const ability = document.createElement("div");
+        const abilityName = gameData.species[speciesName].abilities[j];
         if (
             j === 1 &&
             abilityName === gameData.species[speciesName].abilities[0]
@@ -211,9 +211,9 @@ export function appendSpeciesToTable(speciesName) {
 }
 
 function createBaseStatsContainer(headerText, stats, speciesObj) {
-    let baseStatsContainer = document.createElement("td");
-    let baseStats = document.createElement("div");
-    let baseStatsHeader = document.createElement("div");
+    const baseStatsContainer = document.createElement("td");
+    const baseStats = document.createElement("div");
+    const baseStatsHeader = document.createElement("div");
     baseStatsHeader.className = "italic";
 
     baseStatsHeader.innerText = headerText;

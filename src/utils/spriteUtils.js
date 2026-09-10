@@ -10,8 +10,8 @@ export function isSameColor(r1, g1, b1, r2, g2, b2, tolerance = 1) {
 }
 
 export async function spriteRemoveBgReturnBase64(speciesName, species) {
-    let sprite = new Image();
-    let canvas = document.createElement("canvas");
+    const sprite = new Image();
+    const canvas = document.createElement("canvas");
     canvas.width = 64;
     canvas.height = 64;
     sprite.crossOrigin = "anonymous";
@@ -94,7 +94,7 @@ export async function spriteRemoveBgReturnBase64(speciesName, species) {
 }
 
 export function decodeSpriteDataString(spriteDataString) {
-    let canvas = document.createElement("canvas");
+    const canvas = document.createElement("canvas");
 
     const spriteData = spriteDataString.split("&");
     canvas.width = spriteData[0];
@@ -133,8 +133,8 @@ export function decodeSpriteDataString(spriteDataString) {
 // ---------------------------------------------------------------------------
 
 export async function spriteRemoveItemBgReturnBase64(itemName) {
-    let sprite = new Image();
-    let canvas = document.createElement("canvas");
+    const sprite = new Image();
+    const canvas = document.createElement("canvas");
     canvas.width = 24;
     canvas.height = 24;
     sprite.crossOrigin = "anonymous";
@@ -188,8 +188,8 @@ export async function spriteRemoveItemBgReturnBase64(itemName) {
 }
 
 export async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
-    let sprite = new Image();
-    let canvas = document.createElement("canvas");
+    const sprite = new Image();
+    const canvas = document.createElement("canvas");
     canvas.width = 64;
     canvas.height = 64;
     sprite.crossOrigin = "anonymous";

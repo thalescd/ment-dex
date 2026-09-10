@@ -46,8 +46,24 @@ Requires Node 20+.
 npm install          # also installs the git hooks
 npm run lint         # eslint
 npm run format       # prettier --write
+npm test             # unit tests (fixtures, no network)
+npm run test:smoke   # parses the live upstream repo — needs network
 npm run typecheck    # tsc against jsconfig.json (checkJs)
 ```
+
+### Tests
+
+`npm test` runs the parsers against small fixtures in `test/fixtures/`, taken
+from the real upstream files. It catches parser regressions but, by design,
+cannot catch a format change upstream — a frozen fixture keeps passing.
+
+`npm run test:smoke` is what catches that: it parses the live
+pokeemerald-expansion and asserts thresholds ("at least 1000 species"), so a
+parser that stops matching fails loudly. CI runs it on a daily schedule and
+opens an issue on failure; it is deliberately not part of the PR checks.
+
+`npm run typecheck` is informative, not a gate — the codebase still has type
+errors and CI does not run it.
 
 Serve the directory with any static file server and open `index.html`; there is
 nothing to build.

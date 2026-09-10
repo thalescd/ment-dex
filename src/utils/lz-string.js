@@ -580,4 +580,3 @@ if (typeof define === "function" && define.amd) {
 }
 
 export { LZString };
-window.LZString = LZString;

@@ -247,7 +247,7 @@ export function filterTrainersTableInput(input) {
         const zone = tracker[i]["key"].split("\\")[0];
         const trainer = tracker[i]["key"].split("\\")[1];
         const compareZone = zone.replaceAll(/ /g, "").toUpperCase();
-        let compareArray = [
+        const compareArray = [
             compareZone,
             gameData.trainers[zone][trainer]["ingameName"].toUpperCase(),
         ];

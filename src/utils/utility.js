@@ -17,13 +17,13 @@ export function sanitizeString(string, removeSpecial = true) {
     const regex =
         /^SPECIES_|^TYPE_|^ABILITY_|^MOVE_TARGET_|^MOVE_|^SPLIT_|FLAG_|^EFFECT_|^Z_EFFECT_|^ITEM_|^EGG_GROUP_|^EVO_|^NATURE_|^POCKET_/gi;
 
-    let unsanitizedString = string
+    const unsanitizedString = string
         .toString()
         .replace(regex, "")
         .replaceAll(/_+/g, "_")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
-    let matchArray = unsanitizedString;
+    let matchArray;
     if (removeSpecial) {
         matchArray = unsanitizedString.match(/\w+/g);
     } else {
@@ -214,7 +214,7 @@ export function refreshURLParams() {
                 .getElementsByClassName("filter");
             for (let i = 0, j = filters.length; i < j; i++) {
                 if (!/>|<|=/.test(filters[i].innerText)) {
-                    let param = filters[i].innerText.split(":");
+                    const param = filters[i].innerText.split(":");
                     params += `${param[0]}:${param[1].trim()}:`;
                     params += filters[i].parentNode.children[0].value;
                     if (i !== j - 1) {
@@ -235,7 +235,7 @@ export function refreshURLParams() {
 }
 
 export function getHistoryState() {
-    let historyStateObj = {};
+    const historyStateObj = {};
     if (!speciesPanelMainContainer.classList.contains("hide")) {
         historyStateObj["species"] = panelSpecies;
     }

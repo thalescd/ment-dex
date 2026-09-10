@@ -189,7 +189,7 @@ export async function createSpeciesPanel(name) {
         speciesAbilitiesMainContainer.classList.add("hide");
     }
 
-    let monStats = [
+    const monStats = [
         gameData.species[name]["baseHP"],
         gameData.species[name]["baseAttack"],
         gameData.species[name]["baseDefense"],
@@ -228,7 +228,7 @@ export async function createSpeciesPanel(name) {
         speciesEvoTable.append(rootContainer);
 
         mainLoop: while (speciesArray.length > 0) {
-            let speciesEvoTableContainer = document.createElement("td");
+            const speciesEvoTableContainer = document.createElement("td");
 
             for (let i = 0; i < speciesArray.length; i++) {
                 const targetSpecies = speciesArray[i];
@@ -440,7 +440,7 @@ function formatEvoCondition(evoConditions) {
     const sanitizeMove = (str) => sanitizeString(str.replace(/^MOVE_/, ""));
     const sanitizeRegion = (str) => sanitizeString(str.replace(/^REGION_/, ""));
 
-    let text = "";
+    let text;
 
     if (method.includes("EVO_MEGA")) return "Mega Evolution";
     if (method.includes("EVO_GIGA")) return "Gigantamax";
@@ -607,8 +607,8 @@ function handleShiny() {
 }
 
 async function applyShinyVar(speciesName) {
-    let sprite = new Image();
-    let canvas = document.createElement("canvas");
+    const sprite = new Image();
+    const canvas = document.createElement("canvas");
 
     sprite.src = gameData.sprites[speciesName];
 
@@ -666,7 +666,7 @@ async function fetchSpeciesPal(speciesName, type = "normal") {
     }
     const textPal = await rawPal.text();
 
-    let pal = textPal
+    const pal = textPal
         .replaceAll("\r", "")
         .split("\n")
         .toSpliced(0, 3)

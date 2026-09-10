@@ -89,7 +89,7 @@ export async function fetchTypeChart() {
         if (typeof window.repoTypeChartUrl !== "undefined") {
             typeChartUrl = window.repoTypeChartUrl;
         }
-        let rawTypeChart = await fetch(typeChartUrl);
+        const rawTypeChart = await fetch(typeChartUrl);
         gameData.typeChart = await rawTypeChart.json();
     } catch (e) {
         console.error("Failed to fetch type chart:", e.message, e.stack);
@@ -161,7 +161,7 @@ export async function displayHistoryObj(historyStateObj) {
     deleteFiltersFromTable();
     if (historyStateObj) {
         if ("species" in historyStateObj) {
-            let scrollToSpecies = historyStateObj["species"];
+            const scrollToSpecies = historyStateObj["species"];
             await createSpeciesPanel(scrollToSpecies);
             window.scrollTo(0, 0);
         } else {

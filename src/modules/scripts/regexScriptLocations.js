@@ -183,7 +183,7 @@ export async function regexScripts(textScripts, tradeText, specialFunctions) {
 export async function regexSpecialsFunctions(textSpecials) {
     const lines = textSpecials.split("\n");
     let functionName = null;
-    let functions = {};
+    const functions = {};
     let counter = 0;
 
     lines.forEach((line) => {
