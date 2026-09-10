@@ -46,7 +46,6 @@ export function sanitizeString(string, removeSpecial = true) {
 // fetchData, fetchTypeChart, getLocationsByPokemon, displayParams,
 // displayHistoryObj, exportData foram movidos para app.js
 
-
 export function clearLocalStorage() {
     Object.keys(localStorage).forEach((key) => {
         if (
@@ -131,14 +130,18 @@ export function setDataList() {
         uiState.abilitiesIngameNameArray.push(
             gameData.abilities[abilityName]["ingameName"]
         );
-        uiState.abilityIngameNameToKey[gameData.abilities[abilityName]["ingameName"]] = abilityName;
+        uiState.abilityIngameNameToKey[
+            gameData.abilities[abilityName]["ingameName"]
+        ] = abilityName;
         abilitiesInputDataList.append(option);
     }
 
     uiState.moveIngameNameToKey = {};
     for (const moveName in gameData.moves) {
         if (gameData.moves[moveName]["ingameName"]) {
-            uiState.moveIngameNameToKey[gameData.moves[moveName]["ingameName"]] = moveName;
+            uiState.moveIngameNameToKey[
+                gameData.moves[moveName]["ingameName"]
+            ] = moveName;
         }
     }
 }

@@ -194,8 +194,6 @@ export async function createSpeciesPanel(name) {
         speciesAbilitiesMainContainer.classList.add("hide");
     }
 
-
-
     let monStats = [
         gameData.species[name]["baseHP"],
         gameData.species[name]["baseAttack"],

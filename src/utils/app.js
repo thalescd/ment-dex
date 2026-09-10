@@ -46,7 +46,9 @@ export async function fetchData(urlParams) {
         checkForUpdates(update);
     } catch (e) {
         console.error("Failed to load application data:", e.message, e.stack);
-        statusMsg("Error loading data. Please clear cache and refresh the page.");
+        statusMsg(
+            "Error loading data. Please clear cache and refresh the page."
+        );
     }
 }
 

@@ -192,8 +192,13 @@ button[type="button"] {
 }
 
 @keyframes pulseUpdate {
-    0%, 100% { box-shadow: 0 0 0px #f5a62300; }
-    50% { box-shadow: 0 0 8px #f5a623aa; }
+    0%,
+    100% {
+        box-shadow: 0 0 0px #f5a62300;
+    }
+    50% {
+        box-shadow: 0 0 8px #f5a623aa;
+    }
 }
 
 .activeButton,

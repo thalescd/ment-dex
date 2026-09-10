@@ -16,6 +16,7 @@ Heavily inspired by [Unbound Pokedex](https://github.com/Ydarissep/Unbound-Poked
 - **Strategies** — battle strategy notes
 
 ### UI Highlights
+
 - Shiny sprite toggle
 - Search with autocomplete
 - Type effectiveness chart

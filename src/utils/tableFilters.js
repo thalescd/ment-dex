@@ -486,20 +486,12 @@ export async function setFilters() {
     createFilterGroup(
         createFilterArray(["ingameName"], gameData.abilities, false),
         "Ability",
-        [
-            speciesFilterList,
-            locationsFilterList,
-            trainersFilterList,
-        ]
+        [speciesFilterList, locationsFilterList, trainersFilterList]
     );
     createFilterGroup(
         createFilterArray(["ingameName"], gameData.moves, false),
         "Move",
-        [
-            speciesFilterList,
-            locationsFilterList,
-            trainersFilterList,
-        ]
+        [speciesFilterList, locationsFilterList, trainersFilterList]
     );
     createFilterGroup(
         createFilterArray(["eggGroup1", "eggGroup2"], gameData.species),
@@ -858,7 +850,8 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 passed = false;
                 const speciesObj = trainerTeam[l];
                 if (label === "Ability") {
-                    const abilityName = uiState.abilityIngameNameToKey[value] ?? null;
+                    const abilityName =
+                        uiState.abilityIngameNameToKey[value] ?? null;
                     if (abilityName) {
                         if (
                             gameData.species[speciesObj["name"]]["abilities"][

@@ -139,7 +139,8 @@ function assembleSpecies(parsed) {
             ? levelUpLearnsets[info.levelUpRef] || []
             : [];
 
-        const teachable = teachableLearnsets[name.replace(/^SPECIES_/, "")] || [];
+        const teachable =
+            teachableLearnsets[name.replace(/^SPECIES_/, "")] || [];
 
         // Separar teachable em TMHM e tutor
         const TMHMLearnsets = [];

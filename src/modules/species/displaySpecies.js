@@ -23,10 +23,9 @@ uiState.speciesMoveFilter = null;
 
 export function updateSpeciesMoveFilter(sortTable = false) {
     uiState.speciesMoveFilter = null;
-    const moveFiltersContainer =
-        speciesFilterContainer.getElementsByClassName(
-            "speciesFilterMoveContainer"
-        )[0];
+    const moveFiltersContainer = speciesFilterContainer.getElementsByClassName(
+        "speciesFilterMoveContainer"
+    )[0];
     if (moveFiltersContainer) {
         const filters = moveFiltersContainer.getElementsByClassName("filter");
         if (filters.length === 1) {

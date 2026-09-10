@@ -173,12 +173,15 @@ export function parseSpeciesInfo(text) {
 function extractFunctionMacros(text) {
     const macros = {};
     // Juntar linhas de continuação antes de parsear
-    const joined = text.replace(/\\\n[ \t]*/g, ' ');
+    const joined = text.replace(/\\\n[ \t]*/g, " ");
     const re = /#define\s+(\w+)\(([^)]*)\)\s+(.*)/g;
     let m;
     while ((m = re.exec(joined)) !== null) {
         const name = m[1];
-        const params = m[2].split(',').map(p => p.trim()).filter(Boolean);
+        const params = m[2]
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean);
         const body = m[3].trim();
         if (!macros[name]) {
             macros[name] = { params, body };
@@ -196,19 +199,36 @@ function expandBodyMacros(body, functionMacros) {
     while ((m = callRe.exec(result)) !== null) {
         const macroName = m[1];
         const macro = functionMacros[macroName];
-        if (macro && (macro.body.includes('.types') || macro.body.includes('.abilities') || macro.body.includes('.frontPic'))) {
-            const args = m[2].split(',').map(a => a.trim());
+        if (
+            macro &&
+            (macro.body.includes(".types") ||
+                macro.body.includes(".abilities") ||
+                macro.body.includes(".frontPic"))
+        ) {
+            const args = m[2].split(",").map((a) => a.trim());
             let expanded = macro.body;
             for (let i = 0; i < macro.params.length; i++) {
                 const param = macro.params[i];
-                const arg = args[i] !== undefined ? args[i] : '';
+                const arg = args[i] !== undefined ? args[i] : "";
                 // Concatenação de tokens: consumir espaço antes/depois de ##
-                expanded = expanded.replace(new RegExp(`\\s*##\\s*${param}\\b`, 'g'), arg);
-                expanded = expanded.replace(new RegExp(`\\b${param}\\s*##\\s*`, 'g'), arg);
+                expanded = expanded.replace(
+                    new RegExp(`\\s*##\\s*${param}\\b`, "g"),
+                    arg
+                );
+                expanded = expanded.replace(
+                    new RegExp(`\\b${param}\\s*##\\s*`, "g"),
+                    arg
+                );
                 // Substituição normal de parâmetro
-                expanded = expanded.replace(new RegExp(`\\b${param}\\b`, 'g'), arg);
+                expanded = expanded.replace(
+                    new RegExp(`\\b${param}\\b`, "g"),
+                    arg
+                );
             }
-            result = result.slice(0, m.index) + expanded + result.slice(m.index + m[0].length);
+            result =
+                result.slice(0, m.index) +
+                expanded +
+                result.slice(m.index + m[0].length);
             callRe.lastIndex = 0;
         }
     }
@@ -402,8 +422,7 @@ export function parseLevelUpLearnsets(text) {
     const learnsets = {};
     // Termina no fechamento }; da struct — evita que um learnset sem
     // LEVEL_UP_END "invada" o learnset seguinte via scan guloso
-    const blockRe =
-        /\b(s\w+LevelUpLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)\n\s*\}/g;
+    const blockRe = /\b(s\w+LevelUpLearnset)\s*\[\]\s*=\s*\{([\s\S]*?)\n\s*\}/g;
     let match;
 
     while ((match = blockRe.exec(text)) !== null) {
@@ -520,10 +539,15 @@ export function parseSpriteRefs(text) {
 //    Classifica cada espécie como: base | regional | functional | cosmetic
 // ========================================================================
 const REGIONAL_GUARDS = new Set([
-    "P_ALOLAN_FORMS", "P_GALARIAN_FORMS", "P_HISUIAN_FORMS", "P_PALDEAN_FORMS",
+    "P_ALOLAN_FORMS",
+    "P_GALARIAN_FORMS",
+    "P_HISUIAN_FORMS",
+    "P_PALDEAN_FORMS",
 ]);
 const FUNCTIONAL_GUARDS = new Set([
-    "P_MEGA_EVOLUTIONS", "P_GEN_9_MEGA_EVOLUTIONS", "P_GIGANTAMAX_FORMS",
+    "P_MEGA_EVOLUTIONS",
+    "P_GEN_9_MEGA_EVOLUTIONS",
+    "P_GIGANTAMAX_FORMS",
 ]);
 
 /** @param {string} text */
@@ -542,8 +566,14 @@ export function parseFormSpeciesTables(text) {
         for (const line of lines) {
             const t = line.trim();
             const ifMatch = t.match(/^#if\s+(\w+)/);
-            if (ifMatch) { currentGuard = ifMatch[1]; continue; }
-            if (/^#endif|^#else/.test(t)) { currentGuard = null; continue; }
+            if (ifMatch) {
+                currentGuard = ifMatch[1];
+                continue;
+            }
+            if (/^#endif|^#else/.test(t)) {
+                currentGuard = null;
+                continue;
+            }
 
             const sm = t.match(/^(SPECIES_\w+)/);
             if (!sm || sm[1] === "FORM_SPECIES_END") continue;

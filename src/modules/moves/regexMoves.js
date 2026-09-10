@@ -83,7 +83,8 @@ function extractDescriptionVars(text) {
     // Remove diretivas de pre-processador restantes (#if, #ifdef, #endif, etc.)
     const clean = stripped.replace(/^\s*#[^\n]*/gm, "");
 
-    const varRegex = /static\s+const\s+u8\s+(s\w+Description)\s*\[\]\s*=\s*_\(([\s\S]*?)\)\s*;/g;
+    const varRegex =
+        /static\s+const\s+u8\s+(s\w+Description)\s*\[\]\s*=\s*_\(([\s\S]*?)\)\s*;/g;
     let m;
     while ((m = varRegex.exec(clean)) !== null) {
         const varName = m[1];
@@ -102,7 +103,8 @@ export function parseMovesInfo(text) {
 
     // Regex para capturar cada bloco [MOVE_XXX] = { ... }
     // Suporta chaves aninhadas de dois niveis (ex: additionalEffects com .self = { ... })
-    const blockRegex = /\[(MOVE_\w+)\]\s*=\s*\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g;
+    const blockRegex =
+        /\[(MOVE_\w+)\]\s*=\s*\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g;
 
     let match;
     while ((match = blockRegex.exec(text)) !== null) {
@@ -123,7 +125,9 @@ export function parseMovesInfo(text) {
         if (descInlineMatch) {
             description = [extractCompoundString(descInlineMatch[1])];
         } else {
-            const descVarMatch = body.match(/\.description\s*=\s*(s\w+Description)/);
+            const descVarMatch = body.match(
+                /\.description\s*=\s*(s\w+Description)/
+            );
             if (descVarMatch && descVars[descVarMatch[1]]) {
                 description = [descVars[descVarMatch[1]]];
             }
