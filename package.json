@@ -1,20 +1,28 @@
 {
     "name": "dex-main",
     "version": "1.0.0",
-    "description": "",
+    "description": "Web-based Pokedex for a pokeemerald-expansion ROM hack",
     "main": "index.html",
+    "type": "module",
     "scripts": {
         "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "lint": "eslint src",
+        "lint:fix": "eslint src --fix",
+        "typecheck": "tsc -p jsconfig.json --noEmit",
         "prepare": "husky"
     },
     "keywords": [],
     "author": "Thales Castro",
     "license": "ISC",
     "devDependencies": {
+        "@eslint/js": "^10.0.1",
         "eslint": "^10.0.3",
+        "globals": "^17.12.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.3.3",
-        "prettier": "^3.8.1"
+        "prettier": "^3.8.1",
+        "typescript": "^7.0.2"
     },
     "lint-staged": {
         "*.{js,css,html}": "prettier --write"
