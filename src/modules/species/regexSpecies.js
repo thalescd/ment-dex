@@ -12,16 +12,84 @@ function extractQuotedStrings(raw) {
 
 // ========================================================================
 // 1. parseSpeciesConstants — include/constants/species.h
-//    #define SPECIES_BULBASAUR 1
+//
+//    Formato atual: enum __attribute__((packed)) Species { ... }, com
+//      SPECIES_BULBASAUR = 1,            valor explicito
+//      SPECIES_PYROAR_F,                 valor implicito (anterior + 1)
+//      SPECIES_CASTFORM = SPECIES_CASTFORM_NORMAL,   alias
+//    Formato antigo (fallback): #define SPECIES_BULBASAUR 1
 // ========================================================================
+
+// Nomes presentes no enum que nao sao especies, apenas marcadores/contadores
+const SPECIES_ENUM_MARKERS = new Set([
+    "SPECIES_CUSTOM_START",
+    "SPECIES_CUSTOM_END",
+    "SPECIES_EGG",
+    "SPECIES_SHINY_TAG",
+    "NUM_SPECIES",
+]);
+
 export function parseSpeciesConstants(text) {
+    const enumMatch = text.match(/enum[^{]*\bSpecies\s*\{([\s\S]*?)^\};/m);
+    if (!enumMatch) return parseSpeciesDefines(text);
+
+    // Entradas na ordem do enum: nome + expressao (ausente = incremento implicito)
+    const entries = [];
+    const entryRe = /^[ \t]*(\w+)[ \t]*(?:=[ \t]*([^,\n]+?))?[ \t]*,/gm;
+    let m;
+    while ((m = entryRe.exec(enumMatch[1])) !== null) {
+        const expr = m[2] ? m[2].trim() : null;
+        const isNumber = expr !== null && /^-?\d+$/.test(expr);
+        entries.push({
+            name: m[1],
+            value: isNumber ? parseInt(expr) : null,
+            alias: expr !== null && !isNumber ? expr : null,
+        });
+    }
+
+    // Resolucao iterativa: aliases podem referenciar nomes definidos depois
+    const values = new Map();
+    let changed = true;
+    while (changed) {
+        changed = false;
+        let prev = -1; // valor da entrada anterior (null = ainda desconhecido)
+        for (const entry of entries) {
+            let val = values.get(entry.name);
+            if (val === undefined) {
+                if (entry.value !== null) val = entry.value;
+                else if (entry.alias !== null) val = values.get(entry.alias);
+                else if (prev !== null) val = prev + 1;
+
+                if (val !== undefined) {
+                    values.set(entry.name, val);
+                    changed = true;
+                }
+            }
+            prev = val === undefined ? null : val;
+        }
+    }
+
+    const species = {};
+    for (const entry of entries) {
+        const name = entry.name;
+        if (!name.startsWith("SPECIES_")) continue;
+        if (SPECIES_ENUM_MARKERS.has(name)) continue;
+        const id = values.get(name);
+        if (id === undefined) continue;
+        species[name] = { name, ID: id };
+    }
+    return species;
+}
+
+// Fallback para o formato antigo baseado em #define
+function parseSpeciesDefines(text) {
     const species = {};
     const re = /#define\s+(SPECIES_\w+)\s+(\d+)/g;
     let m;
     while ((m = re.exec(text)) !== null) {
         const name = m[1];
-        const id = parseInt(m[2]);
-        species[name] = { name, ID: id };
+        if (SPECIES_ENUM_MARKERS.has(name)) continue;
+        species[name] = { name, ID: parseInt(m[2]) };
     }
     return species;
 }
@@ -167,6 +235,30 @@ function resolveIntValue(raw, defines) {
     return 0;
 }
 
+// Pega a primeira constante <prefix>* de uma expressao. Em ternarios vale o
+// ramo "updated" (o primeiro valor apos o "?").
+function pickConstFromExpr(expr, prefix) {
+    const q = expr.indexOf("?");
+    const branch = q !== -1 ? expr.slice(q + 1) : expr;
+    const m = branch.match(new RegExp(`${prefix}\\w+`));
+    return m ? m[0] : "";
+}
+
+// Resolve um token que pode ser a constante final (TYPE_FAIRY), uma macro
+// (TOGEPI_FAMILY_TYPE1 → "(P_UPDATED_TYPES >= GEN_6 ? TYPE_FAIRY : TYPE_NORMAL)")
+// ou um fragmento de expressao ("{ TYPE_FAIRY").
+function resolveConstToken(token, defines, prefix) {
+    const trimmed = token.trim();
+    if (new RegExp(`^${prefix}\\w+$`).test(trimmed)) return trimmed;
+
+    const macroVal = defines ? defines[trimmed] : null;
+    if (macroVal) {
+        const fromMacro = pickConstFromExpr(macroVal, prefix);
+        if (fromMacro) return fromMacro;
+    }
+    return pickConstFromExpr(trimmed, prefix);
+}
+
 function parseSpeciesBody(body, defines, functionMacros = null) {
     // Expandir macros de função que fornecem campos (.types, .abilities, etc.)
     if (functionMacros) {
@@ -177,23 +269,29 @@ function parseSpeciesBody(body, defines, functionMacros = null) {
         return m ? resolveIntValue(m[1], defines) : 0;
     };
 
-    // Types: MON_TYPES(TYPE_X, TYPE_Y) ou macro (CLEFAIRY_FAMILY_TYPES)
+    // Types: MON_TYPES(TYPE_X, TYPE_Y) ou macro (CLEFAIRY_FAMILY_TYPES).
+    // Cada argumento tambem pode ser macro: MON_TYPES(TOGEPI_FAMILY_TYPE1, TYPE_FLYING)
     let type1 = "",
         type2 = "";
+    let typeArgs = null;
     const typesMatch = body.match(/\.types\s*=\s*MON_TYPES\(([^)]+)\)/);
     if (typesMatch) {
-        const types = typesMatch[1].match(/TYPE_\w+/g) || [];
-        type1 = types[0] || "";
-        type2 = types[1] || type1;
+        typeArgs = typesMatch[1].split(",");
     } else {
         // Pode ser macro: .types = SOME_MACRO,
         const typesMacroMatch = body.match(/\.types\s*=\s*(\w+)/);
         if (typesMacroMatch && defines && defines[typesMacroMatch[1]]) {
             const resolved = defines[typesMacroMatch[1]];
-            const types = resolved.match(/TYPE_\w+/g) || [];
-            type1 = types[0] || "";
-            type2 = types[1] || type1;
+            const inner = resolved.match(/MON_TYPES\(([^)]+)\)/);
+            typeArgs = (inner ? inner[1] : resolved).split(",");
         }
+    }
+    if (typeArgs) {
+        const types = typeArgs
+            .map((t) => resolveConstToken(t, defines, "TYPE_"))
+            .filter(Boolean);
+        type1 = types[0] || "";
+        type2 = types[1] || type1;
     }
 
     // Abilities: { ABILITY_X, ABILITY_Y, ABILITY_Z } ou macro (GENGAR_ABILITIES)
