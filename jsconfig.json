@@ -4,5 +4,5 @@
         "target": "ESNext",
         "checkJs": true
     },
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", "src/utils/lz-string.js"]
 }

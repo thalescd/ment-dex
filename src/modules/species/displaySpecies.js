@@ -35,7 +35,7 @@ export function updateSpeciesMoveFilter(sortTable = false) {
                     .split(":")[1];
                 Object.keys(gameData.moves).forEach((moveName) => {
                     if (
-                        gameData.moves[moveName]["ingameName"] ===
+                        gameData.moves[moveName].ingameName ===
                         uiState.speciesMoveFilter
                     ) {
                         uiState.speciesMoveFilter = moveName;
@@ -50,7 +50,7 @@ export function updateSpeciesMoveFilter(sortTable = false) {
 }
 
 export function appendSpeciesToTable(speciesName) {
-    if (gameData.species[speciesName]["baseSpeed"] <= 0) {
+    if (gameData.species[speciesName].baseSpeed <= 0) {
         return false;
     }
     let moveMethod = null;
@@ -78,7 +78,7 @@ export function appendSpeciesToTable(speciesName) {
         }
         IDcontainer.append(moveFilter);
     } else {
-        ID.innerText = gameData.species[speciesName]["ID"];
+        ID.innerText = gameData.species[speciesName].ID;
     }
     IDcontainer.append(ID);
     row.append(IDcontainer);
@@ -98,11 +98,9 @@ export function appendSpeciesToTable(speciesName) {
     let ingameName = document.createElement("div");
     nameContainer.className = "nameContainer";
     name.className = "key hide";
-    name.innerText = gameData.species[speciesName]["name"];
+    name.innerText = gameData.species[speciesName].name;
     ingameName.className = "species";
-    ingameName.innerText = sanitizeString(
-        gameData.species[speciesName]["name"]
-    );
+    ingameName.innerText = sanitizeString(gameData.species[speciesName].name);
     nameContainer.append(ingameName);
     nameContainer.append(name);
     row.append(nameContainer);
@@ -113,24 +111,24 @@ export function appendSpeciesToTable(speciesName) {
     let type2 = document.createElement("div");
     let type3 = document.createElement("div");
     typesContainer.className = "types";
-    type1.innerText = `${sanitizeString(gameData.species[speciesName]["type1"])} `;
-    type2.innerText = `${sanitizeString(gameData.species[speciesName]["type2"])} `;
-    type1.className = `${gameData.species[speciesName]["type1"]} background`;
-    type2.className = `${gameData.species[speciesName]["type2"]} background`;
+    type1.innerText = `${sanitizeString(gameData.species[speciesName].type1)} `;
+    type2.innerText = `${sanitizeString(gameData.species[speciesName].type2)} `;
+    type1.className = `${gameData.species[speciesName].type1} background`;
+    type2.className = `${gameData.species[speciesName].type2} background`;
 
-    for (let k = 0; k < gameData.species[speciesName]["changes"].length; k++) {
-        if (gameData.species[speciesName]["changes"][k][0] === "type1") {
+    for (let k = 0; k < gameData.species[speciesName].changes.length; k++) {
+        if (gameData.species[speciesName].changes[k][0] === "type1") {
             if (
-                gameData.species[speciesName]["type1"] !==
-                    gameData.species[speciesName]["changes"][k][1] &&
+                gameData.species[speciesName].type1 !==
+                    gameData.species[speciesName].changes[k][1] &&
                 changelogMode.classList.contains("activeSetting")
             ) {
                 type1.classList.add("typeChanged");
             }
-        } else if (gameData.species[speciesName]["changes"][k][0] === "type2") {
+        } else if (gameData.species[speciesName].changes[k][0] === "type2") {
             if (
-                gameData.species[speciesName]["type2"] !==
-                    gameData.species[speciesName]["changes"][k][1] &&
+                gameData.species[speciesName].type2 !==
+                    gameData.species[speciesName].changes[k][1] &&
                 changelogMode.classList.contains("activeSetting")
             ) {
                 type2.classList.add("typeChanged");
@@ -140,20 +138,20 @@ export function appendSpeciesToTable(speciesName) {
 
     types.append(type1);
     if (
-        gameData.species[speciesName]["type1"] !==
-        gameData.species[speciesName]["type2"]
+        gameData.species[speciesName].type1 !==
+        gameData.species[speciesName].type2
     ) {
         types.append(type2);
     }
-    if (typeof gameData.species[speciesName]["type3"] !== "undefined") {
+    if (typeof gameData.species[speciesName].type3 !== "undefined") {
         if (
-            gameData.species[speciesName]["type3"] !==
-                gameData.species[speciesName]["type1"] &&
-            gameData.species[speciesName]["type3"] !==
-                gameData.species[speciesName]["type2"]
+            gameData.species[speciesName].type3 !==
+                gameData.species[speciesName].type1 &&
+            gameData.species[speciesName].type3 !==
+                gameData.species[speciesName].type2
         ) {
-            type3.innerText = `${sanitizeString(gameData.species[speciesName]["type3"])} `;
-            type3.className = `${gameData.species[speciesName]["type3"]} background`;
+            type3.innerText = `${sanitizeString(gameData.species[speciesName].type3)} `;
+            type3.className = `${gameData.species[speciesName].type3} background`;
             types.append(type3);
         }
     }
@@ -162,45 +160,40 @@ export function appendSpeciesToTable(speciesName) {
 
     let abilitiesContainer = document.createElement("td");
     abilitiesContainer.className = "abilities";
-    for (
-        let j = 0;
-        j < gameData.species[speciesName]["abilities"].length;
-        j++
-    ) {
+    for (let j = 0; j < gameData.species[speciesName].abilities.length; j++) {
         let ability = document.createElement("div");
-        let abilityName = gameData.species[speciesName]["abilities"][j];
+        let abilityName = gameData.species[speciesName].abilities[j];
         if (
             j === 1 &&
-            abilityName === gameData.species[speciesName]["abilities"][0]
+            abilityName === gameData.species[speciesName].abilities[0]
         ) {
             continue;
         } else if (
             j === 2 &&
-            (abilityName === gameData.species[speciesName]["abilities"][0] ||
+            (abilityName === gameData.species[speciesName].abilities[0] ||
                 abilityName === "ABILITY_NONE") &&
-            (abilityName === gameData.species[speciesName]["abilities"][1] ||
+            (abilityName === gameData.species[speciesName].abilities[1] ||
                 abilityName === "ABILITY_NONE")
         ) {
             continue;
         }
         if (abilityName !== "ABILITY_NONE" && gameData.abilities[abilityName]) {
-            ability.innerText = `${gameData.abilities[abilityName]["ingameName"]} `;
+            ability.innerText = `${gameData.abilities[abilityName].ingameName} `;
             if (j === 2) {
                 ability.style.fontWeight = "bold";
             }
 
             for (
                 let k = 0;
-                k < gameData.species[speciesName]["changes"].length;
+                k < gameData.species[speciesName].changes.length;
                 k++
             ) {
                 if (
-                    gameData.species[speciesName]["changes"][k][0] ===
-                    "abilities"
+                    gameData.species[speciesName].changes[k][0] === "abilities"
                 ) {
                     if (
-                        gameData.species[speciesName]["abilities"][j] !==
-                            gameData.species[speciesName]["changes"][k][1][j] &&
+                        gameData.species[speciesName].abilities[j] !==
+                            gameData.species[speciesName].changes[k][1][j] &&
                         changelogMode.classList.contains("activeSetting")
                     ) {
                         const changelogAbilities =
@@ -263,12 +256,12 @@ function createBaseStatsContainer(headerText, stats, speciesObj) {
 
     baseStats.innerText = speciesObj[stats];
 
-    for (let k = 0; k < speciesObj["changes"].length; k++) {
+    for (let k = 0; k < speciesObj.changes.length; k++) {
         if (
-            speciesObj["changes"][k][0] === stats &&
+            speciesObj.changes[k][0] === stats &&
             changelogMode.classList.contains("activeSetting")
         ) {
-            if (speciesObj[stats] > speciesObj["changes"][k][1]) {
+            if (speciesObj[stats] > speciesObj.changes[k][1]) {
                 baseStats.classList.add("buff", "bold");
                 baseStatsHeader.classList.add("buff", "bold");
             } else {

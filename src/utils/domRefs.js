@@ -1,9 +1,41 @@
 // Referencias DOM e variaveis de estado compartilhadas
 
+// Estas referencias sao resolvidas no momento do import (o <script type="module">
+// e deferido, entao o DOM ja existe). Antes usavamos getElementById direto, que
+// devolve null quando o elemento nao esta la: um id renomeado no HTML virava um
+// null silencioso, e o estouro acontecia depois, longe da causa — ou nunca, com
+// a feature simplesmente morta. Falhar aqui, dizendo qual seletor faltou, e mais
+// barato de diagnosticar.
+
+/**
+ * @param {string} id
+ * @returns {HTMLElement}
+ */
+function byId(id) {
+    const element = document.getElementById(id);
+    if (!element)
+        throw new Error(`domRefs: nao existe elemento com id "${id}"`);
+    return element;
+}
+
+/**
+ * @param {string} selector
+ * @returns {HTMLElement}
+ */
+function bySelector(selector) {
+    const element = /** @type {HTMLElement|null} */ (
+        document.querySelector(selector)
+    );
+    if (!element) {
+        throw new Error(`domRefs: nenhum elemento casa com "${selector}"`);
+    }
+    return element;
+}
+
 // --- Variaveis de estado ---
 export let tracker;
 export let panelSpecies = "";
-export let historyObj = [];
+export const historyObj = [];
 
 // Setters para estado mutavel (imports ES sao read-only para quem importa)
 export function setTracker(value) {
@@ -12,287 +44,174 @@ export function setTracker(value) {
 export function setPanelSpecies(value) {
     panelSpecies = value;
 }
-export function setHistoryObj(value) {
-    historyObj = value;
-}
 
 // --- Elementos DOM gerais ---
-export const tableFilter = document.getElementById("tableFilter");
-export const body = document.getElementById("body");
-export const settingsButton = document.getElementById("settings");
-export const credits = document.getElementById("credits");
-export const modal = document.getElementById("modal");
-export const update = document.getElementById("update");
-export const overlay = document.getElementById("overlay");
-export const popup = document.getElementById("popup");
-export const overlayAbilities = document.getElementById("overlayAbilities");
-export const popupAbilities = document.getElementById("popupAbilities");
-export const overlaySpeciesPanel = document.getElementById(
-    "overlaySpeciesPanel"
-);
+export const tableFilter = byId("tableFilter");
+export const body = byId("body");
+export const settingsButton = byId("settings");
+export const credits = byId("credits");
+export const update = byId("update");
+export const overlay = byId("overlay");
+export const popup = byId("popup");
+export const overlayAbilities = byId("overlayAbilities");
+export const popupAbilities = byId("popupAbilities");
+export const overlaySpeciesPanel = byId("overlaySpeciesPanel");
 
 // --- Changelog / Filtros especiais ---
-export const changelogMode = document.getElementById("changelogMode");
-export const onlyShowChangedPokemon = document.getElementById(
-    "onlyShowChangedPokemon"
-);
+export const changelogMode = byId("changelogMode");
+export const onlyShowChangedPokemon = byId("onlyShowChangedPokemon");
 
 // --- Grafico de stats ---
-export const graph = document.getElementById("statsGraph");
+export const graph = byId("statsGraph");
 export const graphStats = [...graph.children];
 export const statDisplays = [...document.querySelectorAll(".statsGraphHeader")];
 
 // --- Species Panel ---
-export const speciesPanelMainContainer = document.getElementById(
-    "speciesPanelMainContainer"
-);
-export const speciesPanelHistoryContainer = document.getElementById(
+export const speciesPanelMainContainer = byId("speciesPanelMainContainer");
+export const speciesPanelHistoryContainer = byId(
     "speciesPanelHistoryContainer"
 );
-export const speciesName = document.getElementById("speciesName");
-export const speciesID = document.getElementById("speciesID");
-export const speciesPanelInputSpecies = document.getElementById(
-    "speciesPanelInputSpecies"
-);
-export const speciesPanelInputSpeciesDataList = document.getElementById(
+export const speciesName = byId("speciesName");
+export const speciesID = byId("speciesID");
+export const speciesPanelInputSpecies = byId("speciesPanelInputSpecies");
+export const speciesPanelInputSpeciesDataList = byId(
     "speciesPanelInputSpeciesDataList"
 );
-export const shinyToggle = document.getElementById("shinyToggle");
-export const speciesSprite = document.getElementById("speciesSprite");
-export const speciesType1 = document.getElementById("speciesType1");
-export const speciesType2 = document.getElementById("speciesType2");
-export const speciesPanelLocationsButton = document.getElementById(
-    "speciesPanelLocationsButton"
-);
-export const speciesPanelInfoButton = document.getElementById(
-    "speciesPanelInfoButton"
-);
-export const speciesAbilities = document.getElementById("speciesAbilities");
-export const speciesInnatesMainContainer = document.getElementById(
-    "speciesInnatesMainContainer"
-);
-export const speciesInnates = document.getElementById("speciesInnates");
-export const speciesBaseStatsGraph = document.getElementById(
-    "speciesBaseStatsGraph"
-);
-export const speciesEvolutionsText = document.getElementById(
-    "speciesEvolutionsText"
-);
-export const speciesEvoTable = document.getElementById("speciesEvoTable");
-export const speciesFormes = document.getElementById("speciesFormes");
-export const speciesFormesText = document.getElementById("speciesFormesText");
-export const speciesChanges = document.getElementById("speciesChanges");
-export const speciesChangesContainer = document.getElementById(
-    "speciesChangesContainer"
-);
-export const speciesDefensiveTypeChart = document.getElementById(
-    "speciesDefensiveTypeChart"
-);
-export const speciesOffensiveTypeChart = document.getElementById(
-    "speciesOffensiveTypeChart"
-);
-export const speciesPanelLevelUpFromPreviousEvoTable = document.getElementById(
+export const shinyToggle = byId("shinyToggle");
+export const speciesSprite = byId("speciesSprite");
+export const speciesType1 = byId("speciesType1");
+export const speciesType2 = byId("speciesType2");
+export const speciesPanelLocationsButton = byId("speciesPanelLocationsButton");
+export const speciesPanelInfoButton = byId("speciesPanelInfoButton");
+export const speciesAbilities = byId("speciesAbilities");
+export const speciesInnatesMainContainer = byId("speciesInnatesMainContainer");
+export const speciesInnates = byId("speciesInnates");
+export const speciesEvoTable = byId("speciesEvoTable");
+export const speciesFormes = byId("speciesFormes");
+export const speciesChanges = byId("speciesChanges");
+export const speciesChangesContainer = byId("speciesChangesContainer");
+export const speciesDefensiveTypeChart = byId("speciesDefensiveTypeChart");
+export const speciesOffensiveTypeChart = byId("speciesOffensiveTypeChart");
+export const speciesPanelLevelUpFromPreviousEvoTable = byId(
     "speciesPanelLevelUpFromPreviousEvoTable"
 );
-export const speciesPanelLevelUpFromPreviousEvoTableTbody =
-    document.getElementById("speciesPanelLevelUpFromPreviousEvoTableTbody");
-export const hideLevelUpFromPreviousEvolution = document.getElementById(
+export const speciesPanelLevelUpFromPreviousEvoTableTbody = byId(
+    "speciesPanelLevelUpFromPreviousEvoTableTbody"
+);
+export const hideLevelUpFromPreviousEvolution = byId(
     "hideLevelUpFromPreviousEvolution"
 );
-export const speciesPanelLevelUpTable = document.getElementById(
-    "speciesPanelLevelUpTable"
-);
-export const speciesPanelLevelUpTableTbody = document.getElementById(
+export const speciesPanelLevelUpTable = byId("speciesPanelLevelUpTable");
+export const speciesPanelLevelUpTableTbody = byId(
     "speciesPanelLevelUpTableTbody"
 );
-export const hideLevelUp = document.getElementById("hideLevelUp");
-export const speciesPanelTMHMTable = document.getElementById(
-    "speciesPanelTMHMTable"
-);
-export const speciesPanelTMHMTableTbody = document.getElementById(
-    "speciesPanelTMHMTableTbody"
-);
-export const hideTMHM = document.getElementById("hideTMHM");
-export const speciesPanelTutorTable = document.getElementById(
-    "speciesPanelTutorTable"
-);
-export const speciesPanelTutorTableTbody = document.getElementById(
-    "speciesPanelTutorTableTbody"
-);
-export const hideTutor = document.getElementById("hideTutor");
-export const speciesPanelEggMovesTable = document.getElementById(
-    "speciesPanelEggMovesTable"
-);
-export const speciesPanelEggMovesTableTbody = document.getElementById(
+export const hideLevelUp = byId("hideLevelUp");
+export const speciesPanelTMHMTable = byId("speciesPanelTMHMTable");
+export const speciesPanelTMHMTableTbody = byId("speciesPanelTMHMTableTbody");
+export const hideTMHM = byId("hideTMHM");
+export const speciesPanelTutorTable = byId("speciesPanelTutorTable");
+export const speciesPanelTutorTableTbody = byId("speciesPanelTutorTableTbody");
+export const hideTutor = byId("hideTutor");
+export const speciesPanelEggMovesTable = byId("speciesPanelEggMovesTable");
+export const speciesPanelEggMovesTableTbody = byId(
     "speciesPanelEggMovesTableTbody"
 );
-export const hideEggMoves = document.getElementById("hideEggMoves");
+export const hideEggMoves = byId("hideEggMoves");
 
 // --- Tabela Species ---
-export const speciesInput = document.getElementById("speciesInput");
-export const speciesButton = document.getElementById("speciesButton");
-export const speciesTable = document.getElementById("speciesTable");
-export const speciesTableThead = document.getElementById("speciesTableThead");
-export const speciesTableTbody = document.getElementById("speciesTableTbody");
+export const speciesInput = byId("speciesInput");
+export const speciesButton = byId("speciesButton");
+export const speciesTable = byId("speciesTable");
+export const speciesTableTbody = byId("speciesTableTbody");
 
 // --- Tabela Abilities ---
-export const abilitiesInput = document.getElementById("abilitiesInput");
-export const abilitiesButton = document.getElementById("abilitiesButton");
-export const abilitiesTable = document.getElementById("abilitiesTable");
-export const abilitiesTableThead = document.getElementById(
-    "abilitiesTableThead"
-);
-export const abilitiesTableTbody = document.getElementById(
-    "abilitiesTableTbody"
-);
+export const abilitiesInput = byId("abilitiesInput");
+export const abilitiesButton = byId("abilitiesButton");
+export const abilitiesTable = byId("abilitiesTable");
+export const abilitiesTableTbody = byId("abilitiesTableTbody");
 
 // --- Tabela Locations ---
-export const locationsInput = document.getElementById("locationsInput");
-export const locationsButton = document.getElementById("locationsButton");
-export const locationsTable = document.getElementById("locationsTable");
-export const locationsTableTbody = document.getElementById(
-    "locationsTableTbody"
-);
-export const locationsFilterContainer = document.getElementById(
-    "locationsFilterContainer"
-);
+export const locationsInput = byId("locationsInput");
+export const locationsButton = byId("locationsButton");
+export const locationsTableTbody = byId("locationsTableTbody");
+export const locationsFilterContainer = byId("locationsFilterContainer");
 
 // --- Tabela Moves ---
-export const movesInput = document.getElementById("movesInput");
-export const movesButton = document.getElementById("movesButton");
-export const movesTable = document.getElementById("movesTable");
-export const movesTableThead = document.getElementById("movesTableThead");
-export const movesTableTbody = document.getElementById("movesTableTbody");
+export const movesInput = byId("movesInput");
+export const movesButton = byId("movesButton");
+export const movesTable = byId("movesTable");
+export const movesTableTbody = byId("movesTableTbody");
 
 // --- Tabela Trainers ---
-export const trainersInput = document.getElementById("trainersInput");
-export const trainersButton = document.getElementById("trainersButton");
-export const trainersTable = document.getElementById("trainersTable");
-export const difficultyButtonContainer = document.getElementById(
-    "difficultyButtonContainer"
-);
-export const trainersTableTbody = document.getElementById("trainersTableTbody");
-export const trainersFilter = document.getElementById("trainersFilter");
+export const trainersInput = byId("trainersInput");
+export const trainersButton = byId("trainersButton");
+export const difficultyButtonContainer = byId("difficultyButtonContainer");
+export const trainersTableTbody = byId("trainersTableTbody");
+export const trainersFilter = byId("trainersFilter");
 
 // --- Tabela Items ---
-export const itemsInput = document.getElementById("itemsInput");
-export const itemsButton = document.getElementById("itemsButton");
-export const itemsTable = document.getElementById("itemsTable");
-export const itemsTableTbody = document.getElementById("itemsTableTbody");
-export const itemsFilter = document.getElementById("itemsFilter");
+export const itemsInput = byId("itemsInput");
+export const itemsButton = byId("itemsButton");
+export const itemsTableTbody = byId("itemsTableTbody");
 
 // --- DataLists ---
-export const abilitiesInputDataList = document.getElementById(
-    "abilitiesInputDataList"
-);
-export const speciesInputDataList = document.getElementById(
-    "speciesInputDataList"
-);
-export const movesInputDataList = document.getElementById("movesInputDataList");
+export const abilitiesInputDataList = byId("abilitiesInputDataList");
 
 // --- Tabela principal ---
-export const table = document.querySelector("#table");
+export const table = bySelector("#table");
 
 // --- Headers Abilities ---
-export const headerAbilitiesName = document.querySelector(
+export const headerAbilitiesName = bySelector(
     "#abilitiesTableThead th.ability"
 );
-export const headerAbilitiesDescription = document.querySelector(
+export const headerAbilitiesDescription = bySelector(
     "#abilitiesTableThead th.description"
 );
 
 // --- Headers Moves ---
-export const headerMovesMove = document.querySelector(
-    "#movesTableThead th.move"
-);
-export const headerMovesType = document.querySelector(
-    "#movesTableThead th.type"
-);
-export const headerMovesSplit = document.querySelector(
-    "#movesTableThead th.split"
-);
-export const headerMovesPower = document.querySelector(
-    "#movesTableThead th.power"
-);
-export const headerMovesAccuracy = document.querySelector(
-    "#movesTableThead th.accuracy"
-);
-export const headerMovesPP = document.querySelector("#movesTableThead th.PP");
-export const headerMovesEffect = document.querySelector(
-    "#movesTableThead th.effect"
-);
+export const headerMovesMove = bySelector("#movesTableThead th.move");
+export const headerMovesType = bySelector("#movesTableThead th.type");
+export const headerMovesSplit = bySelector("#movesTableThead th.split");
+export const headerMovesPower = bySelector("#movesTableThead th.power");
+export const headerMovesAccuracy = bySelector("#movesTableThead th.accuracy");
+export const headerMovesPP = bySelector("#movesTableThead th.PP");
+export const headerMovesEffect = bySelector("#movesTableThead th.effect");
 
 // --- Headers Species ---
-export const headerSpeciesID = document.querySelector(
-    "#speciesTableThead th.ID"
-);
-export const headerSpeciesSprite = document.querySelector(
-    "#speciesTableThead th.sprite"
-);
-export const headerSpeciesName = document.querySelector(
-    "#speciesTableThead th.species"
-);
-export const headerSpeciesTypes = document.querySelector(
-    "#speciesTableThead th.types"
-);
-export const headerSpeciesAbilities = document.querySelector(
+export const headerSpeciesID = bySelector("#speciesTableThead th.ID");
+export const headerSpeciesSprite = bySelector("#speciesTableThead th.sprite");
+export const headerSpeciesName = bySelector("#speciesTableThead th.species");
+export const headerSpeciesTypes = bySelector("#speciesTableThead th.types");
+export const headerSpeciesAbilities = bySelector(
     "#speciesTableThead th.abilities"
 );
-export const headerSpeciesHP = document.querySelector(
-    "#speciesTableThead th.baseHP"
-);
-export const headerSpeciesAtk = document.querySelector(
-    "#speciesTableThead th.baseAttack"
-);
-export const headerSpeciesDef = document.querySelector(
-    "#speciesTableThead th.baseDefense"
-);
-export const headerSpeciesSpA = document.querySelector(
+export const headerSpeciesHP = bySelector("#speciesTableThead th.baseHP");
+export const headerSpeciesAtk = bySelector("#speciesTableThead th.baseAttack");
+export const headerSpeciesDef = bySelector("#speciesTableThead th.baseDefense");
+export const headerSpeciesSpA = bySelector(
     "#speciesTableThead th.baseSpAttack"
 );
-export const headerSpeciesSpD = document.querySelector(
+export const headerSpeciesSpD = bySelector(
     "#speciesTableThead th.baseSpDefense"
 );
-export const headerSpeciesSpe = document.querySelector(
-    "#speciesTableThead th.baseSpeed"
-);
-export const headerSpeciesBST = document.querySelector(
-    "#speciesTableThead th.BST"
-);
+export const headerSpeciesSpe = bySelector("#speciesTableThead th.baseSpeed");
+export const headerSpeciesBST = bySelector("#speciesTableThead th.BST");
 
 // --- Headers Locations ---
-export const headerLocationsSprite = document.querySelector(
-    "#locationsTableThead th.sprite"
-);
-export const headerLocationsSpecies = document.querySelector(
-    "#locationsTableThead th.species"
-);
-export const headerLocationsRarity = document.querySelector(
-    "#locationsTableThead th.rarity"
-);
-export const headerLocationsZone = document.querySelector(
-    "#locationsTableThead th.zone"
-);
 
 // --- Botao utilitario ---
-export const utilityButton = document.querySelector(".utilityButton");
+export const utilityButton = bySelector(".utilityButton");
 
 // --- Containers de input/botao da tabela ---
-export const tableInput = document.getElementById("tableInput");
-export const tableButton = document.getElementById("tableButton");
+export const tableInput = byId("tableInput");
+export const tableButton = byId("tableButton");
 
 // --- Containers de filtro ---
-export const speciesFilterContainer = document.getElementById(
-    "speciesFilterContainer"
-);
-export const trainersFilterContainer = document.getElementById(
-    "trainersFilterContainer"
-);
+export const speciesFilterContainer = byId("speciesFilterContainer");
+export const trainersFilterContainer = byId("trainersFilterContainer");
 
 // --- Listas de filtros por tabela ---
-export const speciesFilterList = document.getElementById("speciesFilterList");
-export const locationsFilterList = document.getElementById(
-    "locationsFilterList"
-);
-export const movesFilterList = document.getElementById("movesFilterList");
-export const trainersFilterList = document.getElementById("trainersFilterList");
+export const speciesFilterList = byId("speciesFilterList");
+export const locationsFilterList = byId("locationsFilterList");
+export const movesFilterList = byId("movesFilterList");
+export const trainersFilterList = byId("trainersFilterList");
