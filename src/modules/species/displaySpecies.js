@@ -9,45 +9,11 @@ import {
     speciesTableTbody,
     changelogMode,
     panelSpecies,
-    speciesFilterContainer,
 } from "../../utils/domRefs.js";
-import {
-    createSpeciesPanel,
-    speciesPanel,
-} from "../../utils/speciesPanelUtility.js";
-import { sortTableByLearnsets } from "../../utils/tableUtility.js";
+import { createSpeciesPanel } from "../../utils/speciesPanelUtility.js";
+import { speciesPanel } from "../../utils/speciesPanelVisibility.js";
 import { gameData, uiState } from "../../utils/state.js";
 import { getMoveMethodLabel } from "../../utils/domUtils.js";
-
-uiState.speciesMoveFilter = null;
-
-export function updateSpeciesMoveFilter(sortTable = false) {
-    uiState.speciesMoveFilter = null;
-    const moveFiltersContainer = speciesFilterContainer.getElementsByClassName(
-        "speciesFilterMoveContainer"
-    )[0];
-    if (moveFiltersContainer) {
-        const filters = moveFiltersContainer.getElementsByClassName("filter");
-        if (filters.length === 1) {
-            if (filters[0].parentNode.children[0].value !== "NOT") {
-                uiState.speciesMoveFilter = filters[0].innerText
-                    .replace(" ", "")
-                    .split(":")[1];
-                Object.keys(gameData.moves).forEach((moveName) => {
-                    if (
-                        gameData.moves[moveName].ingameName ===
-                        uiState.speciesMoveFilter
-                    ) {
-                        uiState.speciesMoveFilter = moveName;
-                        if (sortTable) {
-                            sortTableByLearnsets(true);
-                        }
-                    }
-                });
-            }
-        }
-    }
-}
 
 export function appendSpeciesToTable(speciesName) {
     if (gameData.species[speciesName].baseSpeed <= 0) {

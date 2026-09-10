@@ -5,20 +5,80 @@ import {
     trainersFilter,
     trainersInput,
     trainersFilterContainer,
+    speciesFilterContainer,
+    locationsFilterContainer,
     speciesFilterList,
     locationsFilterList,
     movesFilterList,
     trainersFilterList,
 } from "./domRefs.js";
 import { sanitizeString, speciesCanLearnMove } from "./utility.js";
-import { lazyLoading } from "./tableUtility.js";
-import { updateSpeciesMoveFilter } from "../modules/species/displaySpecies.js";
+import { lazyLoading, sortTableByLearnsets } from "./tableUtility.js";
+import { passAllFilters } from "./trackerFilter.js";
 import {
     checkTrainerDifficulty,
     showRematch,
 } from "../modules/scripts/trainersLogic.js";
-import { updateLocationsMoveFilter } from "../modules/locations/displayLocations.js";
 import { gameData, trackers, uiState } from "./state.js";
+
+// ---------------------------------------------------------------------------
+// Filtro de move ativo.
+//
+// Existiam duas copias quase identicas disto — updateSpeciesMoveFilter em
+// displaySpecies.js e updateLocationsMoveFilter em displayLocations.js —
+// variando so o container, a classe CSS e o campo de uiState. Como quem as
+// chamava era exclusivamente este arquivo, importa-las de volta dos modulos de
+// display fechava o ultimo ciclo de import do projeto.
+//
+// A busca do nome exibido para a constante tambem era um scan linear sobre os
+// ~940 moves; uiState.moveIngameNameToKey e montado em setDataList() para isso.
+// ---------------------------------------------------------------------------
+
+/**
+ * @param {HTMLElement} container container de filtros da tabela
+ * @param {string} moveContainerClass classe do sub-container de filtros de move
+ * @returns {{label: string, key: string|null}|null} null quando nao ha
+ *   exatamente um filtro de move ativo, ou quando ele esta negado com NOT
+ */
+function readMoveFilter(container, moveContainerClass) {
+    const moveFiltersContainer =
+        container.getElementsByClassName(moveContainerClass)[0];
+    if (!moveFiltersContainer) return null;
+
+    const filters = moveFiltersContainer.getElementsByClassName("filter");
+    if (filters.length !== 1) return null;
+    if (filters[0].parentNode.children[0].value === "NOT") return null;
+
+    const label = filters[0].innerText.replace(" ", "").split(":")[1];
+    return { label, key: uiState.moveIngameNameToKey[label] ?? null };
+}
+
+/** @param {boolean} sortTable */
+function updateSpeciesMoveFilter(sortTable = false) {
+    uiState.speciesMoveFilter = null;
+    const found = readMoveFilter(
+        speciesFilterContainer,
+        "speciesFilterMoveContainer"
+    );
+    if (!found) return;
+
+    // Sem correspondencia, guarda o rotulo cru — era o que o codigo antigo
+    // fazia, e um rotulo que nao e move nao casa com learnset nenhum.
+    uiState.speciesMoveFilter = found.key ?? found.label;
+    if (found.key && sortTable) {
+        sortTableByLearnsets(true);
+    }
+}
+
+function updateLocationsMoveFilter() {
+    uiState.locationsMoveFilter = null;
+    const found = readMoveFilter(
+        locationsFilterContainer,
+        "locationsFilterMoveContainer"
+    );
+    if (!found) return;
+    uiState.locationsMoveFilter = found.key ?? found.label;
+}
 
 function returnAllORfilterValuefromLabel(label) {
     let activeORfilterArray = [];
@@ -37,20 +97,6 @@ function returnAllORfilterValuefromLabel(label) {
     }
 
     return activeORfilterArray;
-}
-
-export function reverseFilter(filterString, trackerFilter) {
-    if (trackerFilter.includes(filterString)) {
-        for (let k = 0; k < trackerFilter.length; k++) {
-            if (trackerFilter[k] === filterString) {
-                trackerFilter.splice(k, 1);
-            }
-        }
-    } else {
-        trackerFilter.push(filterString);
-    }
-
-    return trackerFilter;
 }
 
 function filterLogicalConnector(trackerFilter, value, label, operator, passed) {
@@ -109,16 +155,6 @@ function updateORinTracker(value, label) {
             }
         }
     }
-}
-
-export function passAllFilters(filterArray) {
-    for (let i = 0; i < filterArray.length; i++) {
-        if (!filterArray[i].includes("@OK")) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 function filterSpeciesForm(value, label, operator) {

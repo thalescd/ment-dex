@@ -4,41 +4,10 @@ import {
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
 } from "../../utils/utility.js";
-import {
-    locationsTableTbody,
-    locationsFilterContainer,
-} from "../../utils/domRefs.js";
+import { locationsTableTbody } from "../../utils/domRefs.js";
 import { createSpeciesPanel } from "../../utils/speciesPanelUtility.js";
 import { gameData, uiState } from "../../utils/state.js";
 import { getMoveMethodLabel } from "../../utils/domUtils.js";
-
-uiState.locationsMoveFilter = null;
-
-export function updateLocationsMoveFilter() {
-    uiState.locationsMoveFilter = null;
-    const moveFiltersContainer =
-        locationsFilterContainer.getElementsByClassName(
-            "locationsFilterMoveContainer"
-        )[0];
-    if (moveFiltersContainer) {
-        const filters = moveFiltersContainer.getElementsByClassName("filter");
-        if (filters.length === 1) {
-            if (filters[0].parentNode.children[0].value !== "NOT") {
-                uiState.locationsMoveFilter = filters[0].innerText
-                    .replace(" ", "")
-                    .split(":")[1];
-                Object.keys(gameData.moves).forEach((moveName) => {
-                    if (
-                        gameData.moves[moveName]["ingameName"] ===
-                        uiState.locationsMoveFilter
-                    ) {
-                        uiState.locationsMoveFilter = moveName;
-                    }
-                });
-            }
-        }
-    }
-}
 
 export function appendLocationsToTable(key) {
     const timeRegex = /Day|Night|Morning|Evening|Dusk|Dawn/i;

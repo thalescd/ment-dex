@@ -22,8 +22,6 @@ import {
     speciesType2,
     speciesPanelLocationsButton,
     speciesAbilities,
-    speciesInnatesMainContainer,
-    speciesInnates,
     speciesEvoTable,
     speciesFormes,
     speciesChanges,
@@ -37,7 +35,6 @@ import {
     speciesPanelEggMovesTable,
     shinyToggle,
     body,
-    overlay,
     overlaySpeciesPanel,
     graph,
     graphStats,
@@ -55,6 +52,7 @@ import { clearChildren } from "./domUtils.js";
 
 // --- Extracted modules ---
 import { manageSpeciesPanelHistory } from "./speciesPanelHistory.js";
+import { speciesPanel } from "./speciesPanelVisibility.js";
 import { createChange } from "./speciesPanelChanges.js";
 import {
     buildSpeciesPanelLevelUpFromPreviousEvoTable,
@@ -87,7 +85,7 @@ export async function createSpeciesPanel(name) {
     setPanelSpecies(name);
     speciesPanel("show");
     refreshURLParams();
-    await manageSpeciesPanelHistory(name);
+    await manageSpeciesPanelHistory(name, createSpeciesPanel);
 
     if (isReopen) {
         return;
@@ -787,46 +785,6 @@ export function createPopupForInfo() {
             const heldItem2 = document.createElement("div");
             heldItem2.innerText = `5% ${sanitizeString(gameData.species[panelSpecies]["item2"])}`;
             popup.append(heldItem2);
-        }
-    }
-}
-
-export async function speciesPanel(param) {
-    if (typeof speciesPanelMainContainer !== "undefined") {
-        if (
-            param === "hide" ||
-            gameData.species[panelSpecies]["baseSpeed"] <= 0
-        ) {
-            body.classList.remove("fixedPanel");
-            overlaySpeciesPanel.style.display = "none";
-            speciesPanelMainContainer.classList.add("hide");
-            refreshURLParams();
-            if (table.getBoundingClientRect().top < 0) {
-                utilityButton.innerText = "\u2191";
-            } else {
-                utilityButton.innerText = "\u2630";
-            }
-        } else if (param === "show") {
-            utilityButton.innerText = "X";
-            body.classList.add("fixedPanel");
-            overlaySpeciesPanel.style.display = "block";
-            speciesPanelMainContainer.classList.remove("hide");
-        } else {
-            speciesPanelMainContainer.classList.toggle("hide");
-            if (speciesPanelMainContainer.classList.contains("hide")) {
-                overlaySpeciesPanel.style.display = "none";
-                body.classList.remove("fixedPanel");
-                refreshURLParams();
-                if (table.getBoundingClientRect().top < 0) {
-                    utilityButton.innerText = "\u2191";
-                } else {
-                    utilityButton.innerText = "\u2630";
-                }
-            } else {
-                utilityButton.innerText = "X";
-                overlaySpeciesPanel.style.display = "block";
-                body.classList.add("fixedPanel");
-            }
         }
     }
 }

@@ -15,7 +15,7 @@ import {
     deleteFiltersFromTable,
     createFilter,
 } from "../../utils/tableFilters.js";
-import { speciesPanel } from "../../utils/speciesPanelUtility.js";
+import { speciesPanel } from "../../utils/speciesPanelVisibility.js";
 
 export function appendMovesToTable(moveName) {
     if (

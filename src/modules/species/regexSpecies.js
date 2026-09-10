@@ -1,15 +1,6 @@
 // Parsers para o formato pokeemerald-expansion
 import { repos } from "../../utils/config.js";
 
-// Helpers para extrair strings entre aspas de macros C
-function extractQuotedStrings(raw) {
-    const parts = [];
-    const re = /"([^"]*)"/g;
-    let m;
-    while ((m = re.exec(raw)) !== null) parts.push(m[1]);
-    return parts.join("").replace(/\\n/g, " ");
-}
-
 // ========================================================================
 // 1. parseSpeciesConstants — include/constants/species.h
 //
@@ -103,7 +94,6 @@ export function parseSpeciesInfo(text) {
     const families = {};
 
     // Tracking de familias via #if P_FAMILY_XXX ... #endif
-    let currentFamily = null;
     const lines = text.split("\n");
     const familyStartRe = /^#if\s+P_FAMILY_(\w+)/;
     const familyEndRe = /^#endif\s*\/\/\s*P_FAMILY_/;

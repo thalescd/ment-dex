@@ -3,7 +3,6 @@ import { panelSpecies, speciesPanelHistoryContainer } from "./domRefs.js";
 import { gameData, uiState } from "./state.js";
 import { clearChildren } from "./domUtils.js";
 import { MAX_PANEL_HISTORY, LOCK_SPECIES_TIMEOUT_MS } from "./config.js";
-import { createSpeciesPanel } from "./speciesPanelUtility.js";
 
 // Initialize history from localStorage
 if (localStorage.getItem("speciesPanelHistory")) {
@@ -14,7 +13,12 @@ if (localStorage.getItem("speciesPanelHistory")) {
     uiState.speciesPanelHistory = [];
 }
 
-function updateSpeciesPanelHistoryOrder() {
+// `openPanel` e injetado em vez de importado: abrir o painel vive em
+// speciesPanelUtility.js, que por sua vez chama este modulo para registrar o
+// que foi aberto. Importar de volta fechava um ciclo. Como parametro, a
+// dependencia fica visivel na assinatura e o modulo passa a ser testavel.
+/** @param {(name: string) => Promise<void>} openPanel */
+function updateSpeciesPanelHistoryOrder(openPanel) {
     for (let i = 0; i < uiState.speciesPanelHistory.length; i++) {
         if (uiState.speciesPanelHistory[i][1] === true) {
             for (let j = i; j > 0; j--) {
@@ -33,10 +37,11 @@ function updateSpeciesPanelHistoryOrder() {
         "speciesPanelHistory",
         JSON.stringify(uiState.speciesPanelHistory)
     );
-    displaySpeciesPanelHistory();
+    displaySpeciesPanelHistory(openPanel);
 }
 
-function displaySpeciesPanelHistory() {
+/** @param {(name: string) => Promise<void>} openPanel */
+function displaySpeciesPanelHistory(openPanel) {
     clearChildren(speciesPanelHistoryContainer);
 
     for (let i = 0; i < uiState.speciesPanelHistory.length; i++) {
@@ -81,7 +86,7 @@ function displaySpeciesPanelHistory() {
                     spriteContainer.classList.contains("emulateClick") &&
                     panelSpecies !== speciesName
                 ) {
-                    await createSpeciesPanel(speciesName);
+                    await openPanel(speciesName);
                 }
             }
         }
@@ -93,7 +98,7 @@ function displaySpeciesPanelHistory() {
             } else {
                 uiState.speciesPanelHistory[i][1] = false;
             }
-            updateSpeciesPanelHistoryOrder();
+            updateSpeciesPanelHistoryOrder(openPanel);
         }
 
         function emulateClick() {
@@ -118,7 +123,11 @@ function displaySpeciesPanelHistory() {
     }
 }
 
-export async function manageSpeciesPanelHistory(speciesName) {
+/**
+ * @param {string} speciesName
+ * @param {(name: string) => Promise<void>} openPanel
+ */
+export async function manageSpeciesPanelHistory(speciesName, openPanel) {
     for (let i = 0; i < uiState.speciesPanelHistory.length; i++) {
         if (
             !(uiState.speciesPanelHistory[i][0] in gameData.species) ||
@@ -134,7 +143,7 @@ export async function manageSpeciesPanelHistory(speciesName) {
         speciesPanelHistoryContainer.children.length !=
         uiState.speciesPanelHistory.length
     ) {
-        displaySpeciesPanelHistory();
+        displaySpeciesPanelHistory(openPanel);
     }
 
     for (let i = 0; i < speciesPanelHistoryContainer.children.length; i++) {
@@ -186,7 +195,7 @@ export async function manageSpeciesPanelHistory(speciesName) {
                     uiState.speciesPanelHistory[j];
                 uiState.speciesPanelHistory[j] = temp;
             }
-            displaySpeciesPanelHistory();
+            displaySpeciesPanelHistory(openPanel);
             localStorage.setItem(
                 "speciesPanelHistory",
                 JSON.stringify(uiState.speciesPanelHistory)
@@ -203,7 +212,7 @@ export async function manageSpeciesPanelHistory(speciesName) {
     while (uiState.speciesPanelHistory.length > maxHistory) {
         uiState.speciesPanelHistory.splice(-1, 1);
     }
-    displaySpeciesPanelHistory();
+    displaySpeciesPanelHistory(openPanel);
     localStorage.setItem(
         "speciesPanelHistory",
         JSON.stringify(uiState.speciesPanelHistory)

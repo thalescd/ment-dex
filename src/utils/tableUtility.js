@@ -7,7 +7,7 @@ import {
     speciesCanLearnMove,
     refreshURLParams,
 } from "./utility.js";
-import { passAllFilters } from "./tableFilters.js";
+import { passAllFilters } from "./trackerFilter.js";
 import {
     locationsButton,
     trainersButton,

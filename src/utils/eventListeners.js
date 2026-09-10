@@ -16,10 +16,10 @@ import { filterFilters } from "./tableFilters.js";
 import {
     fetchShinySprite,
     createSpeciesPanel,
-    speciesPanel,
     createPopupForLocations,
     createPopupForInfo,
 } from "./speciesPanelUtility.js";
+import { speciesPanel } from "./speciesPanelVisibility.js";
 import { refreshURLParams, clearLocalStorage } from "./utility.js";
 import { clearChildren } from "./domUtils.js";
 import { displayHistoryObj } from "./app.js";
@@ -88,7 +88,6 @@ import {
 } from "./domRefs.js";
 
 // --- Configuracao inicial ---
-let asc;
 document.title = appTitle;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -142,7 +141,7 @@ headerAbilitiesName.addEventListener("click", () => {
         gameData.abilities,
         ["name"],
         "ability",
-        (asc = headerAbilitiesName.classList.contains("th-sort-desc"))
+        headerAbilitiesName.classList.contains("th-sort-desc")
     );
 });
 headerAbilitiesDescription.addEventListener("click", () => {
@@ -151,7 +150,7 @@ headerAbilitiesDescription.addEventListener("click", () => {
         gameData.abilities,
         ["description"],
         "description",
-        (asc = headerAbilitiesDescription.classList.contains("th-sort-desc"))
+        headerAbilitiesDescription.classList.contains("th-sort-desc")
     );
 });
 
@@ -162,7 +161,7 @@ headerMovesMove.addEventListener("click", () => {
         gameData.moves,
         ["name"],
         "move",
-        (asc = headerMovesMove.classList.contains("th-sort-desc"))
+        headerMovesMove.classList.contains("th-sort-desc")
     );
 });
 headerMovesType.addEventListener("click", () => {
@@ -171,7 +170,7 @@ headerMovesType.addEventListener("click", () => {
         gameData.moves,
         ["type", "split"],
         "type",
-        (asc = headerMovesType.classList.contains("th-sort-desc"))
+        headerMovesType.classList.contains("th-sort-desc")
     );
 });
 headerMovesSplit.addEventListener("click", () => {
@@ -180,7 +179,7 @@ headerMovesSplit.addEventListener("click", () => {
         gameData.moves,
         ["split", "type"],
         "split",
-        (asc = headerMovesSplit.classList.contains("th-sort-desc"))
+        headerMovesSplit.classList.contains("th-sort-desc")
     );
 });
 headerMovesPower.addEventListener("click", () => {
@@ -189,7 +188,7 @@ headerMovesPower.addEventListener("click", () => {
         gameData.moves,
         ["power"],
         "power",
-        (asc = headerMovesPower.classList.contains("th-sort-desc"))
+        headerMovesPower.classList.contains("th-sort-desc")
     );
 });
 headerMovesAccuracy.addEventListener("click", () => {
@@ -198,7 +197,7 @@ headerMovesAccuracy.addEventListener("click", () => {
         gameData.moves,
         ["accuracy"],
         "accuracy",
-        (asc = headerMovesAccuracy.classList.contains("th-sort-desc"))
+        headerMovesAccuracy.classList.contains("th-sort-desc")
     );
 });
 headerMovesPP.addEventListener("click", () => {
@@ -207,7 +206,7 @@ headerMovesPP.addEventListener("click", () => {
         gameData.moves,
         ["PP"],
         "PP",
-        (asc = headerMovesPP.classList.contains("th-sort-desc"))
+        headerMovesPP.classList.contains("th-sort-desc")
     );
 });
 headerMovesEffect.addEventListener("click", () => {
@@ -216,7 +215,7 @@ headerMovesEffect.addEventListener("click", () => {
         gameData.moves,
         ["effect"],
         "effect",
-        (asc = headerMovesEffect.classList.contains("th-sort-desc"))
+        headerMovesEffect.classList.contains("th-sort-desc")
     );
 });
 
@@ -224,7 +223,7 @@ headerMovesEffect.addEventListener("click", () => {
 headerSpeciesID.addEventListener("click", () => {
     if (uiState.speciesMoveFilter) {
         sortTableByLearnsets(
-            (asc = !headerSpeciesID.classList.contains("th-sort-asc"))
+            !headerSpeciesID.classList.contains("th-sort-asc")
         );
     } else {
         sortTableByClassName(
@@ -232,7 +231,7 @@ headerSpeciesID.addEventListener("click", () => {
             gameData.species,
             ["ID"],
             "ID",
-            (asc = headerSpeciesID.classList.contains("th-sort-desc"))
+            headerSpeciesID.classList.contains("th-sort-desc")
         );
     }
 });
@@ -242,7 +241,7 @@ headerSpeciesSprite.addEventListener("click", () => {
         gameData.species,
         ["ID"],
         "ID",
-        (asc = headerSpeciesSprite.classList.contains("th-sort-desc"))
+        headerSpeciesSprite.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesName.addEventListener("click", () => {
@@ -251,7 +250,7 @@ headerSpeciesName.addEventListener("click", () => {
         gameData.species,
         ["name"],
         "species",
-        (asc = headerSpeciesName.classList.contains("th-sort-desc"))
+        headerSpeciesName.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesTypes.addEventListener("click", () => {
@@ -260,7 +259,7 @@ headerSpeciesTypes.addEventListener("click", () => {
         gameData.species,
         ["type1", "type2"],
         "types",
-        (asc = headerSpeciesTypes.classList.contains("th-sort-desc"))
+        headerSpeciesTypes.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesAbilities.addEventListener("click", () => {
@@ -269,7 +268,7 @@ headerSpeciesAbilities.addEventListener("click", () => {
         gameData.species,
         ["abilities"],
         "abilities",
-        (asc = headerSpeciesAbilities.classList.contains("th-sort-desc"))
+        headerSpeciesAbilities.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesHP.addEventListener("click", () => {
@@ -278,7 +277,7 @@ headerSpeciesHP.addEventListener("click", () => {
         gameData.species,
         ["baseHP"],
         "baseHP",
-        (asc = headerSpeciesHP.classList.contains("th-sort-desc"))
+        headerSpeciesHP.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesAtk.addEventListener("click", () => {
@@ -287,7 +286,7 @@ headerSpeciesAtk.addEventListener("click", () => {
         gameData.species,
         ["baseAttack"],
         "baseAttack",
-        (asc = headerSpeciesAtk.classList.contains("th-sort-desc"))
+        headerSpeciesAtk.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesDef.addEventListener("click", () => {
@@ -296,7 +295,7 @@ headerSpeciesDef.addEventListener("click", () => {
         gameData.species,
         ["baseDefense"],
         "baseDefense",
-        (asc = headerSpeciesDef.classList.contains("th-sort-desc"))
+        headerSpeciesDef.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesSpA.addEventListener("click", () => {
@@ -305,7 +304,7 @@ headerSpeciesSpA.addEventListener("click", () => {
         gameData.species,
         ["baseSpAttack"],
         "baseSpAttack",
-        (asc = headerSpeciesSpA.classList.contains("th-sort-desc"))
+        headerSpeciesSpA.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesSpD.addEventListener("click", () => {
@@ -314,7 +313,7 @@ headerSpeciesSpD.addEventListener("click", () => {
         gameData.species,
         ["baseSpDefense"],
         "baseSpDefense",
-        (asc = headerSpeciesSpD.classList.contains("th-sort-desc"))
+        headerSpeciesSpD.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesSpe.addEventListener("click", () => {
@@ -323,7 +322,7 @@ headerSpeciesSpe.addEventListener("click", () => {
         gameData.species,
         ["baseSpeed"],
         "baseSpeed",
-        (asc = headerSpeciesSpe.classList.contains("th-sort-desc"))
+        headerSpeciesSpe.classList.contains("th-sort-desc")
     );
 });
 headerSpeciesBST.addEventListener("click", () => {
@@ -332,7 +331,7 @@ headerSpeciesBST.addEventListener("click", () => {
         gameData.species,
         ["BST"],
         "BST",
-        (asc = headerSpeciesBST.classList.contains("th-sort-desc"))
+        headerSpeciesBST.classList.contains("th-sort-desc")
     );
 });
 

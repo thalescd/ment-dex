@@ -16,7 +16,8 @@ import {
     deleteFiltersFromTable,
 } from "./tableFilters.js";
 import { displaySetup, tableButtonClick } from "./tableUtility.js";
-import { createSpeciesPanel, speciesPanel } from "./speciesPanelUtility.js";
+import { createSpeciesPanel } from "./speciesPanelUtility.js";
+import { speciesPanel } from "./speciesPanelVisibility.js";
 import { fetchSpeciesObj } from "../modules/species/fetchSpecies.js";
 import { fetchMovesObj } from "../modules/moves/fetchMoves.js";
 import { fetchAbilitiesObj } from "../modules/abilities/fetchAbilities.js";
