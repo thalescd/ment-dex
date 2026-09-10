@@ -22,7 +22,6 @@ import { fetchMovesObj } from "../modules/moves/fetchMoves.js";
 import { fetchAbilitiesObj } from "../modules/abilities/fetchAbilities.js";
 import { fetchLocationsObj } from "../modules/locations/fetchLocations.js";
 import { fetchScripts } from "../modules/scripts/fetchScripts.js";
-import { fetchStrategiesObj } from "../modules/strategies/fetchStrategies.js";
 
 export async function fetchData(urlParams) {
     try {
@@ -31,7 +30,6 @@ export async function fetchData(urlParams) {
         await fetchSpeciesObj();
         await fetchLocationsObj();
         await fetchScripts();
-        await fetchStrategiesObj();
 
         await fetchTypeChart();
         getLocationsByPokemon();
@@ -165,6 +163,6 @@ export async function displayHistoryObj(historyStateObj) {
 
 export function exportData() {
     console.log(
-        `let backupData = [${JSON.stringify(gameData.moves)}, ${JSON.stringify(gameData.abilities)}, ${JSON.stringify(gameData.species)}, ${JSON.stringify(gameData.locations)}, ${JSON.stringify(gameData.trainers)}, ${JSON.stringify(gameData.items)}, ${JSON.stringify(gameData.strategies)}, ${JSON.stringify(gameData.typeChart)}]`
+        `let backupData = [${JSON.stringify(gameData.moves)}, ${JSON.stringify(gameData.abilities)}, ${JSON.stringify(gameData.species)}, ${JSON.stringify(gameData.locations)}, ${JSON.stringify(gameData.trainers)}, ${JSON.stringify(gameData.items)}, ${JSON.stringify(gameData.typeChart)}]`
     );
 }

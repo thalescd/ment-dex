@@ -30,8 +30,6 @@ import {
     speciesChangesContainer,
     speciesDefensiveTypeChart,
     speciesOffensiveTypeChart,
-    speciesStrategiesContainer,
-    speciesStrategies,
     speciesPanelLevelUpFromPreviousEvoTable,
     speciesPanelLevelUpTable,
     speciesPanelTMHMTable,
@@ -58,7 +56,6 @@ import { clearChildren } from "./domUtils.js";
 // --- Extracted modules ---
 import { manageSpeciesPanelHistory } from "./speciesPanelHistory.js";
 import { createChange } from "./speciesPanelChanges.js";
-import { createSpeciesStrategy } from "./speciesPanelStrategies.js";
 import {
     buildSpeciesPanelLevelUpFromPreviousEvoTable,
     buildSpeciesPanelDoubleLearnsetsTable,
@@ -399,18 +396,6 @@ export async function createSpeciesPanel(name) {
         console.log(
             `Couldn't calc offensiveTypeEffectivenessValue for ${name}`
         );
-    }
-
-    if (gameData.strategies[name]) {
-        speciesStrategiesContainer.classList.remove("hide");
-        clearChildren(speciesStrategies);
-        for (let i = 0; i < gameData.strategies[name].length; i++) {
-            speciesStrategies.append(
-                createSpeciesStrategy(gameData.strategies[name][i], name)
-            );
-        }
-    } else {
-        speciesStrategiesContainer.classList.add("hide");
     }
 
     // Tutor learnsets: WIP

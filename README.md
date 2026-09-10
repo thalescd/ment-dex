@@ -12,8 +12,12 @@ Heavily inspired by [Unbound Pokedex](https://github.com/Ydarissep/Unbound-Poked
 - **Moves** — type, power, accuracy, PP, and descriptions
 - **Abilities** — names and descriptions
 - **Locations** — wild Pokémon encounter tables
-- **Trainers & Items** — trainer rosters with difficulty levels and item lists
-- **Strategies** — battle strategy notes
+
+Planned, not implemented yet:
+
+- **Trainers & Items** — the display layer exists, but the parsers still target
+  the old CFRU source format and are disabled pending a rewrite against
+  pokeemerald-expansion
 
 ### UI Highlights
 
@@ -30,9 +34,23 @@ The app fetches C header files directly from the pokeemerald-expansion repositor
 
 ## Stack
 
-- Vanilla JavaScript (ES modules)
+- Vanilla JavaScript (ES modules), no build step
 - Vanilla CSS
-- ESLint + Prettier + Husky
+- ESLint + Prettier, run on commit via Husky + lint-staged
+
+## Development
+
+Requires Node 20+.
+
+```bash
+npm install          # also installs the git hooks
+npm run lint         # eslint
+npm run format       # prettier --write
+npm run typecheck    # tsc against jsconfig.json (checkJs)
+```
+
+Serve the directory with any static file server and open `index.html`; there is
+nothing to build.
 
 ## Credits
 

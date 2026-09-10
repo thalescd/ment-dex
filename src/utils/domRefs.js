@@ -36,9 +36,6 @@ export const changelogMode = document.getElementById("changelogMode");
 export const onlyShowChangedPokemon = document.getElementById(
     "onlyShowChangedPokemon"
 );
-export const onlyShowStrategyPokemon = document.getElementById(
-    "onlyShowStrategyPokemon"
-);
 
 // --- Grafico de stats ---
 export const graph = document.getElementById("statsGraph");
@@ -94,10 +91,6 @@ export const speciesDefensiveTypeChart = document.getElementById(
 export const speciesOffensiveTypeChart = document.getElementById(
     "speciesOffensiveTypeChart"
 );
-export const speciesStrategiesContainer = document.getElementById(
-    "speciesStrategiesContainer"
-);
-export const speciesStrategies = document.getElementById("speciesStrategies");
 export const speciesPanelLevelUpFromPreviousEvoTable = document.getElementById(
     "speciesPanelLevelUpFromPreviousEvoTable"
 );

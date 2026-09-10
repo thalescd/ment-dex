@@ -13,7 +13,6 @@ import {
 } from "./utility.js";
 import { passAllFilters } from "./tableFilters.js";
 import {
-    onlyShowStrategyPokemon,
     locationsButton,
     trainersButton,
     changelogMode,
@@ -41,9 +40,6 @@ import {
 export async function displaySetup() {
     statusMsg("");
 
-    if (Object.keys(gameData.strategies).length === 0) {
-        onlyShowStrategyPokemon.classList.add("hide");
-    }
     if (Object.keys(gameData.locations).length === 0) {
         locationsButton.classList.add("hide");
     }

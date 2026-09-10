@@ -22,7 +22,7 @@ import {
 } from "./speciesPanelUtility.js";
 import { refreshURLParams, clearLocalStorage } from "./utility.js";
 import { clearChildren } from "./domUtils.js";
-import { displayHistoryObj, fetchData } from "./app.js";
+import { displayHistoryObj } from "./app.js";
 import { gameData, trackers, uiState } from "./state.js";
 import {
     panelSpecies,
@@ -48,7 +48,6 @@ import {
     hideEggMoves,
     changelogMode,
     onlyShowChangedPokemon,
-    onlyShowStrategyPokemon,
     table,
     abilitiesTable,
     movesTable,
@@ -467,21 +466,6 @@ onlyShowChangedPokemon.addEventListener("click", () => {
     }
     lazyLoading(true);
 });
-onlyShowStrategyPokemon.addEventListener("click", () => {
-    onlyShowStrategyPokemon.classList.toggle("activeSetting");
-    for (let i = 0, j = trackers.species.length; i < j; i++) {
-        if (onlyShowStrategyPokemon.classList.contains("activeSetting")) {
-            if (!gameData.strategies[trackers.species[i]["key"]]) {
-                trackers.species[i]["filter"].push("strategy");
-            }
-        } else {
-            trackers.species[i]["filter"] = trackers.species[i][
-                "filter"
-            ].filter((value) => value !== "strategy");
-        }
-    }
-    lazyLoading(true);
-});
 
 // --- Species panel popup buttons ---
 speciesPanelLocationsButton.addEventListener("click", () => {
@@ -682,7 +666,3 @@ window.addEventListener("popstate", async () => {
         historyObj.pop();
     }
 });
-
-// --- Bootstrap: inicia o app ---
-const searchParams = new URLSearchParams(window.location.search);
-fetchData(searchParams);

@@ -9,7 +9,6 @@ export const gameData = {
     locations: {},
     trainers: {},
     items: {},
-    strategies: {},
     typeChart: {},
     sprites: {},
     locationsByPokemon: {},
