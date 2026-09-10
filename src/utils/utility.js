@@ -76,14 +76,22 @@ export async function checkForUpdates(updateBtn) {
     }
 }
 
+/**
+ * Mostra uma mensagem de status no header. Chamar com "" limpa.
+ * A mensagem e unica: a nova substitui a anterior.
+ * @param {string} input
+ */
 export function statusMsg(input) {
-    if (input === "")
-        document
-            .querySelectorAll("#appHeader > p")
-            .forEach((paragraph) => paragraph.remove());
+    const header = document.getElementById("appHeader");
+    if (!header) return;
+
+    header.querySelectorAll("p.statusMsg").forEach((p) => p.remove());
+    if (input === "") return;
 
     const paragraph = document.createElement("p");
-    document.getElementById("appHeader")?.append(paragraph);
+    paragraph.className = "statusMsg";
+    paragraph.innerText = input;
+    header.append(paragraph);
 }
 
 export function copyToClipboard(text) {

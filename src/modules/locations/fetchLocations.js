@@ -1,7 +1,8 @@
-import { LZString } from "../../utils/lz-string.js";
 import { statusMsg } from "../../utils/utility.js";
 import { gameData, trackers } from "../../utils/state.js";
 import { dataSources } from "../../utils/config.js";
+import { fetchJson } from "../../utils/http.js";
+import { loadCached } from "../../utils/cache.js";
 
 // Mapeamento de tipo de encounter para nome legivel
 const METHOD_NAMES = {
@@ -33,8 +34,7 @@ function aggregateSlots(mons, rates) {
 async function buildLocationsObj() {
     try {
         statusMsg("Fetching locations");
-        const raw = await fetch(dataSources.wildEncountersJson);
-        const json = await raw.json();
+        const json = await fetchJson(dataSources.wildEncountersJson);
         const locations = {};
 
         // Pegar o primeiro grupo (gWildMonHeaders)
@@ -91,10 +91,6 @@ async function buildLocationsObj() {
             }
         }
 
-        localStorage.setItem(
-            "locations",
-            LZString.compressToUTF16(JSON.stringify(locations))
-        );
         return locations;
     } catch (e) {
         console.error("Failed to build locations data:", e.message, e.stack);
@@ -104,27 +100,19 @@ async function buildLocationsObj() {
 }
 
 export async function fetchLocationsObj() {
-    if (!localStorage.getItem("locations")) {
-        gameData.locations = await buildLocationsObj();
-    } else {
-        gameData.locations = await JSON.parse(
-            LZString.decompressFromUTF16(localStorage.getItem("locations"))
-        );
-    }
+    gameData.locations = await loadCached("locations", buildLocationsObj);
 
-    let counter = 0;
-    trackers.locations = [];
-    Object.keys(gameData.locations).forEach((zone) => {
-        Object.keys(gameData.locations[zone]).forEach((method) => {
-            Object.keys(gameData.locations[zone][method]).forEach(
-                (speciesName) => {
-                    trackers.locations[counter] = {};
-                    trackers.locations[counter]["key"] =
-                        `${zone}\\${method}\\${speciesName}`;
-                    trackers.locations[counter]["filter"] = [];
-                    counter++;
-                }
-            );
-        });
-    });
+    // Uma entrada de tracker por (zona, metodo, especie)
+    const entries = [];
+    for (const [zone, methods] of Object.entries(gameData.locations)) {
+        for (const [method, speciesMap] of Object.entries(methods)) {
+            for (const speciesName of Object.keys(speciesMap)) {
+                entries.push({
+                    key: `${zone}\\${method}\\${speciesName}`,
+                    filter: [],
+                });
+            }
+        }
+    }
+    trackers.locations = entries;
 }

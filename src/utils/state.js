@@ -36,3 +36,12 @@ export const uiState = {
     abilityIngameNameToKey: {},
     moveIngameNameToKey: {},
 };
+
+/**
+ * Monta a lista de tracker para uma tabela: uma entrada por chave do objeto.
+ * @param {Record<string, unknown>} obj
+ * @returns {{ key: string, filter: string[] }[]}
+ */
+export function buildTracker(obj) {
+    return Object.keys(obj).map((key) => ({ key, filter: [] }));
+}

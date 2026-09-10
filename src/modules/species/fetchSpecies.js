@@ -1,8 +1,9 @@
 import { gameData, trackers } from "../../utils/state.js";
 import { dataSources } from "../../utils/config.js";
-import { LZString } from "../../utils/lz-string.js";
 import { setTracker } from "../../utils/domRefs.js";
 import { statusMsg } from "../../utils/utility.js";
+import { fetchText, fetchJson } from "../../utils/http.js";
+import { loadCached, writeCache } from "../../utils/cache.js";
 import {
     parseSpeciesConstants,
     parseSpeciesInfo,
@@ -30,24 +31,18 @@ async function fetchAllData() {
         spritesText,
         formTablesText,
     ] = await Promise.all([
-        fetch(dataSources.speciesConstants).then((r) => r.text()),
-        Promise.all(
-            dataSources.speciesInfo.map((url) =>
-                fetch(url).then((r) => r.text())
-            )
-        ),
+        fetchText(dataSources.speciesConstants),
+        Promise.all(dataSources.speciesInfo.map(fetchText)),
         Array.isArray(dataSources.levelUpLearnsets)
-            ? Promise.all(
-                  dataSources.levelUpLearnsets.map((url) =>
-                      fetch(url).then((r) => r.text())
-                  )
-              ).then((texts) => texts.join("\n"))
-            : fetch(dataSources.levelUpLearnsets).then((r) => r.text()),
-        fetch(dataSources.teachableLearnsets).then((r) => r.json()),
-        fetch(dataSources.eggMoves).then((r) => r.text()),
-        fetch(dataSources.tmsHms).then((r) => r.text()),
-        fetch(dataSources.pokemonGraphics).then((r) => r.text()),
-        fetch(dataSources.formSpeciesTables).then((r) => r.text()),
+            ? Promise.all(dataSources.levelUpLearnsets.map(fetchText)).then(
+                  (texts) => texts.join("\n")
+              )
+            : fetchText(dataSources.levelUpLearnsets),
+        fetchJson(dataSources.teachableLearnsets),
+        fetchText(dataSources.eggMoves),
+        fetchText(dataSources.tmsHms),
+        fetchText(dataSources.pokemonGraphics),
+        fetchText(dataSources.formSpeciesTables),
     ]);
 
     return {
@@ -85,6 +80,8 @@ function parseAllData(raw) {
     const spriteRefs = parseSpriteRefs(raw.spritesText);
     const formClassification = parseFormSpeciesTables(raw.formTablesText);
 
+    assertPlausible(constants, allInfoData, levelUpLearnsets);
+
     return {
         constants,
         allInfoData,
@@ -98,6 +95,39 @@ function parseAllData(raw) {
     };
 }
 
+// O upstream muda de formato sem aviso, e um parser que deixa de casar devolve
+// um objeto vazio em vez de lançar. Sem esta guarda o resultado vazio era
+// montado, cacheado e servido — a dex ficava vazia e nada avisava.
+// Os limites sao deliberadamente baixos: detectam "o parser parou de casar",
+// nao "faltam algumas especies".
+const MIN_CONSTANTS = 500;
+const MIN_SPECIES_INFO = 500;
+const MIN_LEVEL_UP_LEARNSETS = 300;
+
+function assertPlausible(constants, allInfoData, levelUpLearnsets) {
+    /** @type {string[]} */
+    const problems = [];
+    const check = (label, actual, min) => {
+        if (actual < min) {
+            problems.push(`${label}: ${actual} (esperado no minimo ${min})`);
+        }
+    };
+
+    check("species constants", Object.keys(constants).length, MIN_CONSTANTS);
+    check("species_info", Object.keys(allInfoData).length, MIN_SPECIES_INFO);
+    check(
+        "level-up learnsets",
+        Object.keys(levelUpLearnsets).length,
+        MIN_LEVEL_UP_LEARNSETS
+    );
+
+    if (problems.length > 0) {
+        throw new Error(
+            `Parse de species rendeu muito pouco — o formato upstream provavelmente mudou. ${problems.join("; ")}`
+        );
+    }
+}
+
 // --- FASE 3: MONTAR SPECIES ---
 
 function assembleSpecies(parsed) {
@@ -106,7 +136,6 @@ function assembleSpecies(parsed) {
     const {
         constants,
         allInfoData,
-        allFamilies,
         levelUpLearnsets,
         teachableLearnsets,
         eggMoveLearnsets,
@@ -290,15 +319,8 @@ async function buildSpeciesObj() {
             }
         });
 
-        // Cache
-        localStorage.setItem(
-            "species",
-            LZString.compressToUTF16(JSON.stringify(species))
-        );
-        localStorage.setItem(
-            "moves",
-            LZString.compressToUTF16(JSON.stringify(gameData.moves))
-        );
+        // O pipeline de species anota gameData.moves, entao regrava o cache dele
+        writeCache("moves", gameData.moves);
         return species;
     } catch (e) {
         console.error("Failed to build species data:", e.message, e.stack);
@@ -310,12 +332,7 @@ async function buildSpeciesObj() {
 // --- FUNCAO PRINCIPAL CHAMADA PELO APP ---
 
 export async function fetchSpeciesObj() {
-    if (!localStorage.getItem("species"))
-        gameData.species = await buildSpeciesObj();
-    else
-        gameData.species = await JSON.parse(
-            LZString.decompressFromUTF16(localStorage.getItem("species"))
-        );
+    gameData.species = await loadCached("species", buildSpeciesObj);
 
     gameData.sprites = {};
     trackers.species = [];
