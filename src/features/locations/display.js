@@ -1,9 +1,9 @@
+import { speciesCanLearnMove } from "../../core/speciesRules.js";
+import { sanitizeString } from "../../core/strings.js";
 import {
-    sanitizeString,
-    speciesCanLearnMove,
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
-} from "../../core/utility.js";
+} from "../species/spriteSrc.js";
 import { locationsTableTbody } from "../../core/domRefs.js";
 import { createSpeciesPanel } from "../species-panel/panel.js";
 import { gameData, uiState } from "../../core/state.js";

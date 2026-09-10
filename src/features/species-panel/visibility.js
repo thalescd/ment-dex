@@ -14,7 +14,7 @@ import {
     table,
     body,
 } from "../../core/domRefs.js";
-import { refreshURLParams } from "../../core/utility.js";
+import { refreshURLParams } from "../../core/url.js";
 import { gameData } from "../../core/state.js";
 
 /**

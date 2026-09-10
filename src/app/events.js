@@ -20,7 +20,8 @@ import {
     createPopupForInfo,
 } from "../features/species-panel/panel.js";
 import { speciesPanel } from "../features/species-panel/visibility.js";
-import { refreshURLParams, clearLocalStorage } from "../core/utility.js";
+import { clearLocalStorage } from "../core/dataVersion.js";
+import { refreshURLParams } from "../core/url.js";
 import { clearChildren } from "../core/dom.js";
 import { displayHistoryObj } from "./dataLoader.js";
 import { gameData, trackers, uiState } from "../core/state.js";

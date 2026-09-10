@@ -12,7 +12,8 @@ import {
     movesFilterList,
     trainersFilterList,
 } from "../../core/domRefs.js";
-import { sanitizeString, speciesCanLearnMove } from "../../core/utility.js";
+import { speciesCanLearnMove } from "../../core/speciesRules.js";
+import { sanitizeString } from "../../core/strings.js";
 import { lazyLoading, sortTableByLearnsets } from "./table.js";
 import { passAllFilters } from "./trackerFilter.js";
 import {

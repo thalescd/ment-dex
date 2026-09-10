@@ -1,4 +1,4 @@
-import { statusMsg } from "../../core/utility.js";
+import { statusMsg } from "../../core/status.js";
 import { gameData, trackers } from "../../core/state.js";
 import { dataSources } from "../../core/config.js";
 import { fetchJson } from "../../core/http.js";

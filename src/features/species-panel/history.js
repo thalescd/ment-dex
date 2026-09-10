@@ -1,7 +1,7 @@
 import {
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
-} from "../../core/utility.js";
+} from "../species/spriteSrc.js";
 import {
     panelSpecies,
     speciesPanelHistoryContainer,

@@ -4,12 +4,10 @@
 import { gameData } from "../core/state.js";
 import { update } from "../core/domRefs.js";
 import { applySettings } from "../core/settings.js";
-import {
-    statusMsg,
-    setDataList,
-    refreshURLParams,
-    checkForUpdates,
-} from "../core/utility.js";
+import { setDataList } from "./dataList.js";
+import { checkForUpdates } from "../core/dataVersion.js";
+import { statusMsg } from "../core/status.js";
+import { refreshURLParams } from "../core/url.js";
 import {
     setFilters,
     createFilter,

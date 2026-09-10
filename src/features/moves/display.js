@@ -1,6 +1,6 @@
 import { gameData, trackers } from "../../core/state.js";
 import { clearChildren } from "../../core/dom.js";
-import { sanitizeString } from "../../core/utility.js";
+import { sanitizeString } from "../../core/strings.js";
 import {
     movesTableTbody,
     movesButton,

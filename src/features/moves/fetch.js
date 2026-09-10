@@ -1,6 +1,6 @@
 import { gameData, trackers, buildTracker } from "../../core/state.js";
 import { dataSources } from "../../core/config.js";
-import { statusMsg } from "../../core/utility.js";
+import { statusMsg } from "../../core/status.js";
 import { fetchText } from "../../core/http.js";
 import { loadCached } from "../../core/cache.js";
 import { parseMovesInfo } from "./parse.js";

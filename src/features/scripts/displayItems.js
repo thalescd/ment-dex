@@ -1,4 +1,4 @@
-import { sanitizeString } from "../../core/utility.js";
+import { sanitizeString } from "../../core/strings.js";
 import { itemsTableTbody } from "../../core/domRefs.js";
 import { lazyLoading } from "../../shared/table/table.js";
 import { settings } from "../../core/settings.js";

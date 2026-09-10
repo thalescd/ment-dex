@@ -1,4 +1,5 @@
-import { sanitizeString, speciesCanLearnMove } from "../../core/utility.js";
+import { speciesCanLearnMove } from "../../core/speciesRules.js";
+import { sanitizeString } from "../../core/strings.js";
 import { createPopupForMove } from "../moves/display.js";
 import {
     panelSpecies,

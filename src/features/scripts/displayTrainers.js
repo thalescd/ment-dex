@@ -1,9 +1,8 @@
+import { getTextWidth, sanitizeString } from "../../core/strings.js";
 import {
-    sanitizeString,
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
-    getTextWidth,
-} from "../../core/utility.js";
+} from "../species/spriteSrc.js";
 import {
     trainersTableTbody,
     overlayAbilities,

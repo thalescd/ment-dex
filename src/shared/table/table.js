@@ -1,12 +1,10 @@
 import { regexSpChar } from "../../core/config.js";
 import { clearChildren } from "../../core/dom.js";
 import { settings } from "../../core/settings.js";
-import {
-    statusMsg,
-    sanitizeString,
-    speciesCanLearnMove,
-    refreshURLParams,
-} from "../../core/utility.js";
+import { speciesCanLearnMove } from "../../core/speciesRules.js";
+import { statusMsg } from "../../core/status.js";
+import { sanitizeString } from "../../core/strings.js";
+import { refreshURLParams } from "../../core/url.js";
 import { passAllFilters } from "./trackerFilter.js";
 import {
     locationsButton,

@@ -1,12 +1,14 @@
 // --- ES Module Imports ---
+import { sanitizeString } from "../../core/strings.js";
+import { refreshURLParams } from "../../core/url.js";
 import {
-    sanitizeString,
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
-    refreshURLParams,
-    getPokemonResistanceValueAgainstType,
+} from "../species/spriteSrc.js";
+import {
     getPokemonEffectivenessValueAgainstType,
-} from "../../core/utility.js";
+    getPokemonResistanceValueAgainstType,
+} from "../species/typeMatchups.js";
 
 import { isSameColor } from "../../core/sprites.js";
 
@@ -34,14 +36,10 @@ import {
     speciesPanelTutorTable,
     speciesPanelEggMovesTable,
     shinyToggle,
-    body,
-    overlaySpeciesPanel,
     graph,
     graphStats,
     statDisplays,
     speciesButton,
-    table,
-    utilityButton,
     popup,
 } from "../../core/domRefs.js";
 

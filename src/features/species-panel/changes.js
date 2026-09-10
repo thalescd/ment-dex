@@ -1,4 +1,4 @@
-import { sanitizeString } from "../../core/utility.js";
+import { sanitizeString } from "../../core/strings.js";
 import { gameData } from "../../core/state.js";
 
 function replaceStatString(stat) {

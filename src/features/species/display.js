@@ -1,9 +1,6 @@
-import {
-    sanitizeString,
-    getSpeciesSpriteSrc,
-    returnTargetSpeciesSprite,
-    speciesCanLearnMove,
-} from "../../core/utility.js";
+import { speciesCanLearnMove } from "../../core/speciesRules.js";
+import { sanitizeString } from "../../core/strings.js";
+import { getSpeciesSpriteSrc, returnTargetSpeciesSprite } from "./spriteSrc.js";
 
 import {
     speciesTableTbody,
