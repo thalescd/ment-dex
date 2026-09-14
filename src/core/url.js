@@ -4,11 +4,8 @@
 // a URL descreve a UI inteira, entao esta funcao precisa saber o que esta
 // aberto. As refs vem de core/domRefs.js, entao nao cruza camada.
 
-import {
-    speciesPanelMainContainer,
-    panelSpecies,
-    historyObj,
-} from "./domRefs.js";
+import { speciesPanelMainContainer } from "./domRefs.js";
+import { historyObj, panelSpecies } from "./state.js";
 
 export function refreshURLParams() {
     const url = document.location.href.split("?")[0] + "?";

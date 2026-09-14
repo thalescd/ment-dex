@@ -1,14 +1,15 @@
 import { gameData, trackers } from "../../core/state.js";
-import {
-    abilitiesTableTbody,
-    speciesButton,
-    setTracker,
-} from "../../core/domRefs.js";
+import { speciesButton } from "../../core/domRefs.js";
+import { setTracker } from "../../core/state.js";
 import { tableButtonClick } from "../../shared/table/table.js";
 import {
     deleteFiltersFromTable,
     createFilter,
 } from "../../shared/table/filters.js";
+import { byId } from "../../core/dom.js";
+
+// Unico consumidor deste elemento, entao a ref mora aqui.
+const abilitiesTableTbody = byId("abilitiesTableTbody");
 
 export function appendAbilitiesToTable(abilitiesName) {
     if (

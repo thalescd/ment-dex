@@ -4,10 +4,13 @@ import {
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
 } from "../species/spriteSrc.js";
-import { locationsTableTbody } from "../../core/domRefs.js";
 import { createSpeciesPanel } from "../species-panel/panel.js";
 import { gameData, uiState } from "../../core/state.js";
 import { getMoveMethodLabel } from "../../core/dom.js";
+import { byId } from "../../core/dom.js";
+
+// Unico consumidor deste elemento, entao a ref mora aqui.
+const locationsTableTbody = byId("locationsTableTbody");
 
 export function appendLocationsToTable(key) {
     const timeRegex = /Day|Night|Morning|Evening|Dusk|Dawn/i;

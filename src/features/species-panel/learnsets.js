@@ -1,15 +1,15 @@
 import { speciesCanLearnMove } from "../../core/speciesRules.js";
 import { sanitizeString } from "../../core/strings.js";
 import { createPopupForMove } from "../moves/display.js";
+import { overlay } from "../../core/domRefs.js";
+import { panelSpecies } from "../../core/state.js";
 import {
-    panelSpecies,
-    overlay,
+    speciesPanelEggMovesTable,
     speciesPanelLevelUpFromPreviousEvoTable,
     speciesPanelLevelUpTable,
     speciesPanelTMHMTable,
     speciesPanelTutorTable,
-    speciesPanelEggMovesTable,
-} from "../../core/domRefs.js";
+} from "./domRefs.js";
 import { gameData } from "../../core/state.js";
 import { clearChildren } from "../../core/dom.js";
 

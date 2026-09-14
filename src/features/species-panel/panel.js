@@ -13,35 +13,35 @@ import {
 import { isSameColor } from "../../core/sprites.js";
 
 import {
-    panelSpecies,
-    setPanelSpecies,
-    setTracker,
-    speciesPanelMainContainer,
-    speciesName as speciesNameEl,
-    speciesID,
-    speciesSprite,
-    speciesType1,
-    speciesType2,
+    popup,
+    shinyToggle,
+    speciesButton,
     speciesPanelLocationsButton,
+    speciesPanelMainContainer,
+} from "../../core/domRefs.js";
+import { panelSpecies, setPanelSpecies, setTracker } from "../../core/state.js";
+import {
+    graph,
+    graphStats,
     speciesAbilities,
-    speciesEvoTable,
-    speciesFormes,
     speciesChanges,
     speciesChangesContainer,
     speciesDefensiveTypeChart,
+    speciesEvoTable,
+    speciesFormes,
+    speciesID,
+    speciesName as speciesNameEl,
     speciesOffensiveTypeChart,
+    speciesPanelEggMovesTable,
     speciesPanelLevelUpFromPreviousEvoTable,
     speciesPanelLevelUpTable,
     speciesPanelTMHMTable,
     speciesPanelTutorTable,
-    speciesPanelEggMovesTable,
-    shinyToggle,
-    graph,
-    graphStats,
+    speciesSprite,
+    speciesType1,
+    speciesType2,
     statDisplays,
-    speciesButton,
-    popup,
-} from "../../core/domRefs.js";
+} from "./domRefs.js";
 
 import { tableButtonClick } from "../../shared/table/table.js";
 import {

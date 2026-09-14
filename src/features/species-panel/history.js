@@ -2,10 +2,8 @@ import {
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
 } from "../species/spriteSrc.js";
-import {
-    panelSpecies,
-    speciesPanelHistoryContainer,
-} from "../../core/domRefs.js";
+import { speciesPanelHistoryContainer } from "../../core/domRefs.js";
+import { panelSpecies } from "../../core/state.js";
 import { gameData, uiState } from "../../core/state.js";
 import { clearChildren } from "../../core/dom.js";
 import {

@@ -2,15 +2,16 @@ import { speciesCanLearnMove } from "../../core/speciesRules.js";
 import { sanitizeString } from "../../core/strings.js";
 import { getSpeciesSpriteSrc, returnTargetSpeciesSprite } from "./spriteSrc.js";
 
-import {
-    speciesTableTbody,
-    changelogMode,
-    panelSpecies,
-} from "../../core/domRefs.js";
+import { changelogMode } from "../../core/domRefs.js";
+import { panelSpecies } from "../../core/state.js";
 import { createSpeciesPanel } from "../species-panel/panel.js";
 import { speciesPanel } from "../species-panel/visibility.js";
 import { gameData, uiState } from "../../core/state.js";
 import { getMoveMethodLabel } from "../../core/dom.js";
+import { byId } from "../../core/dom.js";
+
+// Unico consumidor deste elemento, entao a ref mora aqui.
+const speciesTableTbody = byId("speciesTableTbody");
 
 export function appendSpeciesToTable(speciesName) {
     if (gameData.species[speciesName].baseSpeed <= 0) {

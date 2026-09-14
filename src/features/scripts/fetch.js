@@ -2,13 +2,8 @@ import { repos } from "../../core/config.js";
 import { LZString } from "../../vendor/lz-string.js";
 import { statusMsg } from "../../core/status.js";
 import { gameData, trackers, uiState } from "../../core/state.js";
-import {
-    difficultyButtonContainer,
-    trainersTableTbody,
-    trainersInput,
-    overlay,
-    body,
-} from "../../core/domRefs.js";
+import { body, overlay, trainersInput } from "../../core/domRefs.js";
+import { difficultyButtonContainer, trainersTableTbody } from "./domRefs.js";
 import {
     lazyLoading,
     filterTrainersTableInput,

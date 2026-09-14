@@ -1,17 +1,17 @@
 import { regexSpChar, MIN_FILTER_INPUT_LENGTH } from "../../core/config.js";
 import { clearChildren } from "../../core/dom.js";
+import { trainersInput } from "../../core/domRefs.js";
+import { tracker } from "../../core/state.js";
 import {
-    tracker,
-    trainersFilter,
-    trainersInput,
-    trainersFilterContainer,
-    speciesFilterContainer,
     locationsFilterContainer,
-    speciesFilterList,
     locationsFilterList,
     movesFilterList,
+    speciesFilterContainer,
+    speciesFilterList,
+    trainersFilter,
+    trainersFilterContainer,
     trainersFilterList,
-} from "../../core/domRefs.js";
+} from "./domRefs.js";
 import { speciesCanLearnMove } from "../../core/speciesRules.js";
 import { sanitizeString } from "../../core/strings.js";
 import { lazyLoading, sortTableByLearnsets } from "./table.js";

@@ -6,9 +6,9 @@
 import { gameData, uiState } from "../core/state.js";
 import { sanitizeString } from "../core/strings.js";
 import {
-    speciesPanelInputSpeciesDataList,
     abilitiesInputDataList,
-} from "../core/domRefs.js";
+    speciesPanelInputSpeciesDataList,
+} from "./domRefs.js";
 
 export function setDataList() {
     uiState.speciesIngameNameArray = [];

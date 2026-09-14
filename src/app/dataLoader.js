@@ -2,7 +2,7 @@
 // Separado de utility.js para evitar dependencias circulares
 
 import { gameData } from "../core/state.js";
-import { update } from "../core/domRefs.js";
+import { update } from "./domRefs.js";
 import { applySettings } from "../core/settings.js";
 import { setDataList } from "./dataList.js";
 import { checkForUpdates } from "../core/dataVersion.js";

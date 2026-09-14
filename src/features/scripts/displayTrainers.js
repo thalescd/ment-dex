@@ -3,13 +3,8 @@ import {
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
 } from "../species/spriteSrc.js";
-import {
-    trainersTableTbody,
-    overlayAbilities,
-    popupAbilities,
-    overlay,
-    body,
-} from "../../core/domRefs.js";
+import { body, overlay, overlayAbilities } from "../../core/domRefs.js";
+import { popupAbilities, trainersTableTbody } from "./domRefs.js";
 import { createSpeciesPanel } from "../species-panel/panel.js";
 import { createPopupForMove } from "../moves/display.js";
 import { getItemSpriteSrc, getTrainerSpriteSrc } from "./fetch.js";

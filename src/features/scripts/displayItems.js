@@ -1,5 +1,5 @@
 import { sanitizeString } from "../../core/strings.js";
-import { itemsTableTbody } from "../../core/domRefs.js";
+import { itemsTableTbody } from "./domRefs.js";
 import { lazyLoading } from "../../shared/table/table.js";
 import { settings } from "../../core/settings.js";
 import { getItemSpriteSrc } from "./fetch.js";

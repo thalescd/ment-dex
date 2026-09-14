@@ -162,3 +162,25 @@ export const uiState = {
 export function buildTracker(obj) {
     return Object.keys(obj).map((key) => ({ key, filter: [] }));
 }
+
+// ---------------------------------------------------------------------------
+// Estado mutavel que vivia em domRefs.js.
+//
+// Nao sao referencias de DOM: sao estado de aplicacao, e manter os dois no
+// mesmo modulo dava duas fontes de verdade concorrentes. Imports ESM sao
+// somente leitura para quem importa, entao a escrita passa por setters.
+// ---------------------------------------------------------------------------
+
+export let tracker;
+
+export let panelSpecies = "";
+
+export const historyObj = [];
+
+export function setTracker(value) {
+    tracker = value;
+}
+
+export function setPanelSpecies(value) {
+    panelSpecies = value;
+}

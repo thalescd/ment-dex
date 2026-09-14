@@ -2,20 +2,23 @@ import { gameData, trackers } from "../../core/state.js";
 import { clearChildren } from "../../core/dom.js";
 import { sanitizeString } from "../../core/strings.js";
 import {
-    movesTableTbody,
-    movesButton,
-    speciesButton,
-    overlay,
     body,
+    movesButton,
+    overlay,
     popup,
-    setTracker,
+    speciesButton,
 } from "../../core/domRefs.js";
+import { setTracker } from "../../core/state.js";
 import { tableButtonClick } from "../../shared/table/table.js";
 import {
     deleteFiltersFromTable,
     createFilter,
 } from "../../shared/table/filters.js";
 import { speciesPanel } from "../species-panel/visibility.js";
+import { byId } from "../../core/dom.js";
+
+// Unico consumidor deste elemento, entao a ref mora aqui.
+const movesTableTbody = byId("movesTableTbody");
 
 export function appendMovesToTable(moveName) {
     if (

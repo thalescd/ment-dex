@@ -1,16 +1,16 @@
 import {
-    speciesPanelHistoryContainer,
-    hideLevelUpFromPreviousEvolution,
-    speciesPanelLevelUpFromPreviousEvoTableTbody,
-    hideLevelUp,
-    speciesPanelLevelUpTableTbody,
-    hideTMHM,
-    speciesPanelTMHMTableTbody,
-    hideTutor,
-    speciesPanelTutorTableTbody,
     hideEggMoves,
-    speciesPanelEggMovesTableTbody,
+    hideLevelUp,
+    hideLevelUpFromPreviousEvolution,
+    hideTMHM,
+    hideTutor,
     popup,
+    speciesPanelEggMovesTableTbody,
+    speciesPanelHistoryContainer,
+    speciesPanelLevelUpFromPreviousEvoTableTbody,
+    speciesPanelLevelUpTableTbody,
+    speciesPanelTMHMTableTbody,
+    speciesPanelTutorTableTbody,
 } from "./domRefs.js";
 
 export let settings = [];

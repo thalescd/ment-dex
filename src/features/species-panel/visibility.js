@@ -7,13 +7,13 @@
 //   speciesPanelUtility -> speciesPanelLearnsets -> displayMoves -> speciesPanelUtility
 
 import {
-    speciesPanelMainContainer,
-    overlaySpeciesPanel,
-    utilityButton,
-    panelSpecies,
-    table,
     body,
+    overlaySpeciesPanel,
+    speciesPanelMainContainer,
+    table,
+    utilityButton,
 } from "../../core/domRefs.js";
+import { panelSpecies } from "../../core/state.js";
 import { refreshURLParams } from "../../core/url.js";
 import { gameData } from "../../core/state.js";
 

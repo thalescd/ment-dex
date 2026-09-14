@@ -77,3 +77,37 @@ export function createPopup(
 
     popupEl.append(mainContainer);
 }
+
+// ---------------------------------------------------------------------------
+// Resolucao de elementos. Vivia em domRefs.js; agora cada domRefs.js por
+// camada importa daqui.
+//
+// Falham alto de proposito: getElementById devolvendo null transformava um id
+// renomeado no HTML num erro distante da causa — ou em feature silenciosamente
+// morta.
+// ---------------------------------------------------------------------------
+
+/**
+ * @param {string} id
+ * @returns {HTMLElement}
+ */
+export function byId(id) {
+    const element = document.getElementById(id);
+    if (!element)
+        throw new Error(`domRefs: nao existe elemento com id "${id}"`);
+    return element;
+}
+
+/**
+ * @param {string} selector
+ * @returns {HTMLElement}
+ */
+export function bySelector(selector) {
+    const element = /** @type {HTMLElement|null} */ (
+        document.querySelector(selector)
+    );
+    if (!element) {
+        throw new Error(`domRefs: nenhum elemento casa com "${selector}"`);
+    }
+    return element;
+}

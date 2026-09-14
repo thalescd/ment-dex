@@ -7,22 +7,23 @@ import { sanitizeString } from "../../core/strings.js";
 import { refreshURLParams } from "../../core/url.js";
 import { passAllFilters } from "./trackerFilter.js";
 import {
-    locationsButton,
-    trainersButton,
-    changelogMode,
-    onlyShowChangedPokemon,
-    itemsButton,
-    tableFilter,
-    table,
-    utilityButton,
     body,
+    changelogMode,
+    itemsButton,
+    locationsButton,
+    onlyShowChangedPokemon,
     speciesTable,
-    tracker,
-    setTracker,
-    tableInput,
-    tableButton,
-    trainersFilterContainer,
+    table,
+    trainersButton,
+    utilityButton,
 } from "../../core/domRefs.js";
+import { setTracker, tracker } from "../../core/state.js";
+import {
+    tableButton,
+    tableFilter,
+    tableInput,
+    trainersFilterContainer,
+} from "./domRefs.js";
 import { gameData, trackers, uiState } from "../../core/state.js";
 import { getTable } from "./registry.js";
 import {
