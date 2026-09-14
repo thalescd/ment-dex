@@ -72,7 +72,6 @@ function displaySpeciesPanelHistory(openPanel) {
         speciesPanelHistoryContainer.append(spriteContainer);
 
         let lockTimer = 0;
-        let clickTimer = 0;
         async function historyHandler(event, preventDefault = true) {
             if (preventDefault) {
                 event.preventDefault();
@@ -87,7 +86,7 @@ function displaySpeciesPanelHistory(openPanel) {
                 spriteContainer.classList.add("clicked");
                 spriteContainer.classList.add("emulateClick");
                 lockTimer = setTimeout(lockSpecies, LOCK_SPECIES_TIMEOUT_MS);
-                clickTimer = setTimeout(emulateClick, 300);
+                setTimeout(emulateClick, 300);
             } else if (event.type === "mouseup" || event.type === "touchend") {
                 spriteContainer.classList.remove("clicked");
                 clearTimeout(lockTimer);
@@ -149,7 +148,7 @@ export async function manageSpeciesPanelHistory(speciesName, openPanel) {
     }
 
     if (
-        speciesPanelHistoryContainer.children.length !=
+        speciesPanelHistoryContainer.children.length !==
         uiState.speciesPanelHistory.length
     ) {
         displaySpeciesPanelHistory(openPanel);

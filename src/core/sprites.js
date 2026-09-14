@@ -32,9 +32,9 @@ export async function spriteRemoveBgReturnBase64(speciesName, species) {
         for (let i = 0; i < 4; i++) {
             backgroundColor.push(imageData.data[i]);
         }
+        const pal = [];
         let spriteDataString = "",
-            repeat = 1,
-            pal = [];
+            repeat = 1;
         for (let i = 0; i < imageData.data.length; i += 4) {
             if (
                 isSameColor(

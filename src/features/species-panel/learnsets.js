@@ -80,7 +80,7 @@ function sortLearnsetsArray(thead, learnsetsArray, label, asc) {
             }
         }
 
-        return stringA > stringB ? 1 * asc : -1 * asc;
+        return stringA > stringB ? asc : -asc;
     });
 
     thead.querySelectorAll("th").forEach((th) => {

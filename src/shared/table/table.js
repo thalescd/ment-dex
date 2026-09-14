@@ -98,7 +98,7 @@ export function sortTableByClassName(
             stringB = parseInt(stringB);
         }
 
-        return stringA > stringB ? 1 * dirModifier : -1 * dirModifier;
+        return stringA > stringB ? dirModifier : -dirModifier;
     });
 
     lazyLoading(true);
@@ -131,8 +131,8 @@ export function sortTableByLearnsets(asc = true) {
 
         if (Number(stringA) && Number(stringB)) {
             return parseInt(stringA) > parseInt(stringB)
-                ? 1 * dirModifier
-                : -1 * dirModifier;
+                ? dirModifier
+                : -dirModifier;
         }
         if (Number(stringA)) {
             stringA = "levelUpLearnsets";
@@ -142,8 +142,8 @@ export function sortTableByLearnsets(asc = true) {
         }
 
         return sortOrder.indexOf(stringA) > sortOrder.indexOf(stringB)
-            ? 1 * dirModifier
-            : -1 * dirModifier;
+            ? dirModifier
+            : -dirModifier;
     });
 
     lazyLoading(true);
@@ -170,7 +170,7 @@ export function filterTableInput(input, obj, keyArray) {
             if (
                 regexInput.test(
                     sanitizeString(
-                        "" + obj[tracker[i]["key"]][keyArray[k]]
+                        String(obj[tracker[i]["key"]][keyArray[k]])
                     ).replaceAll(regexSpChar, "")
                 )
             ) {
@@ -307,7 +307,7 @@ export function filterItemsTableInput(input, keyArray) {
             if (
                 regexInput.test(
                     sanitizeString(
-                        "" + gameData.items[tracker[i]["key"]][keyArray[k]]
+                        String(gameData.items[tracker[i]["key"]][keyArray[k]])
                     ).replaceAll(regexSpChar, "")
                 )
             ) {
@@ -322,10 +322,11 @@ export function filterItemsTableInput(input, keyArray) {
                 if (
                     regexInput.test(
                         sanitizeString(
-                            "" +
+                            String(
                                 gameData.items[tracker[i]["key"]]["locations"][
                                     method
                                 ]
+                            )
                         ).replaceAll(regexSpChar, "")
                     )
                 ) {

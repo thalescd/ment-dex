@@ -723,7 +723,7 @@ function createFilterElement(label, value, operator = "AND", activeFilter) {
             for (let i = 0, j = tracker.length; i < j; i++) {
                 for (let k = 0; k < tracker[i]["filter"].length; k++) {
                     if (
-                        tracker[i]["filter"][k] ==
+                        tracker[i]["filter"][k] ===
                         `filter${label}${value}`.replaceAll(" ", "")
                     ) {
                         tracker[i]["filter"].splice(k, 1);
@@ -766,7 +766,7 @@ function createFilterElement(label, value, operator = "AND", activeFilter) {
             for (let i = 0, j = tracker.length; i < j; i++) {
                 for (let k = 0; k < tracker[i]["filter"].length; k++) {
                     if (
-                        tracker[i]["filter"][k] ==
+                        tracker[i]["filter"][k] ===
                         `filter${label}${value}`.replaceAll(" ", "")
                     ) {
                         tracker[i]["filter"].splice(k, 1);
@@ -874,7 +874,6 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 trainersFilterElements[k].parentNode.children[0].value;
             const trainerTeam =
                 gameData.trainers[zone][trainer]["party"][difficulty];
-            let passed;
 
             trainerTeamLoop: for (let l = 0; l < trainerTeam.length; l++) {
                 if (ignoreTrainerTeamIndex.includes(l)) {
@@ -907,7 +906,7 @@ export function trainerSpeciesMatchFilter(resetInput = true) {
                 }
                 ignoreTrainerTeamIndex.push(l);
             }
-            passed = trainerTeam.length !== ignoreTrainerTeamIndex.length;
+            const passed = trainerTeam.length !== ignoreTrainerTeamIndex.length;
             trackers.trainers[i]["filter"] = filterLogicalConnector(
                 trackers.trainers[i]["filter"],
                 value.replaceAll(" ", ""),

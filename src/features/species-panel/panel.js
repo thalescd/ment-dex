@@ -208,7 +208,7 @@ export async function createSpeciesPanel(name) {
             stat.style.background = `hsl(${monStats[index] * 0.7},85%,45%)`;
         } else {
             stat.style.width = `${((monStats[index] / 255) * graph.offsetWidth) / 6}px`;
-            stat.style.background = `hsl(${(monStats[index] * 1) / 6},85%,45%)`;
+            stat.style.background = `hsl(${monStats[index] / 6},85%,45%)`;
         }
     });
 
