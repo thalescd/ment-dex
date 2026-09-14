@@ -72,6 +72,7 @@ function appendSpeciesEl(location, method, speciesKey, methodTable) {
         if (label) {
             moveFilter.innerText = label.text;
             moveFilter.classList.add(label.className);
+            moveFilter.title = label.title;
         }
         rarity.append(moveFilter);
     } else {

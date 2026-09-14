@@ -38,6 +38,7 @@ export function appendSpeciesToTable(speciesName) {
         if (label) {
             moveFilter.innerText = label.text;
             moveFilter.classList.add(label.className);
+            moveFilter.title = label.title;
         }
         IDcontainer.append(moveFilter);
     } else {

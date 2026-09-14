@@ -10,12 +10,37 @@ export function clearChildren(element) {
 
 export function getMoveMethodLabel(moveMethod) {
     if (Number.isInteger(moveMethod)) {
-        return { text: `Lv ${moveMethod}`, className: "levelUpLearnsets" };
+        // Nivel 0 nao existe no jogo: e o marcador de move aprendido no
+        // momento em que a especie evolui para esta forma.
+        if (moveMethod === 0) {
+            return {
+                text: "Evo",
+                className: "evoLearnsets",
+                title: "Learned upon evolving into this form",
+            };
+        }
+        return {
+            text: `Lv ${moveMethod}`,
+            className: "levelUpLearnsets",
+            title: `Learned at level ${moveMethod}`,
+        };
     }
     const labels = {
-        eggMovesLearnsets: { text: "Egg", className: "eggMovesLearnsets" },
-        TMHMLearnsets: { text: "TM", className: "TMHMLearnsets" },
-        tutorLearnsets: { text: "Tutor", className: "tutorLearnsets" },
+        eggMovesLearnsets: {
+            text: "Egg",
+            className: "eggMovesLearnsets",
+            title: "Egg move",
+        },
+        TMHMLearnsets: {
+            text: "TM",
+            className: "TMHMLearnsets",
+            title: "Learned by TM/HM",
+        },
+        tutorLearnsets: {
+            text: "Tutor",
+            className: "tutorLearnsets",
+            title: "Learned from a move tutor",
+        },
     };
     return labels[moveMethod] || null;
 }
