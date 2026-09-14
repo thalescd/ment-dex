@@ -4,7 +4,7 @@
 
 .trainerSpeciesSprite:hover,
 #trainersTable .activeSetting {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: var(--surface-hover) !important;
     cursor: pointer;
 }
 
@@ -16,8 +16,9 @@
     background: none !important;
 }
 
+/* (1,1,0): ja vence button.setting por especificidade */
 #difficultyButtonContainer .setting {
-    font-size: 15px !important;
+    font-size: 15px;
     margin-bottom: 10px;
 }
 
@@ -81,8 +82,8 @@
 }
 
 .trainerRematchMatch {
-    background: #4caf50 !important;
-    color: #f1f1f1;
+    background: var(--accent-match) !important;
+    color: var(--text-primary);
 }
 
 .trainerRematch {
@@ -97,27 +98,27 @@
 
 .trainerRematch:hover {
     background: rgba(215, 212, 231, 0.3) !important;
-    color: #f1f1f1;
+    color: var(--text-primary);
 }
 
 .activeRematch {
-    background: rgba(215, 212, 231, 0.075) !important;
-    color: #f1f1f1;
+    background: var(--surface-subtle) !important;
+    color: var(--text-primary);
 }
 
 .activeRematch.trainerRematchMatch {
-    background: rgba(215, 212, 231, 0.075) !important;
+    background: var(--surface-subtle) !important;
     border-color: green;
-    color: #4caf50 !important;
+    color: var(--accent-match) !important;
 }
 
 .trainerRematch.trainerRematchMatch {
-    color: #f1f1f1;
+    color: var(--text-primary);
 }
 
 .trainerRematch.trainerRematchMatch:hover {
     border-color: green;
-    color: #4caf50;
+    color: var(--accent-match);
 }
 
 .trainerName {

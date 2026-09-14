@@ -7,7 +7,7 @@
     height: 100%;
     z-index: 9000;
     overflow-y: scroll;
-    background-color: rgba(0, 0, 0, 0.35);
+    background-color: var(--surface);
 }
 
 #speciesPanelMainContainer {
@@ -35,7 +35,7 @@
     margin: 0px 2px 0px 2px;
     padding: 5px;
     border: 2px solid grey;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--surface-active);
     border-radius: 15%;
     position: relative;
     cursor: pointer;
@@ -78,7 +78,7 @@
 
 @keyframes unlockAnimation {
     100% {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: var(--surface-active);
     }
 }
 
@@ -129,7 +129,7 @@
     margin-right: 10px;
     padding: 3px;
     border: 2px solid grey;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--surface-active);
     border-radius: 15%;
     cursor: pointer;
 }
@@ -377,8 +377,8 @@
 }
 
 #speciesPanelTablesContainer > table > thead > tr > th {
-    background: rgba(215, 212, 231, 0.075);
-    color: #f1f1f1;
+    background: var(--surface-subtle);
+    color: var(--text-primary);
     font-weight: 700;
     padding: 0.5rem 0.5rem;
 }
@@ -392,7 +392,7 @@
 
 .speciesPanelLearnsetsTableMargin th:hover,
 .speciesPanelLearnsetsTableMargin tbody tr:hover {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: var(--surface-hover) !important;
     cursor: pointer;
 }
 

@@ -38,11 +38,11 @@ table[id*="ITEM_"] {
 
 .pocketButton,
 .methodButton {
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--surface);
     outline: none;
     border: 2px solid gray;
     border-radius: 6px;
-    color: #f1f1f1;
+    color: var(--text-primary);
     cursor: pointer;
     font-size: 13px !important;
     margin: 1px;
@@ -57,7 +57,7 @@ table[id*="ITEM_"] {
 .pocketButton.activeSetting:hover {
     text-decoration: line-through;
     text-decoration-color: white;
-    color: rgb(165, 162, 162);
+    color: var(--text-muted);
 }
 
 .methodButton:not(.activeSetting),
@@ -70,8 +70,8 @@ table[id*="ITEM_"] {
 .methodButton:not(.activeSetting):hover,
 .pocketButton:not(.activeSetting):hover {
     text-decoration: line-through;
-    text-decoration-color: rgb(165, 162, 162);
-    color: rgb(165, 162, 162);
+    text-decoration-color: var(--text-muted);
+    color: var(--text-muted);
 }
 
 #resetCrossedItems:hover {

@@ -1,4 +1,14 @@
 :root {
+    /* superficies e texto */
+    --text-primary: #f1f1f1; /* texto sobre superficie escura */
+    --text-bright: #ffffff; /* texto de maior contraste */
+    --text-muted: rgb(165, 162, 162); /* texto secundario */
+    --surface: rgba(0, 0, 0, 0.35); /* fundo de botao, thead, input */
+    --surface-hover: rgba(255, 255, 255, 0.2); /* realce ao passar o mouse */
+    --surface-active: rgba(255, 255, 255, 0.1); /* estado ativo/selecionado */
+    --surface-subtle: rgba(215, 212, 231, 0.075); /* realce discreto de linha */
+    --row-divider: rgba(255, 255, 255, 0.5); /* divisoria entre linhas */
+    --accent-match: #4caf50; /* verde de correspondencia */
     --theme-color: burlywood;
     --TYPE_NORMAL: 157, 157, 113;
     --TYPE_FIRE: 238, 129, 48;
@@ -29,7 +39,7 @@ body {
     font-family: "Roboto Condensed", "Pragati Narrow", Arial, sans-serif;
     font-size: 18px;
     text-align: center;
-    color: #ffffff;
+    color: var(--text-bright);
     background: #1a1a1e;
 }
 
@@ -158,34 +168,37 @@ body {
     user-select: none;
 }
 
-[class*="hide"] {
+.hide {
     display: none !important;
 }
 
 button[type="button"] {
     width: 100px;
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--surface);
     outline: none;
     padding: 8px;
     border: 2px solid var(--blue-border);
     margin-top: 5px;
     border-radius: 12px;
     font-weight: 700;
-    color: #f1f1f1;
+    color: var(--text-primary);
     cursor: pointer;
 }
 
-.setting {
-    font-size: 12px !important;
-    width: revert !important;
-    border: 1px solid var(--theme-color) !important;
-    padding: 6px !important;
-    border-radius: 8px !important;
-    transition: background 0s ease-in-out !important;
+/* button.setting, e nao .setting, para empatar a especificidade de
+   button[type="button"] acima (0,1,1) e vencer por ordem no arquivo. Era isso
+   que as marcacoes de prioridade compensavam. Todo .setting e um <button>. */
+button.setting {
+    font-size: 12px;
+    width: revert;
+    border: 1px solid var(--theme-color);
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0s ease-in-out;
 }
 
 .setting.activeSetting {
-    border: 1px solid green !important;
+    border: 1px solid green;
 }
 
 #update.updateAvailable {
@@ -216,7 +229,7 @@ table {
 }
 
 thead {
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--surface);
 }
 
 th {
@@ -234,7 +247,7 @@ th {
 
 .th-sort-asc,
 .th-sort-desc {
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: var(--surface-active) !important;
 }
 
 tbody > tr:nth-of-type(even) {
@@ -243,13 +256,13 @@ tbody > tr:nth-of-type(even) {
 
 tbody > tr:nth-of-type(odd) {
     background: #2e2e33;
-    border-top: 1px solid rgba(255, 255, 255, 0.5);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    border-top: 1px solid var(--row-divider);
+    border-bottom: 1px solid var(--row-divider);
 }
 
 tbody > tr:last-child {
-    border-top: 1px solid rgba(255, 255, 255, 0.5);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    border-top: 1px solid var(--row-divider);
+    border-bottom: 1px solid var(--row-divider);
 }
 
 input[type="search"] {
@@ -258,9 +271,9 @@ input[type="search"] {
     border-radius: 3px;
     outline: none;
     border: 2px solid var(--blue-border);
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--surface);
     box-sizing: border-box;
-    color: #f1f1f1;
+    color: var(--text-primary);
     font-weight: 700;
     text-align: left !important;
     width: 300px;
@@ -316,7 +329,7 @@ input[type="search"]:hover {
     z-index: 9998;
     justify-content: center;
     align-items: center;
-    color: #f1f1f1;
+    color: var(--text-primary);
     font-size: 1.5rem;
     text-decoration: none;
     border-radius: 50%;
@@ -386,7 +399,7 @@ input[type="search"]:hover {
 
 .logicalConnector option {
     background-color: #3b3b3b;
-    color: #ffffff;
+    color: var(--text-bright);
 }
 
 .background {
@@ -563,7 +576,7 @@ input[type="search"]:hover {
 
 .hyperlink {
     text-decoration: underline;
-    color: #ffffff;
+    color: var(--text-bright);
 }
 
 .hyperlink:hover {
@@ -573,5 +586,5 @@ input[type="search"]:hover {
 
 .popupFilterButton,
 .speciesPanelMiscButton {
-    border: 2px solid #ffffff !important;
+    border: 2px solid var(--text-bright) !important;
 }
