@@ -16,7 +16,6 @@ export const speciesFormes = byId("speciesFormes");
 export const speciesChanges = byId("speciesChanges");
 export const speciesChangesContainer = byId("speciesChangesContainer");
 export const speciesDefensiveTypeChart = byId("speciesDefensiveTypeChart");
-export const speciesOffensiveTypeChart = byId("speciesOffensiveTypeChart");
 export const speciesPanelLevelUpFromPreviousEvoTable = byId(
     "speciesPanelLevelUpFromPreviousEvoTable"
 );

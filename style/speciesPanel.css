@@ -317,25 +317,21 @@
     aspect-ratio: auto 48 / 48;
 }
 
-[class*="typeChartOffensive"],
 [class*="typeChartDefensive"] {
     margin-top: 2px;
     font-size: 14px;
 }
 
-#speciesDefensiveTypeChartContainer,
-#speciesOffensiveTypeChartContainer {
+#speciesDefensiveTypeChartContainer {
     padding: 30px 0px 10px 0px;
 }
 
-#speciesDefensiveTypeChart,
-#speciesOffensiveTypeChart {
+#speciesDefensiveTypeChart {
     justify-content: center;
     padding: 5px 0px 5px 0px;
 }
 
-.typeChartDefensive0,
-.typeChartOffensive0 {
+.typeChartDefensive0 {
     background: rgba(0, 0, 0, 0.7);
 }
 
@@ -345,13 +341,11 @@
     font-size: 14px;
 }
 
-.typeChartDefensive0\.5,
-.typeChartOffensive2 {
+.typeChartDefensive0\.5 {
     background: rgba(100, 221, 23, 0.7);
 }
 
-.typeChartDefensive2,
-.typeChartOffensive0\.5 {
+.typeChartDefensive2 {
     background: rgba(239, 83, 80, 0.7);
 }
 
@@ -360,8 +354,7 @@
     background: rgb(239, 83, 80);
 }
 
-.speciesDefensiveTypeChartMarginTop,
-.speciesOffensiveTypeChartMarginTop {
+.speciesDefensiveTypeChartMarginTop {
     margin: 10px 1px 0px 1px;
     font-family: sans-serif, Arial;
 }

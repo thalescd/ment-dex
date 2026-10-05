@@ -5,10 +5,7 @@ import {
     getSpeciesSpriteSrc,
     returnTargetSpeciesSprite,
 } from "../species/spriteSrc.js";
-import {
-    getPokemonEffectivenessValueAgainstType,
-    getPokemonResistanceValueAgainstType,
-} from "../species/typeMatchups.js";
+import { getPokemonResistanceValueAgainstType } from "../species/typeMatchups.js";
 
 import { isSameColor } from "../../core/sprites.js";
 
@@ -31,7 +28,6 @@ import {
     speciesFormes,
     speciesID,
     speciesName as speciesNameEl,
-    speciesOffensiveTypeChart,
     speciesPanelEggMovesTable,
     speciesPanelLevelUpFromPreviousEvoTable,
     speciesPanelLevelUpTable,
@@ -358,44 +354,6 @@ export async function createSpeciesPanel(name) {
         );
         speciesDefensiveTypeChart.append(defensiveTypeEffectivenessContainer);
     });
-
-    clearChildren(speciesOffensiveTypeChart);
-
-    try {
-        Object.keys(gameData.typeChart).forEach((type) => {
-            const offensiveTypeEffectivenessContainer =
-                document.createElement("span");
-            const checkType = document.createElement("span");
-            const offensiveTypeEffectivenessValue =
-                document.createElement("span");
-            offensiveTypeEffectivenessContainer.className =
-                "flex flexCenter flexColumn speciesOffensiveTypeChartMarginTop";
-            checkType.innerText = sanitizeString(type);
-            if (checkType.innerText.length > 6) {
-                checkType.innerText = checkType.innerText.substring(0, 6);
-            }
-            checkType.className = `backgroundSmall ${type}`;
-
-            offensiveTypeEffectivenessValue.innerText =
-                getPokemonEffectivenessValueAgainstType(
-                    gameData.species[name],
-                    type
-                );
-
-            offensiveTypeEffectivenessValue.className = `typeChartOffensive${offensiveTypeEffectivenessValue.innerText} backgroundSmall`;
-            offensiveTypeEffectivenessContainer.append(checkType);
-            offensiveTypeEffectivenessContainer.append(
-                offensiveTypeEffectivenessValue
-            );
-            speciesOffensiveTypeChart.append(
-                offensiveTypeEffectivenessContainer
-            );
-        });
-    } catch {
-        console.log(
-            `Couldn't calc offensiveTypeEffectivenessValue for ${name}`
-        );
-    }
 
     // Tutor learnsets: WIP
     const tutorTbody = speciesPanelTutorTable.querySelector("tbody");
