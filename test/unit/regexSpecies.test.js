@@ -7,6 +7,8 @@ import {
     parseLevelUpLearnsets,
     parseEggMoves,
     parseTmsHms,
+    indexTeachableLearnsets,
+    resolveTeachable,
     parseSpriteRefs,
     parseFormSpeciesTables,
 } from "../../src/features/species/parse.js";
@@ -147,6 +149,40 @@ test("parseTmsHms: devolve um Set de MOVE_*", () => {
     assert.ok(tmhm instanceof Set);
     assert.ok(tmhm.size > 50, `so ${tmhm.size} moves de TM/HM`);
     for (const move of tmhm) assert.match(move, /^MOVE_/);
+});
+
+// As chaves de all_learnables.json nao sao o nome da especie: as quatro
+// SPECIES_CASTFORM_* apontam para sCastformTeachableLearnset, gerado da chave
+// CASTFORM. Buscar pelo nome deixava o Castform sem nenhum TM.
+test("resolveTeachable: resolve pela referencia, nao pelo nome da especie", () => {
+    const index = indexTeachableLearnsets({
+        CASTFORM: ["MOVE_WEATHER_BALL"],
+        KOMMO_O: ["MOVE_CLANGING_SCALES"],
+        BULBASAUR: ["MOVE_TACKLE"],
+    });
+
+    assert.deepEqual(
+        resolveTeachable(
+            index,
+            "sCastformTeachableLearnset",
+            "SPECIES_CASTFORM_SUNNY"
+        ),
+        ["MOVE_WEATHER_BALL"]
+    );
+    // underscore na chave some no nome da referencia
+    assert.deepEqual(
+        resolveTeachable(
+            index,
+            "sKommoOTeachableLearnset",
+            "SPECIES_KOMMO_O_TOTEM"
+        ),
+        ["MOVE_CLANGING_SCALES"]
+    );
+    // sem referencia, cai no nome da especie
+    assert.deepEqual(resolveTeachable(index, null, "SPECIES_BULBASAUR"), [
+        "MOVE_TACKLE",
+    ]);
+    assert.deepEqual(resolveTeachable(index, null, "SPECIES_MISSINGNO"), []);
 });
 
 test("parseSpriteRefs: primeira ocorrencia vence (sprite novo, nao o GBA)", () => {

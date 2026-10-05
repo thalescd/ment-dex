@@ -18,6 +18,8 @@ import {
     parseLevelUpLearnsets,
     parseEggMoves,
     parseTmsHms,
+    indexTeachableLearnsets,
+    resolveTeachable,
     parseSpriteRefs,
 } from "../../src/features/species/parse.js";
 import { parseMovesInfo } from "../../src/features/moves/parse.js";
@@ -141,6 +143,31 @@ test("all_learnables.json casa com as chaves de especie", async () => {
     assert.ok(
         Array.isArray(teachable.BULBASAUR),
         "chave BULBASAUR ausente — o formato das chaves pode ter mudado"
+    );
+});
+
+test("toda .teachableLearnset do species_info acha sua entrada no JSON", async () => {
+    // Pega o caso em que a regra que liga sXxxTeachableLearnset a chave XXX
+    // do JSON deixa de valer: a especie ficaria sem TM e sem tutor, calada.
+    const response = await fetch(dataSources.teachableLearnsets);
+    assert.ok(response.ok, `HTTP ${response.status}`);
+    const index = indexTeachableLearnsets(await response.json());
+
+    const data = {};
+    for (const url of dataSources.speciesInfo) {
+        Object.assign(data, parseSpeciesInfo(await get(url)).data);
+    }
+    const unresolved = Object.entries(data)
+        .filter(
+            ([name, info]) =>
+                info.teachableRef &&
+                resolveTeachable(index, info.teachableRef, name).length === 0
+        )
+        .map(([name, info]) => `${name} (${info.teachableRef})`);
+    assert.equal(
+        unresolved.length,
+        0,
+        `refs sem entrada: ${unresolved.slice(0, 5).join(", ")}`
     );
 });
 

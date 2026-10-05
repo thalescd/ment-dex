@@ -455,6 +455,32 @@ export function parseTeachableLearnsets(text) {
     return learnsets;
 }
 
+// O app le all_learnables.json, cujas chaves nao sao o nome da especie: o
+// upstream gera sCastformTeachableLearnset a partir da chave CASTFORM, e as
+// quatro SPECIES_CASTFORM_* apontam para ela. Buscar pelo nome da especie
+// falha nessas (e em ~300 outras), entao resolvemos pela referencia
+// .teachableLearnset, normalizando os dois lados (sem "_", minusculo).
+const normTeachable = (s) => s.replace(/_/g, "").toLowerCase();
+
+export function indexTeachableLearnsets(json) {
+    const index = {};
+    for (const [key, moves] of Object.entries(json)) {
+        index[normTeachable(key)] = moves;
+    }
+    return index;
+}
+
+export function resolveTeachable(index, teachableRef, speciesName) {
+    if (teachableRef) {
+        const key = teachableRef
+            .replace(/^s/, "")
+            .replace(/TeachableLearnset$/, "");
+        const moves = index[normTeachable(key)];
+        if (moves) return moves;
+    }
+    return index[normTeachable(speciesName.replace(/^SPECIES_/, ""))] || [];
+}
+
 // ========================================================================
 // 5. parseEggMoves — egg_moves.h
 //    Mesmo padrao do teachable

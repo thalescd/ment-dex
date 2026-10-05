@@ -10,6 +10,8 @@ import {
     parseLevelUpLearnsets,
     parseEggMoves,
     parseTmsHms,
+    indexTeachableLearnsets,
+    resolveTeachable,
     parseSpriteRefs,
     parseFormSpeciesTables,
     getEvolutionLine,
@@ -74,7 +76,7 @@ function parseAllData(raw) {
     }
 
     const levelUpLearnsets = parseLevelUpLearnsets(raw.learnsetText);
-    const teachableLearnsets = raw.teachableData;
+    const teachableLearnsets = indexTeachableLearnsets(raw.teachableData);
     const eggMoveLearnsets = parseEggMoves(raw.eggMovesText);
     const tmhmSet = parseTmsHms(raw.tmsHmsText);
     const spriteRefs = parseSpriteRefs(raw.spritesText);
@@ -168,8 +170,11 @@ function assembleSpecies(parsed) {
             ? levelUpLearnsets[info.levelUpRef] || []
             : [];
 
-        const teachable =
-            teachableLearnsets[name.replace(/^SPECIES_/, "")] || [];
+        const teachable = resolveTeachable(
+            teachableLearnsets,
+            info.teachableRef,
+            name
+        );
 
         // Separar teachable em TMHM e tutor
         const TMHMLearnsets = [];
