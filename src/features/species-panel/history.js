@@ -47,9 +47,15 @@ function updateSpeciesPanelHistoryOrder(openPanel) {
     displaySpeciesPanelHistory(openPanel);
 }
 
+// Os listeners de mouseup no body sobrevivem aos sprites que os criaram; cada
+// redesenho remove os do desenho anterior.
+let bodyListeners = new AbortController();
+
 /** @param {(name: string) => Promise<void>} openPanel */
 function displaySpeciesPanelHistory(openPanel) {
     clearChildren(speciesPanelHistoryContainer);
+    bodyListeners.abort();
+    bodyListeners = new AbortController();
 
     for (let i = 0; i < uiState.speciesPanelHistory.length; i++) {
         const spriteContainer = document.createElement("span");
@@ -123,9 +129,13 @@ function displaySpeciesPanelHistory(openPanel) {
         spriteContainer.addEventListener("mouseup", (event) => {
             historyHandler(event);
         });
-        document.body.addEventListener("mouseup", (event) => {
-            historyHandler(event, false);
-        });
+        document.body.addEventListener(
+            "mouseup",
+            (event) => {
+                historyHandler(event, false);
+            },
+            { signal: bodyListeners.signal }
+        );
     }
 }
 
