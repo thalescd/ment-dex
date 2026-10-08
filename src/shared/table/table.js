@@ -162,18 +162,17 @@ export function filterTableInput(input, obj, keyArray) {
         .trim()
         .replaceAll(regexSpChar, "")
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
-    const regexInput = new RegExp(sanitizedInput, "i");
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
 
     for (let i = 0, j = Object.keys(tracker).length; i < j; i++) {
         tracker[i]["filter"].push("input");
         for (let k = 0; k < keyArray.length; k++) {
             if (
-                regexInput.test(
-                    sanitizeString(
-                        String(obj[tracker[i]["key"]][keyArray[k]])
-                    ).replaceAll(regexSpChar, "")
-                )
+                sanitizeString(String(obj[tracker[i]["key"]][keyArray[k]]))
+                    .replaceAll(regexSpChar, "")
+                    .toLowerCase()
+                    .includes(sanitizedInput)
             ) {
                 tracker[i]["filter"] = tracker[i]["filter"].filter(
                     (value) => value !== "input"
@@ -300,17 +299,17 @@ export function filterItemsTableInput(input, keyArray) {
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
-    const regexInput = new RegExp(sanitizedInput, "i");
 
     for (let i = 0, j = Object.keys(tracker).length; i < j; i++) {
         tracker[i]["filter"].push("input");
         for (let k = 0; k < keyArray.length; k++) {
             if (
-                regexInput.test(
-                    sanitizeString(
-                        String(gameData.items[tracker[i]["key"]][keyArray[k]])
-                    ).replaceAll(regexSpChar, "")
+                sanitizeString(
+                    String(gameData.items[tracker[i]["key"]][keyArray[k]])
                 )
+                    .replaceAll(regexSpChar, "")
+                    .toLowerCase()
+                    .includes(sanitizedInput)
             ) {
                 tracker[i]["filter"] = tracker[i]["filter"].filter(
                     (value) => value !== "input"
@@ -321,15 +320,16 @@ export function filterItemsTableInput(input, keyArray) {
         Object.keys(gameData.items[tracker[i]["key"]]["locations"]).forEach(
             (method) => {
                 if (
-                    regexInput.test(
-                        sanitizeString(
-                            String(
-                                gameData.items[tracker[i]["key"]]["locations"][
-                                    method
-                                ]
-                            )
-                        ).replaceAll(regexSpChar, "")
+                    sanitizeString(
+                        String(
+                            gameData.items[tracker[i]["key"]]["locations"][
+                                method
+                            ]
+                        )
                     )
+                        .replaceAll(regexSpChar, "")
+                        .toLowerCase()
+                        .includes(sanitizedInput)
                 ) {
                     if (!settings.includes(method)) {
                         tracker[i]["filter"] = tracker[i]["filter"].filter(
