@@ -9,45 +9,42 @@ import { historyObj, panelSpecies } from "./state.js";
 
 export function refreshURLParams() {
     const url = document.location.href.split("?")[0] + "?";
-    let params = "";
+    // URLSearchParams codifica: um "&" ou "#" na busca nao quebra mais a URL.
+    const params = new URLSearchParams();
 
     if (!speciesPanelMainContainer.classList.contains("hide")) {
-        params += `species=${panelSpecies}&`;
+        params.set("species", panelSpecies);
     } else if (document.getElementsByClassName("activeTable").length > 0) {
         const activeTable =
             document.getElementsByClassName("activeTable")[0].id;
         if (activeTable !== "speciesTable") {
-            params += `table=${document.getElementsByClassName("activeTable")[0].id}&`;
+            params.set("table", activeTable);
         }
-        if (
-            document
-                .getElementsByClassName("activeFilter")[0]
-                .getElementsByClassName("filter").length > 0
-        ) {
-            params += "filter=";
-            const filters = document
-                .getElementsByClassName("activeFilter")[0]
-                .getElementsByClassName("filter");
-            for (let i = 0, j = filters.length; i < j; i++) {
-                if (!/>|<|=/.test(filters[i].innerText)) {
-                    const param = filters[i].innerText.split(":");
-                    params += `${param[0]}:${param[1].trim()}:`;
-                    params += filters[i].parentNode.children[0].value;
-                    if (i !== j - 1) {
-                        params += ",";
-                    }
-                }
+        const filters = document
+            .getElementsByClassName("activeFilter")[0]
+            .getElementsByClassName("filter");
+        const filterParams = [];
+        for (const filter of filters) {
+            if (!/>|<|=/.test(filter.innerText)) {
+                const param = filter.innerText.split(":");
+                filterParams.push(
+                    `${param[0]}:${param[1].trim()}:${filter.parentNode.children[0].value}`
+                );
             }
-            params += "&";
         }
-        if (document.getElementsByClassName("activeInput")[0].value !== "") {
-            params += `input=${document.getElementsByClassName("activeInput")[0].value}&`;
+        if (filterParams.length > 0) {
+            params.set("filter", filterParams.join(","));
+        }
+        const input = document.getElementsByClassName("activeInput")[0].value;
+        if (input !== "") {
+            params.set("input", input);
         }
     }
 
     getHistoryState();
-    window.history.replaceState(`${url}${params}`, null, `${url}${params}`);
-    return `${url}${params}`;
+    const full = `${url}${params}`;
+    window.history.replaceState(full, null, full);
+    return full;
 }
 
 // Helper privado de refreshURLParams: monta o objeto de estado do history.

@@ -117,7 +117,8 @@ export function getLocationsByPokemon() {
 export async function displayParams(urlParams) {
     if (urlParams.get("species")) {
         const scrollToSpecies = urlParams.get("species");
-        if (gameData.species[scrollToSpecies]) {
+        // hasOwn: "?species=constructor" passaria no teste de truthiness
+        if (Object.hasOwn(gameData.species, scrollToSpecies)) {
             await createSpeciesPanel(scrollToSpecies);
         }
     } else {
