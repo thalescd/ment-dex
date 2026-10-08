@@ -1,6 +1,16 @@
 import { LZString } from "../vendor/lz-string.js";
 import { gameData } from "./state.js";
 
+// localStorage cheio (QuotaExceededError) nao pode impedir o sprite de ser
+// exibido: o cache e so otimizacao, entao a falha so e registrada.
+function cacheSprite(key, data) {
+    try {
+        localStorage.setItem(key, LZString.compressToUTF16(data));
+    } catch (e) {
+        console.warn(`Nao foi possivel cachear o sprite "${key}".`, e);
+    }
+}
+
 export function isSameColor(r1, g1, b1, r2, g2, b2, tolerance = 1) {
     return (
         Math.abs(r1 - r2) <= tolerance &&
@@ -78,10 +88,7 @@ export async function spriteRemoveBgReturnBase64(speciesName, species) {
         spriteDataString = `${canvas.width}&${canvas.height}&[${pal}]${spriteDataString}`;
 
         if (!localStorage.getItem(speciesName)) {
-            localStorage.setItem(
-                speciesName,
-                LZString.compressToUTF16(spriteDataString)
-            );
+            cacheSprite(speciesName, spriteDataString);
             gameData.sprites[speciesName] = canvas.toDataURL();
         }
         const els = document.getElementsByClassName(`sprite${speciesName}`);
@@ -167,10 +174,7 @@ export async function spriteRemoveItemBgReturnBase64(itemName) {
             context.putImageData(imageData, 0, 0);
 
             if (!localStorage.getItem(`${itemName}`)) {
-                localStorage.setItem(
-                    `${itemName}`,
-                    LZString.compressToUTF16(canvas.toDataURL())
-                );
+                cacheSprite(itemName, canvas.toDataURL());
                 gameData.sprites[itemName] = canvas.toDataURL();
             }
             if (
@@ -221,10 +225,7 @@ export async function spriteRemoveTrainerBgReturnBase64(trainerSprite, url) {
         context.putImageData(imageData, 0, 0);
 
         if (!localStorage.getItem(`${trainerSprite}`)) {
-            localStorage.setItem(
-                `${trainerSprite}`,
-                LZString.compressToUTF16(canvas.toDataURL())
-            );
+            cacheSprite(trainerSprite, canvas.toDataURL());
             gameData.sprites[trainerSprite] = canvas.toDataURL();
         }
         if (
