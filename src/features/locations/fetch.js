@@ -2,7 +2,9 @@ import { statusMsg } from "../../core/status.js";
 import { gameData, trackers } from "../../core/state.js";
 import { dataSources } from "../../core/config.js";
 import { fetchJson } from "../../core/http.js";
-import { loadCached } from "../../core/cache.js";
+import { loadCached, assertAtLeast } from "../../core/cache.js";
+
+const MIN_LOCATIONS = 50;
 
 // Mapeamento de tipo de encounter para nome legivel
 const METHOD_NAMES = {
@@ -39,7 +41,7 @@ async function buildLocationsObj() {
 
         // Pegar o primeiro grupo (gWildMonHeaders)
         const group = json.wild_encounter_groups[0];
-        if (!group) return locations;
+        if (!group) throw new Error("wild_encounter_groups[0] ausente");
 
         // Montar mapa de rates por tipo de encounter
         const ratesMap = {};
@@ -91,6 +93,7 @@ async function buildLocationsObj() {
             }
         }
 
+        assertAtLeast("locations", locations, MIN_LOCATIONS);
         return locations;
     } catch (e) {
         console.error("Failed to build locations data:", e.message, e.stack);

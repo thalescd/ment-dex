@@ -2,13 +2,16 @@ import { gameData, trackers, buildTracker } from "../../core/state.js";
 import { dataSources } from "../../core/config.js";
 import { statusMsg } from "../../core/status.js";
 import { fetchText } from "../../core/http.js";
-import { loadCached } from "../../core/cache.js";
+import { loadCached, assertAtLeast } from "../../core/cache.js";
 import { parseMovesInfo } from "./parse.js";
+
+const MIN_MOVES = 300;
 
 async function buildMovesObj() {
     try {
         statusMsg("Fetching moves");
         const moves = parseMovesInfo(await fetchText(dataSources.movesInfo));
+        assertAtLeast("moves", moves, MIN_MOVES);
 
         // Adicionar flags de prioridade (mesmo comportamento do original)
         Object.keys(moves).forEach((move) => {

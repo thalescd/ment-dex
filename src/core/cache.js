@@ -64,6 +64,25 @@ export function writeCache(key, data) {
     }
 }
 
+/**
+ * Lanca se o parse rendeu menos que `min` entradas. Um parser que deixou de
+ * casar devolve um objeto pequeno ou vazio em vez de lancar; sem isto o
+ * resultado virava uma tabela vazia (ou parcial, e cacheada) sem aviso.
+ * Os minimos sao baixos de proposito: detectam "o parser parou de casar",
+ * nao "faltam algumas entradas".
+ * @param {string} label nome do conjunto, para a mensagem de erro
+ * @param {Record<string, any>} data
+ * @param {number} min
+ */
+export function assertAtLeast(label, data, min) {
+    const count = Object.keys(data).length;
+    if (count < min) {
+        throw new Error(
+            `Parse de ${label} rendeu ${count} (esperado no minimo ${min}) — o formato upstream provavelmente mudou.`
+        );
+    }
+}
+
 /** @param {any} data */
 function isUsable(data) {
     if (!data || typeof data !== "object") return false;

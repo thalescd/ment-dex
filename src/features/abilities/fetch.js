@@ -2,8 +2,10 @@ import { gameData, trackers, buildTracker } from "../../core/state.js";
 import { dataSources } from "../../core/config.js";
 import { statusMsg } from "../../core/status.js";
 import { fetchText } from "../../core/http.js";
-import { loadCached } from "../../core/cache.js";
+import { loadCached, assertAtLeast } from "../../core/cache.js";
 import { parseAbilitiesInfo } from "./parse.js";
+
+const MIN_ABILITIES = 150;
 
 async function buildAbilitiesObj() {
     try {
@@ -18,6 +20,7 @@ async function buildAbilitiesObj() {
                 delete abilities[ability];
             }
         });
+        assertAtLeast("abilities", abilities, MIN_ABILITIES);
 
         return abilities;
     } catch (e) {

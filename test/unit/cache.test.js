@@ -10,7 +10,7 @@ globalThis.localStorage = {
     removeItem: (k) => store.delete(k),
 };
 
-const { loadCached, readCache, writeCache } =
+const { loadCached, readCache, writeCache, assertAtLeast } =
     await import("../../src/core/cache.js");
 
 beforeEach(() => store.clear());
@@ -62,4 +62,10 @@ test("loadCached: build vazio nao e cacheado, entao roda de novo", async () => {
     await loadCached("moves", build);
 
     assert.equal(builds, 2, "resultado vazio nao deve virar cache");
+});
+
+test("assertAtLeast: lanca quando o parse rendeu pouco, inclusive vazio", () => {
+    assert.throws(() => assertAtLeast("moves", {}, 300), /moves.*0.*300/);
+    assert.throws(() => assertAtLeast("moves", { a: 1, b: 2 }, 300), /300/);
+    assert.doesNotThrow(() => assertAtLeast("moves", { a: 1, b: 2 }, 2));
 });
