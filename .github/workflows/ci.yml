@@ -70,7 +70,7 @@ jobs:
                               "O smoke test contra o pokeemerald-expansion falhou.",
                               "",
                               "Provavel mudanca de formato nos arquivos .h ou .json do upstream.",
-                              "Os parsers em `src/modules/*/regex*.js` precisam de ajuste.",
+                              "Os parsers em `src/features/*/parse.js` precisam de ajuste.",
                               "",
                               `Run: ${url}`,
                           ].join("\n"),
