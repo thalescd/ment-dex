@@ -38,7 +38,6 @@ export const dataSources = {
     tmsHms: `${repos.expansion}/include/constants/tms_hms.h`,
     // sprite paths: extraidos de pokemon.h, imagens em graphics/pokemon/{name}/
     pokemonGraphics: `${repos.expansion}/src/data/graphics/pokemon.h`,
-    spriteBaseDir: `${repos.expansion}/graphics/pokemon`, // {dir}/{species_name}/front.png
 
     // === MOVES ===
     // moves_info contem: nome, descricao, tipo, power, accuracy, pp, flags — tudo junto

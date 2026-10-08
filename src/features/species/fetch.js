@@ -3,7 +3,7 @@ import { dataSources } from "../../core/config.js";
 import { setTracker } from "../../core/state.js";
 import { statusMsg } from "../../core/status.js";
 import { fetchText, fetchJson } from "../../core/http.js";
-import { loadCached, writeCache } from "../../core/cache.js";
+import { loadCached } from "../../core/cache.js";
 import {
     parseSpeciesConstants,
     parseSpeciesInfo,
@@ -324,8 +324,6 @@ async function buildSpeciesObj() {
             }
         });
 
-        // O pipeline de species anota gameData.moves, entao regrava o cache dele
-        writeCache("moves", gameData.moves);
         return species;
     } catch (e) {
         console.error("Failed to build species data:", e.message, e.stack);

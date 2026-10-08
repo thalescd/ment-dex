@@ -29,7 +29,8 @@ import { appendLocationsToTable } from "../features/locations/display.js";
 import { appendTrainersToTable } from "../features/scripts/displayTrainers.js";
 import { appendItemsToTable } from "../features/scripts/displayItems.js";
 import { registerTable } from "../shared/table/registry.js";
-import { TRAINER_BATCH_SIZE } from "../core/config.js";
+import { TRAINER_BATCH_SIZE, dataSources } from "../core/config.js";
+import { fetchJson } from "../core/http.js";
 
 // Ligacao feature -> infra de tabela. Fica aqui, no orquestrador, porque
 // displayRegistry.js e tableUtility.js nao devem conhecer as features.
@@ -83,12 +84,7 @@ export async function fetchTypeChart() {
     statusMsg("Fetching type chart");
     gameData.typeChart = {};
     try {
-        let typeChartUrl = "src/data/typeChart.json";
-        if (typeof window.repoTypeChartUrl !== "undefined") {
-            typeChartUrl = window.repoTypeChartUrl;
-        }
-        const rawTypeChart = await fetch(typeChartUrl);
-        gameData.typeChart = await rawTypeChart.json();
+        gameData.typeChart = await fetchJson(dataSources.typeChart);
     } catch (e) {
         console.error("Failed to fetch type chart:", e.message, e.stack);
     }
@@ -189,10 +185,4 @@ export async function displayHistoryObj(historyStateObj) {
             }
         }
     }
-}
-
-export function exportData() {
-    console.log(
-        `let backupData = [${JSON.stringify(gameData.moves)}, ${JSON.stringify(gameData.abilities)}, ${JSON.stringify(gameData.species)}, ${JSON.stringify(gameData.locations)}, ${JSON.stringify(gameData.trainers)}, ${JSON.stringify(gameData.items)}, ${JSON.stringify(gameData.typeChart)}]`
-    );
 }
